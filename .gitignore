@@ -46,23 +46,8 @@ logs/
 *.log
 npm-debug.log*
 
-# ===========================
-# OS files
-# ===========================
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# ===========================
-# Editor files
-# ===========================
-.vscode/
-!.vscode/extensions.json
-.idea/
-
-# ===========================
-# Vite / PWA
-# ===========================
-*.local
-sw.js
-workbox-*.js
+# Vite files
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+.vite/
+server/space-race.db

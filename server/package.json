@@ -1,0 +1,26 @@
+{
+  "name": "space-race-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build:pkg": "pkg . --targets node18-linux-x64,node18-macos-x64,node18-win-x64 --output ../dist/space-race-server"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.4.1",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@yao-pkg/pkg": "^6.6.0"
+  },
+  "pkg": {
+    "scripts": [
+      "server.js",
+      "routes/**/*.js",
+      "db/**/*.js"
+    ]
+  }
+}
