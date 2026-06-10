@@ -60,3 +60,61 @@ describe('questions table schema', () => {
     db.close()
   })
 })
+
+describe('game_state table schema', () => {
+  it('creates the game_state table with the expected columns', () => {
+    const db = new Database(':memory:')
+    initializeSchema(db)
+
+    const cols = tableColumns(db, 'game_state')
+    expect(Object.keys(cols).sort()).toEqual(
+      [
+        'id', 'active', 'current_team', 'positions', 'finish_line',
+        'team_names', 'used_questions', 'winner', 'updated_at',
+      ].sort(),
+    )
+    db.close()
+  })
+
+  it('bootstraps exactly one singleton row with id = 1 and documented defaults', () => {
+    const db = new Database(':memory:')
+    initializeSchema(db)
+
+    const rows = db.prepare('SELECT * FROM game_state').all()
+    expect(rows).toHaveLength(1)
+
+    const state = rows[0]
+    expect(state.id).toBe(1)
+    expect(state.active).toBe(0)
+    expect(state.current_team).toBe(1)
+    expect(state.positions).toBe('[0,0,0,0]')
+    expect(state.finish_line).toBe(10)
+    expect(state.team_names).toBe('["Team 1","Team 2","Team 3","Team 4"]')
+    expect(state.used_questions).toBe('[]')
+    expect(state.winner).toBeNull()
+    expect(state.updated_at).toBeTruthy()
+    db.close()
+  })
+
+  it('does not duplicate the singleton row on repeated init', () => {
+    const db = new Database(':memory:')
+    initializeSchema(db)
+    initializeSchema(db)
+
+    const count = db.prepare('SELECT COUNT(*) AS n FROM game_state').get().n
+    expect(count).toBe(1)
+    db.close()
+  })
+
+  it('preserves an existing row across re-init (INSERT OR IGNORE)', () => {
+    const db = new Database(':memory:')
+    initializeSchema(db)
+    db.prepare('UPDATE game_state SET active = 1, winner = 3 WHERE id = 1').run()
+
+    initializeSchema(db)
+    const state = db.prepare('SELECT active, winner FROM game_state WHERE id = 1').get()
+    expect(state.active).toBe(1)
+    expect(state.winner).toBe(3)
+    db.close()
+  })
+})
