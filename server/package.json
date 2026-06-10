@@ -9,6 +9,7 @@
     "dev": "node server.js",
     "test": "vitest run",
     "test:watch": "vitest",
+    "lint": "eslint .",
     "build:pkg": "pkg . --targets node18-linux-x64,node18-macos-x64,node18-win-x64 --output ../dist/space-race-server"
   },
   "dependencies": {
@@ -16,7 +17,10 @@
     "express": "^5.1.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@yao-pkg/pkg": "^6.6.0",
+    "eslint": "^10.4.1",
+    "globals": "^17.6.0",
     "vitest": "^4.1.8"
   },
   "pkg": {
