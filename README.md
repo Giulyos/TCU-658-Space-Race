@@ -420,6 +420,21 @@ This project was developed for educational use at CTP de Guácimo as part of TCU
 
 Please keep commits small and focused. Use clear commit messages in the format `Add:`, `Fix:`, `Update:`, or `Remove:`.
 
+### Testing & quality gates
+
+Tests and linting can be run for both packages at once from the repository root:
+
+```bash
+npm test       # runs the server and client test suites (Vitest)
+npm run lint   # runs ESLint on the server and client packages
+```
+
+A **husky** pre-commit hook runs **lint-staged**, which automatically lints and tests
+the package(s) that have staged changes. Commits that introduce lint errors or failing
+tests are **blocked** — this enforces the project rule that no code is committed with
+failing tests or lint errors. Hooks are installed automatically on `npm install` (via the
+`prepare` script); no manual setup is required.
+
 ---
 
 ## License
