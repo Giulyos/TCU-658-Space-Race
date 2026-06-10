@@ -176,6 +176,22 @@ cd client && npm run dev
 cd server && npm run dev
 ```
 
+### Running the Demo (terminal game)
+
+You can play a complete game of Space Race directly in the terminal — no
+database, server, or browser required:
+
+```bash
+npm run play
+```
+
+This runs the full game logic (the same pure engine used by the backend and UI)
+in an interactive console: it shows the race track, draws a random question for
+the team whose turn it is, and asks you to mark the answer **y** (correct), **n**
+(incorrect), or **q** (quit). Ships advance by each question's point value, turns
+rotate between the four teams, and a winner is declared when one reaches the
+finish line. It's a quick way to see and verify the game mechanics on their own.
+
 ### Building for Production
 
 Build the React frontend and then package everything into cross-platform executables:
