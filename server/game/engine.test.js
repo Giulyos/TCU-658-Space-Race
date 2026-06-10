@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest'
-import { startGame, pickQuestion, resolveTurn, checkWinner } from './engine.js'
+import {
+  startGame,
+  pickQuestion,
+  resolveTurn,
+  checkWinner,
+  pause,
+  resume,
+  restart,
+} from './engine.js'
 import { createInitialState } from './state.js'
 import { STATUS } from './constants.js'
 
@@ -188,6 +196,68 @@ describe('checkWinner', () => {
     const state = { ...startGame(createInitialState()), finishLine: 10, positions: [10, 0, 0, 0] }
     const snapshot = structuredClone(state)
     checkWinner(state)
+    expect(state).toEqual(snapshot)
+  })
+})
+
+describe('pause / resume', () => {
+  it('pauses an active game', () => {
+    const next = pause(startGame(createInitialState()))
+    expect(next.active).toBe(STATUS.PAUSED)
+  })
+
+  it('does not pause a game that is not active', () => {
+    const notStarted = createInitialState() // STATUS.NOT_STARTED
+    expect(pause(notStarted)).toBe(notStarted)
+  })
+
+  it('resumes a paused game', () => {
+    const paused = pause(startGame(createInitialState()))
+    expect(resume(paused).active).toBe(STATUS.ACTIVE)
+  })
+
+  it('does not resume a game that is not paused', () => {
+    const active = startGame(createInitialState())
+    expect(resume(active)).toBe(active)
+  })
+
+  it('does not mutate state when pausing', () => {
+    const active = startGame(createInitialState())
+    const snapshot = structuredClone(active)
+    pause(active)
+    expect(active).toEqual(snapshot)
+  })
+})
+
+describe('restart', () => {
+  it('clears the board and begins a fresh active match', () => {
+    const finished = {
+      ...startGame(createInitialState()),
+      positions: [10, 4, 7, 2],
+      winner: 1,
+      usedQuestions: [1, 2, 3],
+      currentTeam: 3,
+    }
+    const next = restart(finished)
+    expect(next.active).toBe(STATUS.ACTIVE)
+    expect(next.currentTeam).toBe(1)
+    expect(next.positions).toEqual([0, 0, 0, 0])
+    expect(next.winner).toBeNull()
+    expect(next.usedQuestions).toEqual([])
+  })
+
+  it('preserves team configuration and finish line', () => {
+    const configured = createInitialState({ teamNames: ['Red', 'Blue'], finishLine: 15 })
+    const next = restart({ ...configured, positions: [9, 14], winner: 2 })
+    expect(next.teamNames).toEqual(['Red', 'Blue'])
+    expect(next.finishLine).toBe(15)
+    expect(next.positions).toEqual([0, 0])
+  })
+
+  it('does not mutate the input state', () => {
+    const state = { ...startGame(createInitialState()), positions: [5, 0, 0, 0], winner: 1 }
+    const snapshot = structuredClone(state)
+    restart(state)
     expect(state).toEqual(snapshot)
   })
 })

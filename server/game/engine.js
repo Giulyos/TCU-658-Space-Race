@@ -98,3 +98,30 @@ export const checkWinner = (state) => {
 
   return { ...state, winner: index + 1 }
 }
+
+/**
+ * Pauses an active game. No-op unless the game is currently active.
+ * @param {object} state
+ * @returns {object}
+ */
+export const pause = (state) =>
+  state.active === STATUS.ACTIVE ? { ...state, active: STATUS.PAUSED } : state
+
+/**
+ * Resumes a paused game. No-op unless the game is currently paused.
+ * @param {object} state
+ * @returns {object}
+ */
+export const resume = (state) =>
+  state.active === STATUS.PAUSED ? { ...state, active: STATUS.ACTIVE } : state
+
+/**
+ * Restarts the game: clears positions, winner, used questions and turn, and
+ * begins a fresh active match. The team configuration and finish line are
+ * preserved, and the question bank (which lives outside the engine state) is
+ * untouched. Equivalent to starting a new game with the same settings.
+ *
+ * @param {object} state
+ * @returns {object} A new active game state.
+ */
+export const restart = (state) => startGame(state)
