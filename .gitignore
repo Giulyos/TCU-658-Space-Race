@@ -5,6 +5,11 @@ node_modules/
 **/node_modules/
 
 # ===========================
+# Local Claude Code settings (machine-specific, not shared)
+# ===========================
+.claude/settings.local.json
+
+# ===========================
 # Build outputs
 # ===========================
 dist/
