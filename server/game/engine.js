@@ -52,3 +52,26 @@ export const pickQuestion = (state, bank, rng = Math.random) => {
     question,
   }
 }
+
+/**
+ * Resolves the current team's turn and hands play to the next team.
+ *
+ * On a correct answer the current team's ship advances by the question's point
+ * value; on an incorrect answer no ship moves. Either way the turn rotates to
+ * the next team, wrapping from the last team back to team 1. Winner detection
+ * is handled separately (see checkWinner).
+ *
+ * @param {object} state Current game state.
+ * @param {{ correct: boolean, pointValue?: number }} result
+ *   Turn outcome; pointValue is the active question's value (defaults to 1).
+ * @returns {object} A new state with the advance (if any) and rotated turn.
+ */
+export const resolveTurn = (state, { correct, pointValue = 1 }) => {
+  const teamIndex = state.currentTeam - 1
+  const teamCount = state.positions.length
+  const positions = state.positions.map((pos, i) =>
+    i === teamIndex && correct ? pos + pointValue : pos,
+  )
+  const nextTeam = (state.currentTeam % teamCount) + 1
+  return { ...state, positions, currentTeam: nextTeam }
+}

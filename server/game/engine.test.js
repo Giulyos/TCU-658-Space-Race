@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { startGame, pickQuestion } from './engine.js'
+import { startGame, pickQuestion, resolveTurn } from './engine.js'
 import { createInitialState } from './state.js'
 import { STATUS } from './constants.js'
 
@@ -100,6 +100,52 @@ describe('pickQuestion', () => {
     const state = startGame(createInitialState())
     const snapshot = structuredClone(state)
     pickQuestion(state, sampleBank, () => 0)
+    expect(state).toEqual(snapshot)
+  })
+})
+
+describe('resolveTurn', () => {
+  it('advances the current team by the point value on a correct answer', () => {
+    const state = startGame(createInitialState()) // team 1, positions [0,0,0,0]
+    const next = resolveTurn(state, { correct: true, pointValue: 3 })
+    expect(next.positions).toEqual([3, 0, 0, 0])
+  })
+
+  it('leaves positions unchanged on an incorrect answer', () => {
+    const state = startGame(createInitialState())
+    const next = resolveTurn(state, { correct: false, pointValue: 3 })
+    expect(next.positions).toEqual([0, 0, 0, 0])
+  })
+
+  it('rotates the turn to the next team on both outcomes', () => {
+    const state = startGame(createInitialState()) // currentTeam 1
+    expect(resolveTurn(state, { correct: true, pointValue: 1 }).currentTeam).toBe(2)
+    expect(resolveTurn(state, { correct: false, pointValue: 1 }).currentTeam).toBe(2)
+  })
+
+  it('wraps from the last team back to team 1', () => {
+    const state = { ...startGame(createInitialState()), currentTeam: 4 }
+    const next = resolveTurn(state, { correct: true, pointValue: 1 })
+    expect(next.currentTeam).toBe(1)
+    expect(next.positions).toEqual([0, 0, 0, 1]) // team 4 advanced
+  })
+
+  it('only moves the current team, not the others', () => {
+    const state = { ...startGame(createInitialState()), currentTeam: 2, positions: [5, 3, 1, 0] }
+    const next = resolveTurn(state, { correct: true, pointValue: 2 })
+    expect(next.positions).toEqual([5, 5, 1, 0])
+  })
+
+  it('defaults the point value to 1 when omitted', () => {
+    const state = startGame(createInitialState())
+    const next = resolveTurn(state, { correct: true })
+    expect(next.positions).toEqual([1, 0, 0, 0])
+  })
+
+  it('does not mutate the input state', () => {
+    const state = startGame(createInitialState())
+    const snapshot = structuredClone(state)
+    resolveTurn(state, { correct: true, pointValue: 2 })
     expect(state).toEqual(snapshot)
   })
 })
