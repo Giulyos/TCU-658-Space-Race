@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { startGame, pickQuestion, resolveTurn } from './engine.js'
+import { startGame, pickQuestion, resolveTurn, checkWinner } from './engine.js'
 import { createInitialState } from './state.js'
 import { STATUS } from './constants.js'
 
@@ -146,6 +146,48 @@ describe('resolveTurn', () => {
     const state = startGame(createInitialState())
     const snapshot = structuredClone(state)
     resolveTurn(state, { correct: true, pointValue: 2 })
+    expect(state).toEqual(snapshot)
+  })
+
+  it('is a no-op once a winner has been decided (no further turns)', () => {
+    const state = { ...startGame(createInitialState()), winner: 2, positions: [0, 10, 0, 0] }
+    const next = resolveTurn(state, { correct: true, pointValue: 5 })
+    expect(next).toBe(state)
+  })
+})
+
+describe('checkWinner', () => {
+  it('records no winner while every team is short of the finish line', () => {
+    const state = { ...startGame(createInitialState()), finishLine: 10, positions: [9, 8, 0, 5] }
+    expect(checkWinner(state).winner).toBeNull()
+  })
+
+  it('declares a winner on an exact hit of the finish line', () => {
+    const state = { ...startGame(createInitialState()), finishLine: 10, positions: [0, 10, 0, 0] }
+    expect(checkWinner(state).winner).toBe(2)
+  })
+
+  it('declares a winner when the finish line is overshot', () => {
+    const state = { ...startGame(createInitialState()), finishLine: 10, positions: [0, 0, 0, 13] }
+    expect(checkWinner(state).winner).toBe(4)
+  })
+
+  it('keeps an already-decided winner unchanged', () => {
+    const state = { ...startGame(createInitialState()), finishLine: 10, winner: 1, positions: [10, 11, 0, 0] }
+    expect(checkWinner(state)).toBe(state)
+  })
+
+  it('composes with resolveTurn to detect a win after a move', () => {
+    const state = { ...startGame(createInitialState()), finishLine: 3, currentTeam: 1, positions: [2, 0, 0, 0] }
+    const afterTurn = resolveTurn(state, { correct: true, pointValue: 1 }) // team 1 -> 3
+    const result = checkWinner(afterTurn)
+    expect(result.winner).toBe(1)
+  })
+
+  it('does not mutate the input state', () => {
+    const state = { ...startGame(createInitialState()), finishLine: 10, positions: [10, 0, 0, 0] }
+    const snapshot = structuredClone(state)
+    checkWinner(state)
     expect(state).toEqual(snapshot)
   })
 })

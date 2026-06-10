@@ -67,6 +67,9 @@ export const pickQuestion = (state, bank, rng = Math.random) => {
  * @returns {object} A new state with the advance (if any) and rotated turn.
  */
 export const resolveTurn = (state, { correct, pointValue = 1 }) => {
+  // Once a team has won, the game is over and no further turns are accepted.
+  if (state.winner !== null) return state
+
   const teamIndex = state.currentTeam - 1
   const teamCount = state.positions.length
   const positions = state.positions.map((pos, i) =>
@@ -74,4 +77,24 @@ export const resolveTurn = (state, { correct, pointValue = 1 }) => {
   )
   const nextTeam = (state.currentTeam % teamCount) + 1
   return { ...state, positions, currentTeam: nextTeam }
+}
+
+/**
+ * Detects whether a team has reached the finish line and records the winner.
+ *
+ * A team wins as soon as its position reaches or passes finishLine (an exact
+ * hit and an overshoot both count). The winner is the team's 1-based number.
+ * If a winner is already recorded, or no team has reached the line, the state
+ * is returned unchanged. Typically called right after resolveTurn.
+ *
+ * @param {object} state Current game state.
+ * @returns {object} The state, with `winner` set if a team has finished.
+ */
+export const checkWinner = (state) => {
+  if (state.winner !== null) return state
+
+  const index = state.positions.findIndex((pos) => pos >= state.finishLine)
+  if (index === -1) return state
+
+  return { ...state, winner: index + 1 }
 }
