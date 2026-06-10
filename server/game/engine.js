@@ -23,3 +23,32 @@ export const startGame = (state) => ({
   winner: null,
   usedQuestions: [],
 })
+
+/**
+ * Selects a random question from the bank that has not been used this session.
+ *
+ * Questions are never repeated within a session: the chosen question's id is
+ * appended to usedQuestions in the returned state. When every question has
+ * already been used (the bank is exhausted), the question is `null` and the
+ * state is returned unchanged.
+ *
+ * The random source is injectable so callers (and tests) can make selection
+ * deterministic; it defaults to Math.random.
+ *
+ * @param {object} state Current game state.
+ * @param {Array<{id: number}>} bank The teacher's question bank.
+ * @param {() => number} [rng] Returns a float in [0, 1); defaults to Math.random.
+ * @returns {{ state: object, question: object|null }}
+ */
+export const pickQuestion = (state, bank, rng = Math.random) => {
+  const available = bank.filter((q) => !state.usedQuestions.includes(q.id))
+  if (available.length === 0) {
+    return { state, question: null }
+  }
+
+  const question = available[Math.floor(rng() * available.length)]
+  return {
+    state: { ...state, usedQuestions: [...state.usedQuestions, question.id] },
+    question,
+  }
+}
