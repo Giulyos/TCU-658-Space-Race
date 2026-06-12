@@ -42,8 +42,8 @@ export const createGameRouter = ({
   })
 
   router.get('/state', (_req, res) => {
-    // TODO(#22): implement
-    res.status(501).json({ message: 'Not implemented' })
+    const state = bridge.getState()
+    res.json({ state, question: findActiveQuestion(state, questionsRepo.getAll()) })
   })
 
   router.post('/restart', (_req, res) => {
