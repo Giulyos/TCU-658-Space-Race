@@ -123,6 +123,26 @@ label {
   color: var(--green);
 }
 
+/* NES.css draws pixel borders/effects with absolutely-positioned ::before and
+   ::after pseudo-elements. A bordered table's ::before is `position: absolute;
+   top: 0; bottom: 0` — and because the table is statically positioned, it
+   anchors to the nearest positioned ancestor (the panel) and balloons to cover
+   the whole container, sitting on top of the form's submit button and silently
+   swallowing clicks. These overlays are purely decorative, so they must never
+   capture pointer events. */
+.nes-btn::before,
+.nes-btn::after,
+.nes-table::before,
+.nes-table::after,
+.nes-container::before,
+.nes-container::after,
+.nes-input::before,
+.nes-input::after,
+.nes-select::before,
+.nes-select::after {
+  pointer-events: none;
+}
+
 /* Buttons: tighten spacing so a row of controls reads like an arcade panel. */
 .nes-btn {
   margin: 6px 6px 6px 0;
