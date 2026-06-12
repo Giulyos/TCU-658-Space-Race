@@ -48,6 +48,28 @@ export const createQuestionsRouter = (repo = defaultQuestionsRepo) => {
     res.status(201).json(created)
   })
 
+  router.put('/:id', (req, res) => {
+    const id = Number(req.params.id)
+    const error = validateQuestion(req.body ?? {}, { partial: true })
+    if (error) {
+      return res.status(400).json({ error })
+    }
+    const updated = repo.update(id, req.body ?? {})
+    if (!updated) {
+      return res.status(404).json({ error: 'Question not found' })
+    }
+    res.json(updated)
+  })
+
+  router.delete('/:id', (req, res) => {
+    const id = Number(req.params.id)
+    const removed = repo.remove(id)
+    if (!removed) {
+      return res.status(404).json({ error: 'Question not found' })
+    }
+    res.status(204).end()
+  })
+
   return router
 }
 
