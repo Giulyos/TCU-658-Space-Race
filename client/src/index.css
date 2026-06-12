@@ -1,111 +1,129 @@
+/* Deep-space arcade theme for Space Race.
+ *
+ * Built on NES.css (8-bit components) + the Press Start 2P pixel font, both
+ * bundled locally for offline use. Palette: dark starfield background with
+ * neon cyan / magenta accents, evoking Space Invaders-era arcade cabinets. */
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --space-900: #0b0420; /* deepest background */
+  --space-800: #140a33; /* panel background */
+  --space-700: #241158; /* panel border / raised */
+  --cyan: #21d4fd;
+  --magenta: #ff3ca6;
+  --amber: #ffd23f;
+  --green: #6dff8f;
+  --ink: #e8e6ff; /* default text */
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  font-family: 'Press Start 2P', ui-monospace, monospace;
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--ink);
+  color-scheme: dark;
+  -webkit-font-smoothing: none; /* keep pixels crisp */
+  image-rendering: pixelated;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
+  min-height: 100svh;
+  color: var(--ink);
+  background-color: var(--space-900);
+  /* Layered "starfield": three sizes of stars via repeating radial gradients. */
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, #ffffff 50%, transparent 50%),
+    radial-gradient(1px 1px at 75% 44%, #cfe9ff 50%, transparent 50%),
+    radial-gradient(2px 2px at 50% 80%, #ffffff 50%, transparent 50%),
+    radial-gradient(1px 1px at 90% 15%, #b9f6ff 50%, transparent 50%),
+    radial-gradient(1px 1px at 12% 70%, #ffd9f4 50%, transparent 50%);
+  background-size:
+    300px 300px, 260px 260px, 420px 420px, 200px 200px, 350px 350px;
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
+  max-width: 1100px;
   margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+  padding: 24px 16px 64px;
 }
 
+/* Headings ----------------------------------------------------------------- */
 h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+h2,
+h3 {
+  font-family: 'Press Start 2P', monospace;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--cyan);
+  text-shadow: 3px 3px 0 #06122e;
 }
 
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+  font-size: 28px;
+  text-align: center;
+  margin: 12px 0 28px;
+  color: var(--amber);
+  text-shadow: 4px 4px 0 var(--magenta);
 }
+
 h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
+  font-size: 16px;
+  margin: 0 0 16px;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+a {
+  color: var(--cyan);
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+p,
+label,
+li {
+  line-height: 1.9;
+}
+
+/* NES.css overrides for the dark arcade palette ---------------------------- */
+.nes-container {
+  background-color: var(--space-800);
+  color: var(--ink);
+  margin-bottom: 28px;
+}
+
+/* with-title variant: place the title chip and tint it */
+.nes-container.is-dark {
+  background-color: var(--space-800);
+  color: var(--ink);
+}
+
+.nes-container.with-title > .title {
+  background-color: var(--space-800);
+  color: var(--amber);
+}
+
+/* Inputs read as dark terminal fields */
+.nes-input,
+.nes-select select,
+input.nes-input {
+  background-color: #0d0726;
+  color: var(--ink);
+}
+
+label {
+  color: var(--ink);
+  display: block;
+  margin-top: 12px;
+}
+
+/* Status / error messages */
+[role='alert'] {
+  color: var(--magenta);
+}
+[role='status'] {
+  color: var(--green);
+}
+
+/* Buttons: tighten spacing so a row of controls reads like an arcade panel. */
+.nes-btn {
+  margin: 6px 6px 6px 0;
 }

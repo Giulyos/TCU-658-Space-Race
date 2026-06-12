@@ -83,45 +83,59 @@ function QuestionBank() {
   }
 
   return (
-    <section>
-      <h2>Question Bank</h2>
+    <section className="nes-container with-title">
+      <p className="title">Question Bank</p>
 
       {error && <p role="alert">{error}</p>}
 
       <form onSubmit={handleSubmit}>
-        <label htmlFor="q-text">Question</label>
-        <input
-          id="q-text"
-          value={form.text}
-          onChange={(e) => setForm({ ...form, text: e.target.value })}
-        />
+        <div className="nes-field">
+          <label htmlFor="q-text">Question</label>
+          <input
+            id="q-text"
+            className="nes-input"
+            value={form.text}
+            onChange={(e) => setForm({ ...form, text: e.target.value })}
+          />
+        </div>
 
-        <label htmlFor="q-answer">Correct answer</label>
-        <input
-          id="q-answer"
-          value={form.correct_answer}
-          onChange={(e) => setForm({ ...form, correct_answer: e.target.value })}
-        />
+        <div className="nes-field">
+          <label htmlFor="q-answer">Correct answer</label>
+          <input
+            id="q-answer"
+            className="nes-input"
+            value={form.correct_answer}
+            onChange={(e) => setForm({ ...form, correct_answer: e.target.value })}
+          />
+        </div>
 
-        <label htmlFor="q-distractors">Distractors (comma-separated)</label>
-        <input
-          id="q-distractors"
-          value={form.distractors}
-          onChange={(e) => setForm({ ...form, distractors: e.target.value })}
-        />
+        <div className="nes-field">
+          <label htmlFor="q-distractors">Distractors (comma-separated)</label>
+          <input
+            id="q-distractors"
+            className="nes-input"
+            value={form.distractors}
+            onChange={(e) => setForm({ ...form, distractors: e.target.value })}
+          />
+        </div>
 
-        <label htmlFor="q-points">Point value</label>
-        <input
-          id="q-points"
-          type="number"
-          min="1"
-          value={form.point_value}
-          onChange={(e) => setForm({ ...form, point_value: e.target.value })}
-        />
+        <div className="nes-field">
+          <label htmlFor="q-points">Point value</label>
+          <input
+            id="q-points"
+            type="number"
+            min="1"
+            className="nes-input"
+            value={form.point_value}
+            onChange={(e) => setForm({ ...form, point_value: e.target.value })}
+          />
+        </div>
 
-        <button type="submit">{editingId === null ? 'Add question' : 'Save changes'}</button>
+        <button type="submit" className="nes-btn is-primary">
+          {editingId === null ? 'Add question' : 'Save changes'}
+        </button>
         {editingId !== null && (
-          <button type="button" onClick={resetForm}>
+          <button type="button" className="nes-btn" onClick={resetForm}>
             Cancel
           </button>
         )}
@@ -130,17 +144,23 @@ function QuestionBank() {
       {questions.length === 0 ? (
         <p>No questions yet. Add one above.</p>
       ) : (
-        <ul>
+        <ul className="nes-list is-disc">
           {questions.map((q) => (
             <li key={q.id}>
               <span>
                 {q.text} — <strong>{q.correct_answer}</strong> ({q.point_value} pt)
               </span>
-              <button type="button" onClick={() => handleEdit(q)} aria-label={`Edit question ${q.id}`}>
+              <button
+                type="button"
+                className="nes-btn is-warning"
+                onClick={() => handleEdit(q)}
+                aria-label={`Edit question ${q.id}`}
+              >
                 Edit
               </button>
               <button
                 type="button"
+                className="nes-btn is-error"
                 onClick={() => handleDelete(q.id)}
                 aria-label={`Delete question ${q.id}`}
               >
