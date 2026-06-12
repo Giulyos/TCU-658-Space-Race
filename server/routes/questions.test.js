@@ -83,3 +83,58 @@ describe('POST /api/questions', () => {
     expect(res.body.error).toMatch(/distractors/)
   })
 })
+
+// Helper to seed one question and return its id.
+const seed = async (body = { text: 'Q', correct_answer: 'A' }) =>
+  (await request(app).post('/api/questions').send(body)).body.id
+
+describe('PUT /api/questions/:id', () => {
+  it('updates an existing question and returns it', async () => {
+    const id = await seed({ text: 'Q', correct_answer: 'A', point_value: 1 })
+    const res = await request(app)
+      .put(`/api/questions/${id}`)
+      .send({ point_value: 3, distractors: ['b', 'c'] })
+
+    expect(res.status).toBe(200)
+    expect(res.body.point_value).toBe(3)
+    expect(res.body.distractors).toEqual(['b', 'c'])
+    expect(res.body.text).toBe('Q') // untouched field preserved
+  })
+
+  it('returns 404 for an unknown id', async () => {
+    const res = await request(app).put('/api/questions/999').send({ text: 'x' })
+    expect(res.status).toBe(404)
+    expect(res.body.error).toMatch(/not found/i)
+  })
+
+  it('validates fields when present (400 on bad point_value)', async () => {
+    const id = await seed()
+    const res = await request(app).put(`/api/questions/${id}`).send({ point_value: 0 })
+    expect(res.status).toBe(400)
+    expect(res.body.error).toMatch(/point_value/)
+  })
+
+  it('rejects emptying a required field (400 on blank text)', async () => {
+    const id = await seed()
+    const res = await request(app).put(`/api/questions/${id}`).send({ text: '   ' })
+    expect(res.status).toBe(400)
+    expect(res.body.error).toMatch(/text/)
+  })
+})
+
+describe('DELETE /api/questions/:id', () => {
+  it('deletes an existing question and returns 204', async () => {
+    const id = await seed()
+    const res = await request(app).delete(`/api/questions/${id}`)
+    expect(res.status).toBe(204)
+
+    const list = await request(app).get('/api/questions')
+    expect(list.body).toEqual([])
+  })
+
+  it('returns 404 for an unknown id', async () => {
+    const res = await request(app).delete('/api/questions/999')
+    expect(res.status).toBe(404)
+    expect(res.body.error).toMatch(/not found/i)
+  })
+})
