@@ -1,15 +1,11 @@
-export const getQuestions = async () => {
-  // TODO: implement
-}
+import { request } from './http.js'
 
-export const addQuestion = async () => {
-  // TODO: implement
-}
+// Question-bank API client. Mirrors the /api/questions endpoints.
 
-export const updateQuestion = async () => {
-  // TODO: implement
-}
+export const getQuestions = () => request('GET', '/questions')
 
-export const deleteQuestion = async () => {
-  // TODO: implement
-}
+export const addQuestion = (question) => request('POST', '/questions', question)
+
+export const updateQuestion = (id, fields) => request('PUT', `/questions/${id}`, fields)
+
+export const deleteQuestion = (id) => request('DELETE', `/questions/${id}`)
