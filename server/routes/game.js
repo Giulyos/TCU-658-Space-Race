@@ -24,12 +24,19 @@ export const createGameRouter = ({
 } = {}) => {
   const router = Router()
 
+  // The question bank used for play: the active game's questions when a game is
+  // loaded, otherwise all questions (legacy / no game activated yet).
+  const bankForPlay = () => {
+    const gameId = bridge.getActiveGameId()
+    return gameId != null ? questionsRepo.getAllByGame(gameId) : questionsRepo.getAll()
+  }
+
   // Begins a fresh match: resets the game and draws the first question, keeping
   // the question bank and team/finish-line configuration. Shared by /start and
   // /restart (starting fresh and restarting are the same operation — startGame
   // clears positions, winner, and used questions).
   const beginGame = (res) => {
-    const bank = questionsRepo.getAll()
+    const bank = bankForPlay()
     if (bank.length === 0) {
       throw badRequest('Cannot start a game with an empty question bank')
     }
@@ -56,7 +63,7 @@ export const createGameRouter = ({
     }
 
     const { correct } = req.body
-    const bank = questionsRepo.getAll()
+    const bank = bankForPlay()
 
     // Resolve the current turn using the active question's point value, check
     // for a winner, and — only if nobody has won — draw the next question. If
@@ -100,7 +107,7 @@ export const createGameRouter = ({
     const state = bridge.getState()
     // Once a team has won there is no active question to answer (consistent
     // with the response from /turn on a winning move).
-    const question = state.winner !== null ? null : findActiveQuestion(state, questionsRepo.getAll())
+    const question = state.winner !== null ? null : findActiveQuestion(state, bankForPlay())
     res.json({ state, question })
   })
 
@@ -110,12 +117,12 @@ export const createGameRouter = ({
   // if the game is not in the expected state, so they are always safe to call.
   router.post('/pause', (_req, res) => {
     const state = bridge.applyAndPersist(pause)
-    res.json({ state, question: findActiveQuestion(state, questionsRepo.getAll()) })
+    res.json({ state, question: findActiveQuestion(state, bankForPlay()) })
   })
 
   router.post('/resume', (_req, res) => {
     const state = bridge.applyAndPersist(resume)
-    res.json({ state, question: findActiveQuestion(state, questionsRepo.getAll()) })
+    res.json({ state, question: findActiveQuestion(state, bankForPlay()) })
   })
 
   return router

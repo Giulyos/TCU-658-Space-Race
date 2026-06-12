@@ -20,7 +20,13 @@ export const createEngineBridge = (repo = defaultGameStateRepo) => {
     return repo.save(next)
   }
 
-  return { getState, applyAndPersist }
+  // The id of the game currently loaded for play (or null).
+  const getActiveGameId = () => repo.getActiveGameId()
+
+  // Loads a saved game for play (fresh not-started state with its config).
+  const activateGame = (game) => repo.activate(game)
+
+  return { getState, applyAndPersist, getActiveGameId, activateGame }
 }
 
 export default createEngineBridge()

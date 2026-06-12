@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url'
 
 import { createQuestionsRouter } from './routes/questions.js'
 import { createGameRouter } from './routes/game.js'
+import { createGamesRouter } from './routes/games.js'
 import { notFoundHandler, errorHandler } from './middleware/errors.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -15,9 +16,10 @@ const __dirname = path.dirname(__filename)
 //
 // @param {object}  [opts]
 // @param {object}  [opts.questionsRepo]  Questions repository (default instance if omitted).
+// @param {object}  [opts.gamesRepo]      Games repository (default instance if omitted).
 // @param {object}  [opts.bridge]         Engine/persistence bridge (default instance if omitted).
 // @param {boolean} [opts.serveStatic]    Serve the built client (production).
-export const createApp = ({ questionsRepo, bridge, serveStatic = false } = {}) => {
+export const createApp = ({ questionsRepo, gamesRepo, bridge, serveStatic = false } = {}) => {
   const app = express()
   app.use(express.json())
 
@@ -25,6 +27,7 @@ export const createApp = ({ questionsRepo, bridge, serveStatic = false } = {}) =
     res.json({ status: 'ok' })
   })
 
+  app.use('/api/games', createGamesRouter({ gamesRepo, questionsRepo, bridge }))
   app.use('/api/questions', createQuestionsRouter(questionsRepo))
   app.use('/api/game', createGameRouter({ bridge, questionsRepo }))
 
