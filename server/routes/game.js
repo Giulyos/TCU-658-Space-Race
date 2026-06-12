@@ -3,6 +3,7 @@ import defaultBridge from '../db/engineBridge.js'
 import defaultQuestionsRepo from '../db/questionsRepo.js'
 import { startGame, pickQuestion, resolveTurn, checkWinner } from '../game/engine.js'
 import { STATUS } from '../game/constants.js'
+import { badRequest } from '../middleware/errors.js'
 
 // Routes for running a game. Exposed as a factory taking an injectable engine
 // bridge and questions repo so tests can bind them to an in-memory database;
@@ -29,7 +30,7 @@ export const createGameRouter = ({
   const beginGame = (res) => {
     const bank = questionsRepo.getAll()
     if (bank.length === 0) {
-      return res.status(400).json({ error: 'Cannot start a game with an empty question bank' })
+      throw badRequest('Cannot start a game with an empty question bank')
     }
 
     const state = bridge.applyAndPersist((current) =>
@@ -42,15 +43,15 @@ export const createGameRouter = ({
 
   router.post('/turn', (req, res) => {
     if (typeof req.body?.correct !== 'boolean') {
-      return res.status(400).json({ error: 'correct (boolean) is required' })
+      throw badRequest('correct (boolean) is required')
     }
 
     const current = bridge.getState()
     if (current.winner !== null) {
-      return res.status(400).json({ error: 'Game is already finished' })
+      throw badRequest('Game is already finished')
     }
     if (current.active !== STATUS.ACTIVE) {
-      return res.status(400).json({ error: 'No active game' })
+      throw badRequest('No active game')
     }
 
     const { correct } = req.body

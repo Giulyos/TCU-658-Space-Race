@@ -12,5 +12,10 @@ export default defineConfig([
       sourceType: 'module',
       globals: globals.node,
     },
+    rules: {
+      // Allow intentionally-unused args/vars prefixed with _ (e.g. the required
+      // 4th `next` param on Express error-handling middleware).
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+    },
   },
 ])
