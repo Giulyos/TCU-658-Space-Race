@@ -1,8 +1,10 @@
+import QuestionBank from '../components/QuestionBank.jsx'
+
 function AdminPanel() {
-  // TODO: implement
   return (
     <main>
       <h1>Admin Panel</h1>
+      <QuestionBank />
     </main>
   )
 }
