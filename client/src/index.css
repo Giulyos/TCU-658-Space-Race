@@ -134,6 +134,29 @@ label {
   padding: 4px 8px;
 }
 
+/* Question-bank table: fixed layout so it always spans the panel exactly,
+   regardless of content length. Long text wraps and grows the ROW taller
+   instead of widening its column. Column widths are set on the header cells
+   (which is what table-layout: fixed uses). */
+.nes-table-responsive {
+  overflow-x: visible;
+}
+.nes-table {
+  table-layout: fixed;
+  width: 100%;
+}
+.nes-table th,
+.nes-table td {
+  overflow-wrap: break-word;
+  vertical-align: top;
+}
+.nes-table th:nth-child(1) { width: 5%; }  /* #           */
+.nes-table th:nth-child(2) { width: 36%; } /* Question    */
+.nes-table th:nth-child(3) { width: 17%; } /* Answer      */
+.nes-table th:nth-child(4) { width: 19%; } /* Distractors */
+.nes-table th:nth-child(5) { width: 7%; }  /* Pts         */
+.nes-table th:nth-child(6) { width: 16%; } /* Actions     */
+
 /* Question-bank pagination row. */
 .pagination {
   display: flex;
