@@ -10,3 +10,5 @@ export const startGame = () => request('POST', '/game/start')
 export const submitTurn = (correct) => request('POST', '/game/turn', { correct })
 
 export const restartGame = () => request('POST', '/game/restart')
+
+export const updateSettings = (settings) => request('PUT', '/game/settings', settings)
