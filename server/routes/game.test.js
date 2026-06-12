@@ -177,6 +177,50 @@ describe('POST /api/game/turn', () => {
   })
 })
 
+describe('PUT /api/game/settings', () => {
+  it('updates finish line and team names, resetting to a fresh game', async () => {
+    const res = await request(app)
+      .put('/api/game/settings')
+      .send({ finishLine: 15, teamNames: ['Red', 'Blue', 'Green'] })
+
+    expect(res.status).toBe(200)
+    expect(res.body.state.finishLine).toBe(15)
+    expect(res.body.state.teamNames).toEqual(['Red', 'Blue', 'Green'])
+    expect(res.body.state.positions).toEqual([0, 0, 0]) // team count derived from names
+    expect(res.body.state.active).toBe(0) // reset to not-started
+  })
+
+  it('keeps unspecified fields at their current value', async () => {
+    await request(app).put('/api/game/settings').send({ finishLine: 20 })
+    const res = await request(app).get('/api/game/state')
+    expect(res.body.state.finishLine).toBe(20)
+    expect(res.body.state.teamNames).toHaveLength(4) // default kept
+  })
+
+  it('rejects a finish line below 1 (400)', async () => {
+    const res = await request(app).put('/api/game/settings').send({ finishLine: 0 })
+    expect(res.status).toBe(400)
+    expect(res.body.error).toMatch(/finishLine/)
+  })
+
+  it('rejects too few or too many teams (400)', async () => {
+    const tooFew = await request(app).put('/api/game/settings').send({ teamNames: ['Solo'] })
+    expect(tooFew.status).toBe(400)
+    const tooMany = await request(app)
+      .put('/api/game/settings')
+      .send({ teamNames: ['A', 'B', 'C', 'D', 'E'] })
+    expect(tooMany.status).toBe(400)
+  })
+
+  it('rejects a blank team name (400)', async () => {
+    const res = await request(app)
+      .put('/api/game/settings')
+      .send({ teamNames: ['Red', '  '] })
+    expect(res.status).toBe(400)
+    expect(res.body.error).toMatch(/non-empty/)
+  })
+})
+
 describe('POST /api/game/restart', () => {
   it('resets a game in progress to a fresh active match', async () => {
     seedBank()
