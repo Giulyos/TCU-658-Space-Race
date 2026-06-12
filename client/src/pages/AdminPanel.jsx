@@ -59,7 +59,9 @@ function AdminPanel() {
         </section>
       )}
 
-      {view === 'wizard' && <GameWizard game={selected} onCancel={backToLibrary} />}
+      {view === 'wizard' && (
+        <GameWizard game={selected} onDone={backToLibrary} onCancel={backToLibrary} />
+      )}
     </main>
   )
 }

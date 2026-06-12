@@ -35,14 +35,14 @@ describe('AdminPanel view router', () => {
     expect(await screen.findByText('Playing: Unit 3 Review')).toBeInTheDocument()
   })
 
-  it('opens the wizard on New Game and returns to the library on Back', async () => {
+  it('opens the wizard on New Game and returns to the library on Cancel', async () => {
     render(<AdminPanel />)
     await screen.findByText('Unit 3 Review')
 
     fireEvent.click(screen.getByRole('button', { name: '+ New Game' }))
-    expect(await screen.findByText('New Game')).toBeInTheDocument()
+    expect(await screen.findByText(/step 1 of 2/i)).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Back to games' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
     expect(await screen.findByText('My Games')).toBeInTheDocument()
   })
 })

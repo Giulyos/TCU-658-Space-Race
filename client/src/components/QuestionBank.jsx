@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
-import {
-  getQuestions,
-  addQuestion,
-  updateQuestion,
-  deleteQuestion,
-} from '../api/questionsApi.js'
+import { getQuestions, addQuestion, updateQuestion, deleteQuestion } from '../api/questionsApi.js'
+import { getGameQuestions, addGameQuestion } from '../api/gamesApi.js'
 
 // Teacher's question-bank manager: a paginated table of questions plus a form to
-// add, edit, and delete them, wired to the /api/questions endpoints.
+// add, edit, and delete them. When a `gameId` prop is given, the bank is scoped
+// to that game (used inside the setup wizard); otherwise it operates on all
+// questions. Updates and deletes are by question id either way.
 
 const EMPTY_FORM = { text: '', correct_answer: '', distractors: '', point_value: 1 }
 const PAGE_SIZE = 10
@@ -16,7 +14,7 @@ const PAGE_SIZE = 10
 const parseDistractors = (s) =>
   s.split(',').map((d) => d.trim()).filter(Boolean)
 
-function QuestionBank() {
+function QuestionBank({ gameId = null }) {
   const [questions, setQuestions] = useState([])
   const [form, setForm] = useState(EMPTY_FORM)
   const [editingId, setEditingId] = useState(null)
@@ -25,11 +23,11 @@ function QuestionBank() {
 
   const load = useCallback(async () => {
     try {
-      setQuestions(await getQuestions())
+      setQuestions(await (gameId != null ? getGameQuestions(gameId) : getQuestions()))
     } catch (err) {
       setError(err.message)
     }
-  }, [])
+  }, [gameId])
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -52,7 +50,7 @@ function QuestionBank() {
     }
     try {
       if (editingId === null) {
-        await addQuestion(payload)
+        await (gameId != null ? addGameQuestion(gameId, payload) : addQuestion(payload))
       } else {
         await updateQuestion(editingId, payload)
       }
