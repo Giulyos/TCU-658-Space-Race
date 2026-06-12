@@ -8,6 +8,7 @@
     "build": "npm --prefix client run build && npm --prefix server run build:pkg",
     "install:all": "npm --prefix client install && npm --prefix server install",
     "play": "node server/game/cli.js",
+    "demo:db": "node server/db/persistence-demo.mjs",
     "test": "npm --prefix server test && npm --prefix client test",
     "lint": "npm --prefix server run lint && npm --prefix client run lint",
     "prepare": "husky"
