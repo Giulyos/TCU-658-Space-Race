@@ -1,25 +1,57 @@
 import { Router } from 'express'
+import defaultBridge from '../db/engineBridge.js'
+import defaultQuestionsRepo from '../db/questionsRepo.js'
+import { startGame, pickQuestion } from '../game/engine.js'
 
-const router = Router()
+// Routes for running a game. Exposed as a factory taking an injectable engine
+// bridge and questions repo so tests can bind them to an in-memory database;
+// server.js uses the default instances via the default export.
 
-router.post('/start', (_req, res) => {
-  // TODO: implement
-  res.status(501).json({ message: 'Not implemented' })
-})
+// The "active question" is the most recently drawn one — i.e. the last id in
+// usedQuestions. Returns the matching question from the bank, or null.
+export const findActiveQuestion = (state, bank) => {
+  const currentId = state.usedQuestions.at(-1)
+  if (currentId === undefined) return null
+  return bank.find((q) => q.id === currentId) ?? null
+}
 
-router.post('/turn', (_req, res) => {
-  // TODO: implement
-  res.status(501).json({ message: 'Not implemented' })
-})
+export const createGameRouter = ({
+  bridge = defaultBridge,
+  questionsRepo = defaultQuestionsRepo,
+} = {}) => {
+  const router = Router()
 
-router.get('/state', (_req, res) => {
-  // TODO: implement
-  res.status(501).json({ message: 'Not implemented' })
-})
+  router.post('/start', (_req, res) => {
+    const bank = questionsRepo.getAll()
+    if (bank.length === 0) {
+      return res.status(400).json({ error: 'Cannot start a game with an empty question bank' })
+    }
 
-router.post('/restart', (_req, res) => {
-  // TODO: implement
-  res.status(501).json({ message: 'Not implemented' })
-})
+    // Start a fresh game and draw the first question in one persisted step.
+    const state = bridge.applyAndPersist((current) => {
+      const started = startGame(current)
+      return pickQuestion(started, bank).state
+    })
 
-export default router
+    res.json({ state, question: findActiveQuestion(state, bank) })
+  })
+
+  router.post('/turn', (_req, res) => {
+    // TODO(#23): implement
+    res.status(501).json({ message: 'Not implemented' })
+  })
+
+  router.get('/state', (_req, res) => {
+    // TODO(#22): implement
+    res.status(501).json({ message: 'Not implemented' })
+  })
+
+  router.post('/restart', (_req, res) => {
+    // TODO(#24): implement
+    res.status(501).json({ message: 'Not implemented' })
+  })
+
+  return router
+}
+
+export default createGameRouter()
