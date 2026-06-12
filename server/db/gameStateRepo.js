@@ -1,4 +1,5 @@
 import defaultDb from './database.js'
+import { createInitialState } from '../game/state.js'
 
 // Data-access layer for the single game_state row (id = 1). This is the only
 // place that bridges the database representation (snake_case columns, JSON-
@@ -54,7 +55,41 @@ export const createGameStateRepo = (db = defaultDb) => {
     return load()
   }
 
-  return { load, save }
+  // The id of the game currently loaded for play (or null if none).
+  const getActiveGameId = () =>
+    db.prepare('SELECT game_id FROM game_state WHERE id = ?').get(SINGLETON_ID).game_id ?? null
+
+  // Loads a saved game for play: records which game is active and resets the
+  // singleton to a fresh not-started state using that game's finish line and
+  // team names. Returns the new engine state.
+  const activate = (game) => {
+    const init = createInitialState({
+      finishLine: game.finish_line,
+      teamNames: game.team_names,
+    })
+    db
+      .prepare(
+        `UPDATE game_state
+            SET game_id = ?, active = ?, current_team = ?, positions = ?,
+                finish_line = ?, team_names = ?, used_questions = ?, winner = ?,
+                updated_at = CURRENT_TIMESTAMP
+          WHERE id = ?`,
+      )
+      .run(
+        game.id,
+        init.active,
+        init.currentTeam,
+        JSON.stringify(init.positions),
+        init.finishLine,
+        JSON.stringify(init.teamNames),
+        JSON.stringify(init.usedQuestions),
+        init.winner,
+        SINGLETON_ID,
+      )
+    return load()
+  }
+
+  return { load, save, getActiveGameId, activate }
 }
 
 export default createGameStateRepo()
