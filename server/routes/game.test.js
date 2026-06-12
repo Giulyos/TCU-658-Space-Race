@@ -91,3 +91,86 @@ describe('GET /api/game/state', () => {
     expect(res.body.question.id).toBe(res.body.state.usedQuestions.at(-1))
   })
 })
+
+describe('POST /api/game/turn', () => {
+  const start = () => request(app).post('/api/game/start')
+
+  it('advances the current team by the active question point value on correct', async () => {
+    seedBank()
+    const started = await start()
+    const pointValue = started.body.question.point_value
+
+    const res = await request(app).post('/api/game/turn').send({ correct: true })
+    expect(res.status).toBe(200)
+    expect(res.body.state.positions[0]).toBe(pointValue) // team 1 advanced
+    expect(res.body.state.currentTeam).toBe(2) // turn rotated
+  })
+
+  it('does not advance on an incorrect answer but still rotates', async () => {
+    seedBank()
+    await start()
+    const res = await request(app).post('/api/game/turn').send({ correct: false })
+    expect(res.body.state.positions).toEqual([0, 0, 0, 0])
+    expect(res.body.state.currentTeam).toBe(2)
+  })
+
+  it('draws a new active question after a (non-winning) turn', async () => {
+    seedBank()
+    const started = await start()
+    const res = await request(app).post('/api/game/turn').send({ correct: false })
+    expect(res.body.question).not.toBeNull()
+    expect(res.body.question.id).not.toBe(started.body.question.id) // no repeat
+    expect(res.body.state.usedQuestions).toHaveLength(2)
+  })
+
+  it('detects a winner and reports a null active question', async () => {
+    // finish line 3, one big-value question so team 1 wins on the first turn
+    questionsRepo.create({ text: 'Big', correct_answer: 'A', point_value: 5 })
+    await request(app).post('/api/game/start')
+    // force a small finish line via a fresh start is not exposed; instead rely
+    // on point_value 5 >= default finish line 10? No — bump with several turns.
+    // Simpler: play correct turns for team 1 until it crosses the line.
+    let res
+    for (let i = 0; i < 20; i++) {
+      res = await request(app).post('/api/game/turn').send({ correct: true })
+      if (res.body.state.winner !== null) break
+      // let the other three teams miss so only team 1 advances
+      await request(app).post('/api/game/turn').send({ correct: false })
+      await request(app).post('/api/game/turn').send({ correct: false })
+      await request(app).post('/api/game/turn').send({ correct: false })
+    }
+    expect(res.body.state.winner).toBe(1)
+    expect(res.body.question).toBeNull()
+  })
+
+  it('rejects a turn when no game is active (400)', async () => {
+    seedBank()
+    const res = await request(app).post('/api/game/turn').send({ correct: true })
+    expect(res.status).toBe(400)
+    expect(res.body.error).toMatch(/no active game/i)
+  })
+
+  it('rejects a turn after the game is finished (400)', async () => {
+    questionsRepo.create({ text: 'Big', correct_answer: 'A', point_value: 5 })
+    await request(app).post('/api/game/start')
+    let res
+    for (let i = 0; i < 20; i++) {
+      res = await request(app).post('/api/game/turn').send({ correct: true })
+      if (res.body.state.winner !== null) break
+      await request(app).post('/api/game/turn').send({ correct: false })
+      await request(app).post('/api/game/turn').send({ correct: false })
+      await request(app).post('/api/game/turn').send({ correct: false })
+    }
+    const after = await request(app).post('/api/game/turn').send({ correct: true })
+    expect(after.status).toBe(400)
+    expect(after.body.error).toMatch(/finished/i)
+  })
+
+  it('rejects a non-boolean correct (400)', async () => {
+    seedBank()
+    await start()
+    const res = await request(app).post('/api/game/turn').send({ correct: 'yes' })
+    expect(res.status).toBe(400)
+    expect(res.body.error).toMatch(/correct/i)
+  })
+})
