@@ -7,6 +7,7 @@ import { createQuestionsRepo } from '../db/questionsRepo.js'
 import { createGameStateRepo } from '../db/gameStateRepo.js'
 import { createEngineBridge } from '../db/engineBridge.js'
 import { createGameRouter, findActiveQuestion } from './game.js'
+import { errorHandler } from '../middleware/errors.js'
 
 let app
 let questionsRepo
@@ -19,6 +20,7 @@ beforeEach(() => {
   app = express()
   app.use(express.json())
   app.use('/api/game', createGameRouter({ bridge, questionsRepo }))
+  app.use(errorHandler)
 })
 
 const seedBank = () => {

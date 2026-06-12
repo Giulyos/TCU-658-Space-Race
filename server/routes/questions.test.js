@@ -5,6 +5,7 @@ import Database from 'better-sqlite3'
 import { initializeSchema } from '../db/schema.js'
 import { createQuestionsRepo } from '../db/questionsRepo.js'
 import { createQuestionsRouter } from './questions.js'
+import { errorHandler } from '../middleware/errors.js'
 
 let app
 
@@ -15,6 +16,7 @@ beforeEach(() => {
   app = express()
   app.use(express.json())
   app.use('/api/questions', createQuestionsRouter(repo))
+  app.use(errorHandler)
 })
 
 describe('GET /api/questions', () => {
