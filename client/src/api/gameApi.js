@@ -1,15 +1,12 @@
-export const startGame = async () => {
-  // TODO: implement
-}
+import { request } from './http.js'
 
-export const submitTurn = async () => {
-  // TODO: implement
-}
+// Game API client. Mirrors the /api/game endpoints. start/turn/restart return
+// { state, question }; getState does too (question is null before start / after a win).
 
-export const getState = async () => {
-  // TODO: implement
-}
+export const getState = () => request('GET', '/game/state')
 
-export const restartGame = async () => {
-  // TODO: implement
-}
+export const startGame = () => request('POST', '/game/start')
+
+export const submitTurn = (correct) => request('POST', '/game/turn', { correct })
+
+export const restartGame = () => request('POST', '/game/restart')
