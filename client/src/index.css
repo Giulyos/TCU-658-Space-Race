@@ -165,3 +165,24 @@ label {
   gap: 16px;
   margin-top: 16px;
 }
+
+/* Game library rows: name + meta on the left, actions on the right. */
+.game-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 4px solid var(--space-700);
+}
+.game-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+.game-info span {
+  font-size: 11px;
+  color: var(--cyan);
+}
