@@ -24,16 +24,23 @@ export const createQuestionsRepo = (db = defaultDb) => {
       .all()
       .map(deserialize)
 
+  // Questions belonging to a single game (its question bank).
+  const getAllByGame = (gameId) =>
+    db
+      .prepare('SELECT * FROM questions WHERE game_id = ? ORDER BY id')
+      .all(gameId)
+      .map(deserialize)
+
   const getById = (id) =>
     deserialize(db.prepare('SELECT * FROM questions WHERE id = ?').get(id))
 
-  const create = ({ text, correct_answer, distractors = [], point_value = 1 }) => {
+  const create = ({ text, correct_answer, distractors = [], point_value = 1, game_id = null }) => {
     const info = db
       .prepare(
-        `INSERT INTO questions (text, correct_answer, distractors, point_value)
-         VALUES (?, ?, ?, ?)`,
+        `INSERT INTO questions (text, correct_answer, distractors, point_value, game_id)
+         VALUES (?, ?, ?, ?, ?)`,
       )
-      .run(text, correct_answer, JSON.stringify(distractors), point_value)
+      .run(text, correct_answer, JSON.stringify(distractors), point_value, game_id)
     return getById(info.lastInsertRowid)
   }
 
@@ -64,7 +71,7 @@ export const createQuestionsRepo = (db = defaultDb) => {
   const remove = (id) =>
     db.prepare('DELETE FROM questions WHERE id = ?').run(id).changes > 0
 
-  return { getAll, getById, create, update, remove }
+  return { getAll, getAllByGame, getById, create, update, remove }
 }
 
 export default createQuestionsRepo()
