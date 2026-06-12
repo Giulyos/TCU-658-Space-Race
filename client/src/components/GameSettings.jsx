@@ -45,47 +45,57 @@ function GameSettings() {
   }
 
   return (
-    <section>
-      <h2>Game Settings</h2>
+    <section className="nes-container with-title">
+      <p className="title">Game Settings</p>
 
       {error && <p role="alert">{error}</p>}
       {saved && <p role="status">Settings saved.</p>}
 
       <form onSubmit={handleSubmit}>
-        <label htmlFor="s-finish">Spaces to win</label>
-        <input
-          id="s-finish"
-          type="number"
-          min="1"
-          value={finishLine}
-          onChange={(e) => setFinishLine(e.target.value)}
-        />
+        <div className="nes-field">
+          <label htmlFor="s-finish">Spaces to win</label>
+          <input
+            id="s-finish"
+            type="number"
+            min="1"
+            className="nes-input"
+            value={finishLine}
+            onChange={(e) => setFinishLine(e.target.value)}
+          />
+        </div>
 
-        <label htmlFor="s-teams">Number of teams</label>
-        <select
-          id="s-teams"
-          value={teamCount}
-          onChange={(e) => handleCountChange(Number(e.target.value))}
-        >
-          {Array.from({ length: MAX_TEAMS - MIN_TEAMS + 1 }, (_, i) => MIN_TEAMS + i).map((n) => (
-            <option key={n} value={n}>
-              {n}
-            </option>
-          ))}
-        </select>
+        <div className="nes-field">
+          <label htmlFor="s-teams">Number of teams</label>
+          <div className="nes-select">
+            <select
+              id="s-teams"
+              value={teamCount}
+              onChange={(e) => handleCountChange(Number(e.target.value))}
+            >
+              {Array.from({ length: MAX_TEAMS - MIN_TEAMS + 1 }, (_, i) => MIN_TEAMS + i).map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
         {names.slice(0, teamCount).map((name, i) => (
-          <div key={i}>
+          <div className="nes-field" key={i}>
             <label htmlFor={`s-name-${i}`}>Team {i + 1} name</label>
             <input
               id={`s-name-${i}`}
+              className="nes-input"
               value={name}
               onChange={(e) => handleNameChange(i, e.target.value)}
             />
           </div>
         ))}
 
-        <button type="submit">Save settings</button>
+        <button type="submit" className="nes-btn is-primary">
+          Save settings
+        </button>
       </form>
     </section>
   )

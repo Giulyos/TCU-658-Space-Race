@@ -47,36 +47,56 @@ function TurnControls() {
   const started = active !== STATUS.NOT_STARTED
 
   return (
-    <section>
-      <h2>Game Controls</h2>
+    <section className="nes-container with-title">
+      <p className="title">Game Controls</p>
       {error && <p role="alert">{error}</p>}
 
-      <button type="button" onClick={() => run(startGame)} disabled={inPlay || active === STATUS.PAUSED}>
+      <button
+        type="button"
+        className="nes-btn is-success"
+        onClick={() => run(startGame)}
+        disabled={inPlay || active === STATUS.PAUSED}
+      >
         Start Game
       </button>
 
-      <button type="button" onClick={() => run(() => submitTurn(true))} disabled={!inPlay}>
+      <button
+        type="button"
+        className="nes-btn is-primary"
+        onClick={() => run(() => submitTurn(true))}
+        disabled={!inPlay}
+      >
         Correct
       </button>
-      <button type="button" onClick={() => run(() => submitTurn(false))} disabled={!inPlay}>
+      <button
+        type="button"
+        className="nes-btn is-error"
+        onClick={() => run(() => submitTurn(false))}
+        disabled={!inPlay}
+      >
         Incorrect
       </button>
 
       {active === STATUS.PAUSED ? (
-        <button type="button" onClick={() => run(resumeGame)}>
+        <button type="button" className="nes-btn is-warning" onClick={() => run(resumeGame)}>
           Resume
         </button>
       ) : (
-        <button type="button" onClick={() => run(pauseGame)} disabled={!inPlay}>
+        <button
+          type="button"
+          className="nes-btn is-warning"
+          onClick={() => run(pauseGame)}
+          disabled={!inPlay}
+        >
           Pause
         </button>
       )}
 
-      <button type="button" onClick={() => run(restartGame)} disabled={!started}>
+      <button type="button" className="nes-btn" onClick={() => run(restartGame)} disabled={!started}>
         Restart
       </button>
 
-      <button type="button" onClick={toggleMute} aria-pressed={muted}>
+      <button type="button" className="nes-btn" onClick={toggleMute} aria-pressed={muted}>
         {muted ? 'Unmute' : 'Mute'}
       </button>
     </section>
