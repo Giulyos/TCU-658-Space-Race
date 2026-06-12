@@ -221,6 +221,27 @@ describe('PUT /api/game/settings', () => {
   })
 })
 
+describe('POST /api/game/pause and /resume', () => {
+  it('pauses an active game (active -> 2) and resumes it (-> 1)', async () => {
+    seedBank()
+    await request(app).post('/api/game/start')
+
+    const paused = await request(app).post('/api/game/pause')
+    expect(paused.status).toBe(200)
+    expect(paused.body.state.active).toBe(2)
+
+    const resumed = await request(app).post('/api/game/resume')
+    expect(resumed.status).toBe(200)
+    expect(resumed.body.state.active).toBe(1)
+  })
+
+  it('pause is a no-op when no game is active', async () => {
+    const res = await request(app).post('/api/game/pause')
+    expect(res.status).toBe(200)
+    expect(res.body.state.active).toBe(0) // unchanged
+  })
+})
+
 describe('POST /api/game/restart', () => {
   it('resets a game in progress to a fresh active match', async () => {
     seedBank()

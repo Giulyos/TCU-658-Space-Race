@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import defaultBridge from '../db/engineBridge.js'
 import defaultQuestionsRepo from '../db/questionsRepo.js'
-import { startGame, pickQuestion, resolveTurn, checkWinner } from '../game/engine.js'
+import { startGame, pickQuestion, resolveTurn, checkWinner, pause, resume } from '../game/engine.js'
 import { createInitialState } from '../game/state.js'
 import { STATUS, MIN_TEAMS, MAX_TEAMS, MIN_FINISH_LINE } from '../game/constants.js'
 import { badRequest } from '../middleware/errors.js'
@@ -105,6 +105,18 @@ export const createGameRouter = ({
   })
 
   router.post('/restart', (_req, res) => beginGame(res))
+
+  // Pause/resume toggle the active status. Each is a no-op on the engine side
+  // if the game is not in the expected state, so they are always safe to call.
+  router.post('/pause', (_req, res) => {
+    const state = bridge.applyAndPersist(pause)
+    res.json({ state, question: findActiveQuestion(state, questionsRepo.getAll()) })
+  })
+
+  router.post('/resume', (_req, res) => {
+    const state = bridge.applyAndPersist(resume)
+    res.json({ state, question: findActiveQuestion(state, questionsRepo.getAll()) })
+  })
 
   return router
 }
