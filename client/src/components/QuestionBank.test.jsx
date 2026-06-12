@@ -76,4 +76,48 @@ describe('QuestionBank', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Add question' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('text is required')
   })
+
+  describe('pagination', () => {
+    // 23 questions -> 3 pages of 10/10/3.
+    const many = Array.from({ length: 23 }, (_, i) => ({
+      id: i + 1,
+      text: `Question ${i + 1}`,
+      correct_answer: `A${i + 1}`,
+      distractors: [],
+      point_value: 1,
+    }))
+
+    beforeEach(() => {
+      api.getQuestions.mockResolvedValue(many)
+    })
+
+    it('shows only 10 questions on the first page', async () => {
+      render(<QuestionBank />)
+      expect(await screen.findByText('Question 1')).toBeInTheDocument()
+      expect(screen.getByText('Question 10')).toBeInTheDocument()
+      expect(screen.queryByText('Question 11')).not.toBeInTheDocument()
+      expect(screen.getByText('Page 1 / 3')).toBeInTheDocument()
+    })
+
+    it('navigates to the next page', async () => {
+      render(<QuestionBank />)
+      await screen.findByText('Question 1')
+
+      fireEvent.click(screen.getByRole('button', { name: 'Next' }))
+      expect(screen.getByText('Question 11')).toBeInTheDocument()
+      expect(screen.queryByText('Question 1')).not.toBeInTheDocument()
+      expect(screen.getByText('Page 2 / 3')).toBeInTheDocument()
+    })
+
+    it('disables Prev on the first page and Next on the last', async () => {
+      render(<QuestionBank />)
+      await screen.findByText('Question 1')
+
+      expect(screen.getByRole('button', { name: 'Prev' })).toBeDisabled()
+      fireEvent.click(screen.getByRole('button', { name: 'Next' })) // page 2
+      fireEvent.click(screen.getByRole('button', { name: 'Next' })) // page 3 (last)
+      expect(screen.getByText('Page 3 / 3')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled()
+    })
+  })
 })

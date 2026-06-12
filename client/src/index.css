@@ -127,3 +127,18 @@ label {
 .nes-btn {
   margin: 6px 6px 6px 0;
 }
+
+/* Smaller action buttons inside table rows so the table stays compact. */
+.nes-table .nes-btn {
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+/* Question-bank pagination row. */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+}

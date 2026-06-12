@@ -6,10 +6,11 @@ import {
   deleteQuestion,
 } from '../api/questionsApi.js'
 
-// Teacher's question-bank manager: lists questions and provides a form to add,
-// edit, and delete them, wired to the /api/questions endpoints.
+// Teacher's question-bank manager: a paginated table of questions plus a form to
+// add, edit, and delete them, wired to the /api/questions endpoints.
 
 const EMPTY_FORM = { text: '', correct_answer: '', distractors: '', point_value: 1 }
+const PAGE_SIZE = 10
 
 // distractors is edited as a comma-separated string; convert to/from an array.
 const parseDistractors = (s) =>
@@ -20,6 +21,7 @@ function QuestionBank() {
   const [form, setForm] = useState(EMPTY_FORM)
   const [editingId, setEditingId] = useState(null)
   const [error, setError] = useState(null)
+  const [page, setPage] = useState(1)
 
   const load = useCallback(async () => {
     try {
@@ -81,6 +83,12 @@ function QuestionBank() {
       setError(err.message)
     }
   }
+
+  // Derive paging values each render. Clamping `page` here (rather than in an
+  // effect) keeps it correct after deletes shrink the list, with no extra render.
+  const totalPages = Math.max(1, Math.ceil(questions.length / PAGE_SIZE))
+  const safePage = Math.min(page, totalPages)
+  const visible = questions.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
 
   return (
     <section className="nes-container with-title">
@@ -144,31 +152,73 @@ function QuestionBank() {
       {questions.length === 0 ? (
         <p>No questions yet. Add one above.</p>
       ) : (
-        <ul className="nes-list is-disc">
-          {questions.map((q) => (
-            <li key={q.id}>
-              <span>
-                {q.text} — <strong>{q.correct_answer}</strong> ({q.point_value} pt)
-              </span>
-              <button
-                type="button"
-                className="nes-btn is-warning"
-                onClick={() => handleEdit(q)}
-                aria-label={`Edit question ${q.id}`}
-              >
-                Edit
-              </button>
-              <button
-                type="button"
-                className="nes-btn is-error"
-                onClick={() => handleDelete(q.id)}
-                aria-label={`Delete question ${q.id}`}
-              >
-                Delete
-              </button>
-            </li>
-          ))}
-        </ul>
+        <>
+          <div className="nes-table-responsive">
+            <table className="nes-table is-bordered is-dark">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Question</th>
+                  <th>Answer</th>
+                  <th>Distractors</th>
+                  <th>Pts</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visible.map((q) => (
+                  <tr key={q.id}>
+                    <td>{q.id}</td>
+                    <td>{q.text}</td>
+                    <td>{q.correct_answer}</td>
+                    <td>{(q.distractors ?? []).join(', ')}</td>
+                    <td>{q.point_value}</td>
+                    <td>
+                      <button
+                        type="button"
+                        className="nes-btn is-warning"
+                        onClick={() => handleEdit(q)}
+                        aria-label={`Edit question ${q.id}`}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="nes-btn is-error"
+                        onClick={() => handleDelete(q.id)}
+                        aria-label={`Delete question ${q.id}`}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="pagination">
+            <button
+              type="button"
+              className="nes-btn"
+              onClick={() => setPage(safePage - 1)}
+              disabled={safePage <= 1}
+            >
+              Prev
+            </button>
+            <span>
+              Page {safePage} / {totalPages}
+            </span>
+            <button
+              type="button"
+              className="nes-btn"
+              onClick={() => setPage(safePage + 1)}
+              disabled={safePage >= totalPages}
+            >
+              Next
+            </button>
+          </div>
+        </>
       )}
     </section>
   )
