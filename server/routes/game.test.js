@@ -68,3 +68,26 @@ describe('POST /api/game/start', () => {
     expect(res.body.error).toMatch(/empty question bank/i)
   })
 })
+
+describe('GET /api/game/state', () => {
+  it('returns the not-started state with no active question before a game starts', async () => {
+    const res = await request(app).get('/api/game/state')
+    expect(res.status).toBe(200)
+    expect(res.body.state.active).toBe(0)
+    expect(res.body.state.positions).toEqual([0, 0, 0, 0])
+    expect(res.body.question).toBeNull()
+  })
+
+  it('returns the active game and current question after starting', async () => {
+    seedBank()
+    const started = await request(app).post('/api/game/start')
+
+    const res = await request(app).get('/api/game/state')
+    expect(res.status).toBe(200)
+    expect(res.body.state.active).toBe(1)
+    expect(res.body.question).not.toBeNull()
+    // matches what start reported and the last drawn id
+    expect(res.body.question.id).toBe(started.body.question.id)
+    expect(res.body.question.id).toBe(res.body.state.usedQuestions.at(-1))
+  })
+})
