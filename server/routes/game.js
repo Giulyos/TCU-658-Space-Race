@@ -22,20 +22,23 @@ export const createGameRouter = ({
 } = {}) => {
   const router = Router()
 
-  router.post('/start', (_req, res) => {
+  // Begins a fresh match: resets the game and draws the first question, keeping
+  // the question bank and team/finish-line configuration. Shared by /start and
+  // /restart (starting fresh and restarting are the same operation — startGame
+  // clears positions, winner, and used questions).
+  const beginGame = (res) => {
     const bank = questionsRepo.getAll()
     if (bank.length === 0) {
       return res.status(400).json({ error: 'Cannot start a game with an empty question bank' })
     }
 
-    // Start a fresh game and draw the first question in one persisted step.
-    const state = bridge.applyAndPersist((current) => {
-      const started = startGame(current)
-      return pickQuestion(started, bank).state
-    })
-
+    const state = bridge.applyAndPersist((current) =>
+      pickQuestion(startGame(current), bank).state,
+    )
     res.json({ state, question: findActiveQuestion(state, bank) })
-  })
+  }
+
+  router.post('/start', (_req, res) => beginGame(res))
 
   router.post('/turn', (req, res) => {
     if (typeof req.body?.correct !== 'boolean') {
@@ -73,10 +76,7 @@ export const createGameRouter = ({
     res.json({ state, question: findActiveQuestion(state, questionsRepo.getAll()) })
   })
 
-  router.post('/restart', (_req, res) => {
-    // TODO(#24): implement
-    res.status(501).json({ message: 'Not implemented' })
-  })
+  router.post('/restart', (_req, res) => beginGame(res))
 
   return router
 }

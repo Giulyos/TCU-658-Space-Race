@@ -174,3 +174,37 @@ describe('POST /api/game/turn', () => {
     expect(res.body.error).toMatch(/correct/i)
   })
 })
+
+describe('POST /api/game/restart', () => {
+  it('resets a game in progress to a fresh active match', async () => {
+    seedBank()
+    await request(app).post('/api/game/start')
+    await request(app).post('/api/game/turn').send({ correct: true }) // team 1 moves
+
+    const res = await request(app).post('/api/game/restart')
+    expect(res.status).toBe(200)
+    expect(res.body.state.active).toBe(1)
+    expect(res.body.state.currentTeam).toBe(1)
+    expect(res.body.state.positions).toEqual([0, 0, 0, 0])
+    expect(res.body.state.winner).toBeNull()
+    expect(res.body.state.usedQuestions).toHaveLength(1) // fresh first question drawn
+    expect(res.body.question).not.toBeNull()
+  })
+
+  it('keeps the question bank intact', async () => {
+    seedBank()
+    await request(app).post('/api/game/start')
+    await request(app).post('/api/game/restart')
+
+    const bank = await request(app).get('/api/game/state')
+    // bank still has both questions available to draw across a session
+    expect(questionsRepo.getAll()).toHaveLength(2)
+    expect(bank.body.state.active).toBe(1)
+  })
+
+  it('returns 400 when the question bank is empty', async () => {
+    const res = await request(app).post('/api/game/restart')
+    expect(res.status).toBe(400)
+    expect(res.body.error).toMatch(/empty question bank/i)
+  })
+})
