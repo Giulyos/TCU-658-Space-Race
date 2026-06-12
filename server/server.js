@@ -1,38 +1,12 @@
-import express from 'express'
-import path from 'path'
-import { fileURLToPath } from 'url'
-
-import gameRouter from './routes/game.js'
-import questionsRouter from './routes/questions.js'
+import { createApp } from './app.js'
 import { initializeSchema } from './db/schema.js'
-import { notFoundHandler, errorHandler } from './middleware/errors.js'
 
-const app = express()
 const PORT = 3001
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 
+// Create the database tables (and singleton game row) before serving.
 initializeSchema()
 
-app.use(express.json())
-
-app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok' })
-})
-
-app.use('/api/questions', questionsRouter)
-app.use('/api/game', gameRouter)
-
-// Unmatched /api/* routes return a consistent JSON 404.
-app.use('/api', notFoundHandler)
-
-if (process.env.NODE_ENV === 'production') {
-  const clientDistPath = path.resolve(__dirname, '../client/dist')
-  app.use(express.static(clientDistPath))
-}
-
-// Central error handler — must be registered last.
-app.use(errorHandler)
+const app = createApp({ serveStatic: process.env.NODE_ENV === 'production' })
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`)

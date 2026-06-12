@@ -74,7 +74,10 @@ export const createGameRouter = ({
 
   router.get('/state', (_req, res) => {
     const state = bridge.getState()
-    res.json({ state, question: findActiveQuestion(state, questionsRepo.getAll()) })
+    // Once a team has won there is no active question to answer (consistent
+    // with the response from /turn on a winning move).
+    const question = state.winner !== null ? null : findActiveQuestion(state, questionsRepo.getAll())
+    res.json({ state, question })
   })
 
   router.post('/restart', (_req, res) => beginGame(res))
