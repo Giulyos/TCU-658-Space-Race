@@ -1,12 +1,14 @@
 import { Router } from 'express'
 import defaultQuestionsRepo from '../db/questionsRepo.js'
+import { badRequest, notFound } from '../middleware/errors.js'
 
 // Routes for the question bank. Exposed as a factory taking an injectable repo
 // so tests can bind it to an in-memory database; server.js uses the default
 // instance via the default export.
 //
-// Note: validation here is inline and minimal. A central validation/error
-// middleware arrives in #24 and will replace these ad-hoc checks.
+// Validation failures and not-found cases are signalled by throwing HttpError;
+// the central error middleware (middleware/errors.js) turns these into the
+// consistent { error } JSON response.
 
 // Validates a question payload for create/update. Returns an error message
 // string, or null when the payload is acceptable. `partial` allows missing
@@ -41,9 +43,8 @@ export const createQuestionsRouter = (repo = defaultQuestionsRepo) => {
 
   router.post('/', (req, res) => {
     const error = validateQuestion(req.body ?? {})
-    if (error) {
-      return res.status(400).json({ error })
-    }
+    if (error) throw badRequest(error)
+
     const created = repo.create(req.body)
     res.status(201).json(created)
   })
@@ -51,22 +52,18 @@ export const createQuestionsRouter = (repo = defaultQuestionsRepo) => {
   router.put('/:id', (req, res) => {
     const id = Number(req.params.id)
     const error = validateQuestion(req.body ?? {}, { partial: true })
-    if (error) {
-      return res.status(400).json({ error })
-    }
+    if (error) throw badRequest(error)
+
     const updated = repo.update(id, req.body ?? {})
-    if (!updated) {
-      return res.status(404).json({ error: 'Question not found' })
-    }
+    if (!updated) throw notFound('Question not found')
+
     res.json(updated)
   })
 
   router.delete('/:id', (req, res) => {
     const id = Number(req.params.id)
-    const removed = repo.remove(id)
-    if (!removed) {
-      return res.status(404).json({ error: 'Question not found' })
-    }
+    if (!repo.remove(id)) throw notFound('Question not found')
+
     res.status(204).end()
   })
 
