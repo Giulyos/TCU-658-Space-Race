@@ -192,6 +192,25 @@ the team whose turn it is, and asks you to mark the answer **y** (correct), **n*
 rotate between the four teams, and a winner is declared when one reaches the
 finish line. It's a quick way to see and verify the game mechanics on their own.
 
+### Playing a Game over HTTP (API demo)
+
+You can also play a full game against the **running server**, exercising the
+real REST API and SQLite database with no UI involved:
+
+```bash
+# 1. In one terminal, start the server:
+node server/server.js        # (or: npm run dev)
+
+# 2. In another terminal, run the demo:
+npm run demo:http
+```
+
+The demo checks the server health, seeds the question bank (only if empty),
+starts a game, then plays it out turn by turn over HTTP — printing the race
+track after each turn — until a team wins. It pauses for Enter at the major
+steps so it can be narrated. This demonstrates that the entire backend works
+end to end before any frontend is built.
+
 ### Building for Production
 
 Build the React frontend and then package everything into cross-platform executables:
