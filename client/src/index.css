@@ -234,72 +234,81 @@ label {
   font-size: 12px;
 }
 
-/* ===== Race track (Game Screen) ===== */
-.race-track {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin: 20px 0;
+/* ===== Jumanji-style board (Game Screen) ===== */
+.board {
+  margin: 16px 0;
 }
-
-.race-lane {
-  display: grid;
-  grid-template-columns: 140px 1fr 64px;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 10px;
-  background: var(--space-800);
+.board-svg {
+  display: block;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  aspect-ratio: 1 / 1;
+  background: #0d0726;
   border: 4px solid var(--space-700);
 }
-.race-lane.is-current {
-  border-color: var(--cyan);
+
+/* each team's winding route */
+.board-path {
+  stroke-width: 0.7;
+  stroke-dasharray: 1.5 1.5;
+  opacity: 0.55;
 }
-.race-lane.is-winner {
-  border-color: var(--amber);
-  box-shadow: 0 0 0 4px rgba(255, 210, 63, 0.25);
+/* the board spaces along a route */
+.board-space {
+  fill: #2a1a5e;
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 0.2;
 }
 
-.lane-label {
-  text-align: left;
-  font-size: 11px;
-  line-height: 1.4;
-  overflow-wrap: anywhere;
+/* shared finish */
+.board-finish {
+  fill: none;
+  stroke: var(--amber);
+  stroke-width: 0.8;
+}
+.board-finish-flag {
+  font-size: 4px;
 }
 
-/* The lane is a grid of `--cells` spaces drawn with a repeating gradient; the
-   ship is absolutely positioned over it by its left-offset percentage. */
-.lane-track {
-  position: relative;
-  height: 40px;
-  background-color: #0d0726;
-  background-image: repeating-linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.12) 0,
-    rgba(255, 255, 255, 0.12) 2px,
-    transparent 2px,
-    transparent calc(100% / var(--cells, 10))
-  );
-  border: 2px solid var(--space-700);
+/* ships (a coloured token with the team number) */
+.board-ship circle {
+  stroke: #06122e;
+  stroke-width: 0.4;
+}
+.board-ship .board-ship-num {
+  font-size: 3px;
+  fill: #06122e;
+}
+.board-ship.is-current circle {
+  stroke: #ffffff;
+  stroke-width: 0.7;
+}
+.board-ship.is-winner circle {
+  stroke: var(--amber);
+  stroke-width: 1;
 }
 
-.finish-flag {
-  position: absolute;
-  right: 2px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 22px;
+/* team legend (name + position) under the board */
+.board-legend {
+  list-style: none;
+  padding: 0;
+  margin: 14px auto 0;
+  max-width: 640px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px;
 }
-
-.spaceship {
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 24px;
-  filter: drop-shadow(0 0 5px var(--team-color));
+.board-legend li {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
 }
-
-.lane-pos {
-  font-size: 11px;
+.board-legend .legend-name {
+  color: var(--team-color);
+}
+.board-legend .legend-pos {
   color: var(--cyan);
 }
 
