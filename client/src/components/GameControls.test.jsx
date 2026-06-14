@@ -42,10 +42,19 @@ describe('GameControls', () => {
     expect(screen.queryByRole('button', { name: 'Pause' })).not.toBeInTheDocument()
   })
 
-  it('shows no play controls once there is a winner (only Mute)', () => {
+  it('shows no controls once there is a winner', () => {
     render(<GameControls state={{ active: 1, winner: 2 }} question={null} refresh={refresh} />)
     expect(screen.queryByRole('button', { name: 'Next Question' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Correct' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Mute' })).not.toBeInTheDocument()
+  })
+
+  it('shows Mute only alongside Next Question (not during a question)', () => {
+    const withQuestion = render(<GameControls state={playing} question={{ id: 1 }} refresh={refresh} />)
+    expect(withQuestion.queryByRole('button', { name: 'Mute' })).not.toBeInTheDocument()
+    withQuestion.unmount()
+
+    render(<GameControls state={playing} question={null} refresh={refresh} />)
     expect(screen.getByRole('button', { name: 'Mute' })).toBeInTheDocument()
   })
 
