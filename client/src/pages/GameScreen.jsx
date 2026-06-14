@@ -1,11 +1,14 @@
 import RaceTrack from '../components/RaceTrack.jsx'
+import TurnIndicator from '../components/TurnIndicator.jsx'
+import QuestionDisplay from '../components/QuestionDisplay.jsx'
+import Scoreboard from '../components/Scoreboard.jsx'
 import { useGameState } from '../hooks/useGameState.js'
 
 // The projected, student-facing view. It polls /api/game/state and renders the
-// race. QuestionDisplay, TurnIndicator, Scoreboard and the winner banner are
-// added in #34/#35; for now it shows the race track once a game is loaded.
+// turn indicator, active question, race track, and scoreboard. The advance
+// animation and winner banner are added in #35.
 function GameScreen() {
-  const { state, loading, error } = useGameState()
+  const { state, question, loading, error } = useGameState()
 
   return (
     <main>
@@ -17,7 +20,12 @@ function GameScreen() {
       {state && state.active === 0 ? (
         <p>Waiting for the teacher to start a game…</p>
       ) : (
-        <RaceTrack state={state} />
+        <>
+          <TurnIndicator state={state} />
+          <QuestionDisplay question={question} />
+          <RaceTrack state={state} />
+          <Scoreboard state={state} />
+        </>
       )}
     </main>
   )

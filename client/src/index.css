@@ -186,6 +186,76 @@ label {
   margin-top: 16px;
 }
 
+/* ===== Turn indicator ===== */
+.turn-indicator {
+  font-size: 18px;
+  margin: 12px 0;
+  color: var(--ink);
+}
+.turn-indicator .turn-team {
+  color: var(--team-color);
+  text-shadow: 2px 2px 0 #06122e;
+}
+
+/* ===== Active question ===== */
+.question-display {
+  margin: 12px 0 20px;
+  text-align: center;
+}
+.question-text {
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--amber);
+}
+.question-options {
+  list-style: none;
+  padding: 0;
+  margin: 16px auto 0;
+  max-width: 760px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  text-align: left;
+}
+.question-options li {
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 8px 10px;
+  background: #0d0726;
+  border: 2px solid var(--space-700);
+}
+.option-key {
+  color: var(--cyan);
+  margin-right: 6px;
+}
+
+/* ===== Scoreboard ===== */
+.score-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.score-list li {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 4px;
+  border-bottom: 4px solid var(--space-700);
+  text-align: left;
+}
+.score-rank {
+  color: var(--ink);
+}
+.score-name {
+  color: var(--team-color);
+  overflow-wrap: anywhere;
+}
+.score-pos {
+  color: var(--cyan);
+  font-size: 12px;
+}
+
 /* ===== Race track (Game Screen) ===== */
 .race-track {
   display: flex;
