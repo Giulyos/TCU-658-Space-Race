@@ -271,20 +271,15 @@ label {
   font-size: 4px;
 }
 
-/* ships (a coloured token with the team number) */
-.board-ship circle {
-  stroke: #06122e;
-  stroke-width: 0.4;
+/* ships (retro pixel sprites, tinted per team) */
+.ship-halo {
+  fill: none;
+  stroke-width: 0.6;
 }
-.board-ship .board-ship-num {
-  font-size: 3px;
-  fill: #06122e;
-}
-.board-ship.is-current circle {
+.board-ship.is-current .ship-halo {
   stroke: #ffffff;
-  stroke-width: 0.7;
 }
-.board-ship.is-winner circle {
+.board-ship.is-winner .ship-halo {
   stroke: var(--amber);
   stroke-width: 1;
 }

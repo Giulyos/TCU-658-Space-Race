@@ -1,5 +1,6 @@
 import { teamColor } from './raceUtils.js'
 import { layoutFor, makeWindingPath, sampleAlong } from './boardLayout.js'
+import PixelShip from './PixelShip.jsx'
 
 // The Jumanji-style board: each team follows a winding path from its start to a
 // shared finish, with one board space per step (0..finishLine). A team's ship
@@ -51,25 +52,24 @@ function Board({ state }) {
 
         {/* ships on top */}
         {teams.map((t) => {
-          const cls = [
-            'board-ship',
-            currentTeam === t.team && winner == null ? 'is-current' : '',
-            winner === t.team ? 'is-winner' : '',
-          ]
+          const isCurrent = currentTeam === t.team && winner == null
+          const isWinner = winner === t.team
+          const cls = ['board-ship', isCurrent ? 'is-current' : '', isWinner ? 'is-winner' : '']
             .filter(Boolean)
             .join(' ')
           return (
-            <g key={`ship-${t.team}`} className={cls} data-team={t.team} aria-label={`Team ${t.team} spaceship`}>
-              <circle cx={t.ship[0]} cy={t.ship[1]} r="2.8" style={{ fill: t.color }} />
-              <text
-                className="board-ship-num"
-                x={t.ship[0]}
-                y={t.ship[1]}
-                textAnchor="middle"
-                dominantBaseline="central"
-              >
-                {t.team}
-              </text>
+            <g
+              key={`ship-${t.team}`}
+              className={cls}
+              data-team={t.team}
+              data-x={t.ship[0].toFixed(3)}
+              data-y={t.ship[1].toFixed(3)}
+              aria-label={`Team ${t.team} spaceship`}
+            >
+              {(isCurrent || isWinner) && (
+                <circle className="ship-halo" cx={t.ship[0]} cy={t.ship[1]} r="6" />
+              )}
+              <PixelShip cx={t.ship[0]} cy={t.ship[1]} size={9} color={t.color} />
             </g>
           )
         })}

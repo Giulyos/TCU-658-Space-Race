@@ -66,13 +66,14 @@ describe('Board', () => {
   it('puts a ship at its start (pos 0) and at the finish (pos = finishLine)', () => {
     const { container } = render(<Board state={state()} />)
     const { finish, starts } = layoutFor(4)
-    const ship = (team) => container.querySelector(`.board-ship[data-team="${team}"] circle`)
+    const ship = (team) => container.querySelector(`.board-ship[data-team="${team}"]`)
+    const xy = (g) => [Number(g.getAttribute('data-x')), Number(g.getAttribute('data-y'))]
     // team 1 at position 0 -> its start corner
-    expect(close(Number(ship(1).getAttribute('cx')), starts[0][0])).toBe(true)
-    expect(close(Number(ship(1).getAttribute('cy')), starts[0][1])).toBe(true)
+    expect(close(xy(ship(1))[0], starts[0][0])).toBe(true)
+    expect(close(xy(ship(1))[1], starts[0][1])).toBe(true)
     // team 4 at position 10 (finishLine) -> the finish
-    expect(close(Number(ship(4).getAttribute('cx')), finish[0])).toBe(true)
-    expect(close(Number(ship(4).getAttribute('cy')), finish[1])).toBe(true)
+    expect(close(xy(ship(4))[0], finish[0])).toBe(true)
+    expect(close(xy(ship(4))[1], finish[1])).toBe(true)
   })
 
   it('marks the current team and the winner', () => {
