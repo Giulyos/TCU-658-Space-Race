@@ -21,37 +21,37 @@ beforeEach(() => {
 
 describe('API integration — a complete game', () => {
   it('seeds questions, starts, plays turns, and reaches a winner', async () => {
-    // 1. Teacher builds the question bank.
-    for (let i = 1; i <= 3; i++) {
+    // 1. Teacher builds the question bank (enough for a no-repeat session).
+    for (let i = 1; i <= 6; i++) {
       const res = await request(app)
         .post('/api/questions')
         .send({ text: `Q${i}`, correct_answer: `A${i}`, point_value: 2 })
       expect(res.status).toBe(201)
     }
-    expect((await request(app).get('/api/questions')).body).toHaveLength(3)
+    expect((await request(app).get('/api/questions')).body).toHaveLength(6)
 
-    // 2. Start the game — first question is drawn.
+    // Configure a short two-team game so it finishes within the bank.
+    await request(app).put('/api/game/settings').send({ finishLine: 4, teamNames: ['Red', 'Blue'] })
+
+    // 2. Start the game — board shown, no question yet (teacher-paced reveal).
     const start = await request(app).post('/api/game/start')
     expect(start.status).toBe(200)
     expect(start.body.state.active).toBe(1)
-    expect(start.body.question).not.toBeNull()
+    expect(start.body.question).toBeNull()
 
-    // 3. Play until someone wins: team 1 always correct, others always wrong,
-    //    so team 1 marches to the finish line (default 10).
+    // 3. Play until someone wins: reveal a question each turn; Red always
+    //    correct, Blue always wrong, so Red marches to the finish line.
     let winner = null
-    for (let i = 0; i < 100 && winner === null; i++) {
-      const turn = await request(app).post('/api/game/turn').send({ correct: true }) // current team correct
+    for (let i = 0; i < 20 && winner === null; i++) {
+      await request(app).post('/api/game/next')
+      const turn = await request(app).post('/api/game/turn').send({ correct: true }) // Red correct
       winner = turn.body.state.winner
       if (winner !== null) break
-      // the other three teams miss
-      await request(app).post('/api/game/turn').send({ correct: false })
-      await request(app).post('/api/game/turn').send({ correct: false })
-      await request(app).post('/api/game/turn').send({ correct: false })
-      const after = await request(app).get('/api/game/state')
-      winner = after.body.state.winner
+      await request(app).post('/api/game/next')
+      await request(app).post('/api/game/turn').send({ correct: false }) // Blue wrong
     }
 
-    // 4. Verify the end state: team 1 won, reached the finish line.
+    // 4. Verify the end state: Red won, reached the finish line.
     const final = await request(app).get('/api/game/state')
     expect(final.body.state.winner).toBe(1)
     expect(final.body.state.positions[0]).toBeGreaterThanOrEqual(final.body.state.finishLine)
@@ -65,8 +65,8 @@ describe('API integration — a complete game', () => {
     // 6. Restart returns to a fresh, playable game keeping the bank.
     const restart = await request(app).post('/api/game/restart')
     expect(restart.body.state.winner).toBeNull()
-    expect(restart.body.state.positions).toEqual([0, 0, 0, 0])
-    expect((await request(app).get('/api/questions')).body).toHaveLength(3)
+    expect(restart.body.state.positions).toEqual([0, 0])
+    expect((await request(app).get('/api/questions')).body).toHaveLength(6)
   })
 
   it('reports health and a JSON 404 for unknown API routes', async () => {

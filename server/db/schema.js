@@ -50,16 +50,17 @@ export const initializeSchema = (db = defaultDb) => {
     );
 
     CREATE TABLE IF NOT EXISTS game_state (
-      id             INTEGER PRIMARY KEY DEFAULT 1,
-      game_id        INTEGER,                        -- the game currently loaded for play
-      active         INTEGER NOT NULL DEFAULT 0,     -- 0 = not started, 1 = active, 2 = paused
-      current_team   INTEGER NOT NULL DEFAULT 1,     -- 1-4
-      positions      TEXT    NOT NULL DEFAULT '[0,0,0,0]',
-      finish_line    INTEGER NOT NULL DEFAULT 10,
-      team_names     TEXT    NOT NULL DEFAULT '["Team 1","Team 2","Team 3","Team 4"]',
-      used_questions TEXT    NOT NULL DEFAULT '[]',
-      winner         INTEGER,                         -- NULL or team number 1-4
-      updated_at     DATETIME DEFAULT CURRENT_TIMESTAMP
+      id               INTEGER PRIMARY KEY DEFAULT 1,
+      game_id          INTEGER,                       -- the game currently loaded for play
+      active           INTEGER NOT NULL DEFAULT 0,    -- 0 = not started, 1 = active, 2 = paused
+      current_team     INTEGER NOT NULL DEFAULT 1,    -- 1-4
+      positions        TEXT    NOT NULL DEFAULT '[0,0,0,0]',
+      finish_line      INTEGER NOT NULL DEFAULT 10,
+      team_names       TEXT    NOT NULL DEFAULT '["Team 1","Team 2","Team 3","Team 4"]',
+      used_questions   TEXT    NOT NULL DEFAULT '[]',
+      current_question INTEGER,                       -- id of the question on screen, or NULL
+      winner           INTEGER,                        -- NULL or team number 1-4
+      updated_at       DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `)
 
@@ -73,6 +74,10 @@ export const initializeSchema = (db = defaultDb) => {
   // Distractors were removed (the game is teacher-judged); drop the old column.
   if (hasColumn(db, 'questions', 'distractors')) {
     db.exec('ALTER TABLE questions DROP COLUMN distractors')
+  }
+  // Question reveal is teacher-paced: track which question is currently on screen.
+  if (!hasColumn(db, 'game_state', 'current_question')) {
+    db.exec('ALTER TABLE game_state ADD COLUMN current_question INTEGER')
   }
 
   // The game has exactly one persisted state: a single row with id = 1. Bootstrap

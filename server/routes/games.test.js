@@ -125,9 +125,10 @@ describe('activation drives game play', () => {
     expect(activated.body.state.teamNames).toEqual(['Red', 'Blue', 'Green'])
     expect(activated.body.state.positions).toEqual([0, 0, 0])
 
-    // Start + a turn now use the activated game's question bank.
-    const started = await request(app).post('/api/game/start')
-    expect(started.body.question.text).toBe('Q1')
+    // Start + reveal + a turn now use the activated game's question bank.
+    await request(app).post('/api/game/start')
+    const revealed = await request(app).post('/api/game/next')
+    expect(revealed.body.question.text).toBe('Q1')
     const turn = await request(app).post('/api/game/turn').send({ correct: true })
     expect(turn.body.state.positions[0]).toBe(2) // advanced by the question's points
   })

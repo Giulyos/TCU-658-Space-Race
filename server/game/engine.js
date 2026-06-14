@@ -22,6 +22,7 @@ export const startGame = (state) => ({
   positions: state.positions.map(() => 0),
   winner: null,
   usedQuestions: [],
+  currentQuestion: null,
 })
 
 /**

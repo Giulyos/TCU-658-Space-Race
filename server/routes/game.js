@@ -10,12 +10,11 @@ import { badRequest } from '../middleware/errors.js'
 // bridge and questions repo so tests can bind them to an in-memory database;
 // server.js uses the default instances via the default export.
 
-// The "active question" is the most recently drawn one — i.e. the last id in
-// usedQuestions. Returns the matching question from the bank, or null.
+// The question currently on screen (teacher-revealed). Returns the matching
+// question from the bank, or null when nothing is being shown.
 export const findActiveQuestion = (state, bank) => {
-  const currentId = state.usedQuestions.at(-1)
-  if (currentId === undefined) return null
-  return bank.find((q) => q.id === currentId) ?? null
+  if (state.currentQuestion == null) return null
+  return bank.find((q) => q.id === state.currentQuestion) ?? null
 }
 
 export const createGameRouter = ({
@@ -31,23 +30,42 @@ export const createGameRouter = ({
     return gameId != null ? questionsRepo.getAllByGame(gameId) : questionsRepo.getAll()
   }
 
-  // Begins a fresh match: resets the game and draws the first question, keeping
-  // the question bank and team/finish-line configuration. Shared by /start and
-  // /restart (starting fresh and restarting are the same operation — startGame
-  // clears positions, winner, and used questions).
+  // Begins a fresh match: resets positions/winner/used questions and starts the
+  // game with NO question showing (the teacher reveals the first one via /next).
+  // Keeps the question bank and team/finish-line configuration. Shared by /start
+  // and /restart.
   const beginGame = (res) => {
     const bank = bankForPlay()
     if (bank.length === 0) {
       throw badRequest('Cannot start a game with an empty question bank')
     }
 
-    const state = bridge.applyAndPersist((current) =>
-      pickQuestion(startGame(current), bank).state,
-    )
-    res.json({ state, question: findActiveQuestion(state, bank) })
+    const state = bridge.applyAndPersist((current) => startGame(current))
+    res.json({ state, question: null })
   }
 
   router.post('/start', (_req, res) => beginGame(res))
+
+  // Reveals the next question for the current team. Teacher-paced: the board
+  // sits with no question until this is called.
+  router.post('/next', (_req, res) => {
+    const current = bridge.getState()
+    if (current.active !== STATUS.ACTIVE) throw badRequest('No active game')
+    if (current.winner !== null) throw badRequest('Game is already finished')
+    if (current.currentQuestion != null) throw badRequest('Resolve the current question first')
+
+    const bank = bankForPlay()
+    const available = bank.filter((q) => !current.usedQuestions.includes(q.id))
+    if (available.length === 0) {
+      throw badRequest('No more questions available — add questions or restart')
+    }
+
+    const state = bridge.applyAndPersist((s) => {
+      const picked = pickQuestion(s, bank)
+      return { ...picked.state, currentQuestion: picked.question.id }
+    })
+    res.json({ state, question: findActiveQuestion(state, bank) })
+  })
 
   router.post('/turn', (req, res) => {
     if (typeof req.body?.correct !== 'boolean') {
@@ -61,23 +79,23 @@ export const createGameRouter = ({
     if (current.active !== STATUS.ACTIVE) {
       throw badRequest('No active game')
     }
+    if (current.currentQuestion == null) {
+      throw badRequest('No question to mark — reveal one first')
+    }
 
     const { correct } = req.body
     const bank = bankForPlay()
 
-    // Resolve the current turn using the active question's point value, check
-    // for a winner, and — only if nobody has won — draw the next question. If
-    // the bank is exhausted, no new question is drawn (no repeats per session)
-    // and the last question simply remains the active one.
+    // Resolve the current turn using the showing question's point value, check
+    // for a winner, and clear the current question. The next question is NOT
+    // auto-drawn — the teacher reveals it with /next after the board is shown.
     const state = bridge.applyAndPersist((s) => {
       const pointValue = findActiveQuestion(s, bank)?.point_value ?? 1
       const afterTurn = checkWinner(resolveTurn(s, { correct, pointValue }))
-      if (afterTurn.winner !== null) return afterTurn
-      return pickQuestion(afterTurn, bank).state
+      return { ...afterTurn, currentQuestion: null }
     })
 
-    const question = state.winner !== null ? null : findActiveQuestion(state, bank)
-    res.json({ state, question })
+    res.json({ state, question: null })
   })
 
   // Configure the game before a match: finish line and team names (their count
@@ -105,10 +123,7 @@ export const createGameRouter = ({
 
   router.get('/state', (_req, res) => {
     const state = bridge.getState()
-    // Once a team has won there is no active question to answer (consistent
-    // with the response from /turn on a winning move).
-    const question = state.winner !== null ? null : findActiveQuestion(state, bankForPlay())
-    res.json({ state, question })
+    res.json({ state, question: findActiveQuestion(state, bankForPlay()) })
   })
 
   router.post('/restart', (_req, res) => beginGame(res))

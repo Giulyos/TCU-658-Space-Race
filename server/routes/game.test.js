@@ -29,18 +29,18 @@ const seedBank = () => {
 }
 
 describe('findActiveQuestion', () => {
-  it('returns null when no question has been drawn', () => {
-    expect(findActiveQuestion({ usedQuestions: [] }, [{ id: 1 }])).toBeNull()
+  it('returns null when no question is showing', () => {
+    expect(findActiveQuestion({ currentQuestion: null }, [{ id: 1 }])).toBeNull()
   })
 
-  it('returns the most recently drawn question', () => {
+  it('returns the current question from the bank', () => {
     const bank = [{ id: 1 }, { id: 2 }, { id: 3 }]
-    expect(findActiveQuestion({ usedQuestions: [2, 1] }, bank)).toEqual({ id: 1 })
+    expect(findActiveQuestion({ currentQuestion: 2 }, bank)).toEqual({ id: 2 })
   })
 })
 
 describe('POST /api/game/start', () => {
-  it('starts an active game and returns state plus the first question', async () => {
+  it('starts an active game with no question showing yet', async () => {
     seedBank()
     const res = await request(app).post('/api/game/start')
 
@@ -49,25 +49,63 @@ describe('POST /api/game/start', () => {
     expect(res.body.state.currentTeam).toBe(1)
     expect(res.body.state.positions).toEqual([0, 0, 0, 0])
     expect(res.body.state.winner).toBeNull()
-    // a question was drawn and is reported as active
-    expect(res.body.state.usedQuestions).toHaveLength(1)
-    expect(res.body.question).not.toBeNull()
-    expect(res.body.question.id).toBe(res.body.state.usedQuestions[0])
+    // teacher-paced: no question drawn until /next
+    expect(res.body.state.usedQuestions).toHaveLength(0)
+    expect(res.body.state.currentQuestion).toBeNull()
+    expect(res.body.question).toBeNull()
   })
 
   it('persists the started game (a second start re-reads, not duplicates)', async () => {
     seedBank()
     await request(app).post('/api/game/start')
     const res = await request(app).post('/api/game/start')
-    // still a valid fresh game with exactly one drawn question
     expect(res.body.state.active).toBe(1)
-    expect(res.body.state.usedQuestions).toHaveLength(1)
+    expect(res.body.state.usedQuestions).toHaveLength(0)
   })
 
   it('returns 400 when the question bank is empty', async () => {
     const res = await request(app).post('/api/game/start')
     expect(res.status).toBe(400)
     expect(res.body.error).toMatch(/empty question bank/i)
+  })
+})
+
+describe('POST /api/game/next', () => {
+  it('reveals an unused question for the current team', async () => {
+    seedBank()
+    await request(app).post('/api/game/start')
+    const res = await request(app).post('/api/game/next')
+    expect(res.status).toBe(200)
+    expect(res.body.question).not.toBeNull()
+    expect(res.body.state.currentQuestion).toBe(res.body.question.id)
+    expect(res.body.state.usedQuestions).toContain(res.body.question.id)
+  })
+
+  it('rejects revealing while a question is already showing (400)', async () => {
+    seedBank()
+    await request(app).post('/api/game/start')
+    await request(app).post('/api/game/next')
+    const res = await request(app).post('/api/game/next')
+    expect(res.status).toBe(400)
+    expect(res.body.error).toMatch(/resolve the current question/i)
+  })
+
+  it('rejects when no game is active (400)', async () => {
+    const res = await request(app).post('/api/game/next')
+    expect(res.status).toBe(400)
+    expect(res.body.error).toMatch(/no active game/i)
+  })
+
+  it('rejects when the bank is exhausted, no repeats (400)', async () => {
+    seedBank() // 2 questions
+    await request(app).post('/api/game/start')
+    for (let i = 0; i < 2; i++) {
+      await request(app).post('/api/game/next')
+      await request(app).post('/api/game/turn').send({ correct: false })
+    }
+    const res = await request(app).post('/api/game/next')
+    expect(res.status).toBe(400)
+    expect(res.body.error).toMatch(/no more questions/i)
   })
 })
 
@@ -80,27 +118,31 @@ describe('GET /api/game/state', () => {
     expect(res.body.question).toBeNull()
   })
 
-  it('returns the active game and current question after starting', async () => {
+  it('returns the active game and the revealed question', async () => {
     seedBank()
-    const started = await request(app).post('/api/game/start')
+    await request(app).post('/api/game/start')
+    const revealed = await request(app).post('/api/game/next')
 
     const res = await request(app).get('/api/game/state')
     expect(res.status).toBe(200)
     expect(res.body.state.active).toBe(1)
     expect(res.body.question).not.toBeNull()
-    // matches what start reported and the last drawn id
-    expect(res.body.question.id).toBe(started.body.question.id)
-    expect(res.body.question.id).toBe(res.body.state.usedQuestions.at(-1))
+    expect(res.body.question.id).toBe(revealed.body.question.id)
+    expect(res.body.state.currentQuestion).toBe(revealed.body.question.id)
   })
 })
 
 describe('POST /api/game/turn', () => {
-  const start = () => request(app).post('/api/game/start')
+  // Starts a game and reveals a question; returns the /next response.
+  const startAndReveal = async () => {
+    await request(app).post('/api/game/start')
+    return request(app).post('/api/game/next')
+  }
 
-  it('advances the current team by the active question point value on correct', async () => {
+  it('advances the current team by the showing question point value on correct', async () => {
     seedBank()
-    const started = await start()
-    const pointValue = started.body.question.point_value
+    const revealed = await startAndReveal()
+    const pointValue = revealed.body.question.point_value
 
     const res = await request(app).post('/api/game/turn').send({ correct: true })
     expect(res.status).toBe(200)
@@ -110,39 +152,29 @@ describe('POST /api/game/turn', () => {
 
   it('does not advance on an incorrect answer but still rotates', async () => {
     seedBank()
-    await start()
+    await startAndReveal()
     const res = await request(app).post('/api/game/turn').send({ correct: false })
     expect(res.body.state.positions).toEqual([0, 0, 0, 0])
     expect(res.body.state.currentTeam).toBe(2)
   })
 
-  it('draws a new active question after a (non-winning) turn', async () => {
+  it('clears the question after a turn (board shown, no auto-draw)', async () => {
     seedBank()
-    const started = await start()
+    await startAndReveal()
     const res = await request(app).post('/api/game/turn').send({ correct: false })
-    expect(res.body.question).not.toBeNull()
-    expect(res.body.question.id).not.toBe(started.body.question.id) // no repeat
-    expect(res.body.state.usedQuestions).toHaveLength(2)
+    expect(res.body.question).toBeNull()
+    expect(res.body.state.currentQuestion).toBeNull()
   })
 
   it('detects a winner and reports a null active question', async () => {
-    // finish line 3, one big-value question so team 1 wins on the first turn
     questionsRepo.create({ text: 'Big', correct_answer: 'A', point_value: 5 })
+    await request(app).put('/api/game/settings').send({ finishLine: 4, teamNames: ['A', 'B'] })
     await request(app).post('/api/game/start')
-    // force a small finish line via a fresh start is not exposed; instead rely
-    // on point_value 5 >= default finish line 10? No — bump with several turns.
-    // Simpler: play correct turns for team 1 until it crosses the line.
-    let res
-    for (let i = 0; i < 20; i++) {
-      res = await request(app).post('/api/game/turn').send({ correct: true })
-      if (res.body.state.winner !== null) break
-      // let the other three teams miss so only team 1 advances
-      await request(app).post('/api/game/turn').send({ correct: false })
-      await request(app).post('/api/game/turn').send({ correct: false })
-      await request(app).post('/api/game/turn').send({ correct: false })
-    }
+    await request(app).post('/api/game/next')
+    const res = await request(app).post('/api/game/turn').send({ correct: true })
     expect(res.body.state.winner).toBe(1)
     expect(res.body.question).toBeNull()
+    expect(res.body.state.currentQuestion).toBeNull()
   })
 
   it('rejects a turn when no game is active (400)', async () => {
@@ -152,17 +184,20 @@ describe('POST /api/game/turn', () => {
     expect(res.body.error).toMatch(/no active game/i)
   })
 
+  it('rejects a turn when no question is showing (400)', async () => {
+    seedBank()
+    await request(app).post('/api/game/start')
+    const res = await request(app).post('/api/game/turn').send({ correct: true })
+    expect(res.status).toBe(400)
+    expect(res.body.error).toMatch(/reveal one first/i)
+  })
+
   it('rejects a turn after the game is finished (400)', async () => {
     questionsRepo.create({ text: 'Big', correct_answer: 'A', point_value: 5 })
+    await request(app).put('/api/game/settings').send({ finishLine: 4, teamNames: ['A', 'B'] })
     await request(app).post('/api/game/start')
-    let res
-    for (let i = 0; i < 20; i++) {
-      res = await request(app).post('/api/game/turn').send({ correct: true })
-      if (res.body.state.winner !== null) break
-      await request(app).post('/api/game/turn').send({ correct: false })
-      await request(app).post('/api/game/turn').send({ correct: false })
-      await request(app).post('/api/game/turn').send({ correct: false })
-    }
+    await request(app).post('/api/game/next')
+    await request(app).post('/api/game/turn').send({ correct: true }) // team A wins
     const after = await request(app).post('/api/game/turn').send({ correct: true })
     expect(after.status).toBe(400)
     expect(after.body.error).toMatch(/finished/i)
@@ -170,7 +205,7 @@ describe('POST /api/game/turn', () => {
 
   it('rejects a non-boolean correct (400)', async () => {
     seedBank()
-    await start()
+    await startAndReveal()
     const res = await request(app).post('/api/game/turn').send({ correct: 'yes' })
     expect(res.status).toBe(400)
     expect(res.body.error).toMatch(/correct/i)
@@ -246,6 +281,7 @@ describe('POST /api/game/restart', () => {
   it('resets a game in progress to a fresh active match', async () => {
     seedBank()
     await request(app).post('/api/game/start')
+    await request(app).post('/api/game/next')
     await request(app).post('/api/game/turn').send({ correct: true }) // team 1 moves
 
     const res = await request(app).post('/api/game/restart')
@@ -254,8 +290,9 @@ describe('POST /api/game/restart', () => {
     expect(res.body.state.currentTeam).toBe(1)
     expect(res.body.state.positions).toEqual([0, 0, 0, 0])
     expect(res.body.state.winner).toBeNull()
-    expect(res.body.state.usedQuestions).toHaveLength(1) // fresh first question drawn
-    expect(res.body.question).not.toBeNull()
+    expect(res.body.state.usedQuestions).toHaveLength(0) // fresh, nothing revealed yet
+    expect(res.body.state.currentQuestion).toBeNull()
+    expect(res.body.question).toBeNull()
   })
 
   it('keeps the question bank intact', async () => {
