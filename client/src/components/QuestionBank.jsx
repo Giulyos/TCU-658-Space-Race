@@ -177,6 +177,7 @@ function QuestionBank({ gameId = null }) {
             </table>
           </div>
 
+          {totalPages > 1 && (
           <div className="pagination">
             <button
               type="button"
@@ -198,6 +199,7 @@ function QuestionBank({ gameId = null }) {
               Next
             </button>
           </div>
+          )}
         </>
       )}
     </section>
