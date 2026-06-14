@@ -36,8 +36,10 @@ describe('GameControls', () => {
     expect(refresh).toHaveBeenCalled()
   })
 
-  it('shows Resume when paused', () => {
+  it('shows a full-screen Paused overlay with Resume when paused', () => {
     render(<GameControls state={{ active: 2, winner: null }} question={null} refresh={refresh} />)
+    expect(screen.getByRole('dialog', { name: /paused/i })).toBeInTheDocument()
+    expect(screen.getByText(/paused/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Resume' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Pause' })).not.toBeInTheDocument()
   })
