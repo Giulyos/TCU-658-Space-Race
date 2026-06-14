@@ -74,10 +74,13 @@ function GameControls({ state, question, refresh }) {
       )}
 
       {paused && (
-        <div className="hud hud-topright">
-          <button type="button" className="nes-btn is-warning" onClick={() => run(resumeGame)}>
-            Resume
-          </button>
+        <div className="pause-overlay" role="dialog" aria-label="Paused">
+          <div className="pause-card nes-container is-dark">
+            <p className="pause-title">⏸ Paused</p>
+            <button type="button" className="nes-btn is-warning" onClick={() => run(resumeGame)}>
+              Resume
+            </button>
+          </div>
         </div>
       )}
     </>
