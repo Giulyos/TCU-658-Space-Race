@@ -7,8 +7,9 @@ import { nextQuestion, pauseGame, resumeGame } from '../api/gameApi.js'
 //   - a question is showing:       (Correct / Incorrect live on the popup)
 //   - paused:                      Resume
 //   - winner:                      no controls (the winner banner takes over)
-// Plus a Mute toggle (local, persisted preference the board reads for sounds).
-// Launch (activate + start) and Restart live on the Admin panel.
+// Mute (a local, persisted preference the board reads for sounds) appears only
+// alongside Next Question — i.e. when no popup is up. Launch (activate + start)
+// and Restart live on the Admin panel.
 
 const STATUS = { NOT_STARTED: 0, ACTIVE: 1, PAUSED: 2 }
 const MUTE_KEY = 'spacerace:muted'
@@ -54,6 +55,10 @@ function GameControls({ state, question, refresh }) {
           <button type="button" className="nes-btn is-warning" onClick={() => run(pauseGame)}>
             Pause
           </button>
+          {/* Mute lives here so it only shows when no popup is up. */}
+          <button type="button" className="nes-btn" onClick={toggleMute} aria-pressed={muted}>
+            {muted ? 'Unmute' : 'Mute'}
+          </button>
         </>
       )}
 
@@ -62,10 +67,6 @@ function GameControls({ state, question, refresh }) {
           Resume
         </button>
       )}
-
-      <button type="button" className="nes-btn" onClick={toggleMute} aria-pressed={muted}>
-        {muted ? 'Unmute' : 'Mute'}
-      </button>
     </section>
   )
 }
