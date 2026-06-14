@@ -186,6 +186,75 @@ label {
   margin-top: 16px;
 }
 
+/* ===== Race track (Game Screen) ===== */
+.race-track {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.race-lane {
+  display: grid;
+  grid-template-columns: 140px 1fr 64px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  background: var(--space-800);
+  border: 4px solid var(--space-700);
+}
+.race-lane.is-current {
+  border-color: var(--cyan);
+}
+.race-lane.is-winner {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 4px rgba(255, 210, 63, 0.25);
+}
+
+.lane-label {
+  text-align: left;
+  font-size: 11px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+/* The lane is a grid of `--cells` spaces drawn with a repeating gradient; the
+   ship is absolutely positioned over it by its left-offset percentage. */
+.lane-track {
+  position: relative;
+  height: 40px;
+  background-color: #0d0726;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.12) 0,
+    rgba(255, 255, 255, 0.12) 2px,
+    transparent 2px,
+    transparent calc(100% / var(--cells, 10))
+  );
+  border: 2px solid var(--space-700);
+}
+
+.finish-flag {
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 22px;
+}
+
+.spaceship {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  filter: drop-shadow(0 0 5px var(--team-color));
+}
+
+.lane-pos {
+  font-size: 11px;
+  color: var(--cyan);
+}
+
 /* Game library rows: name + meta on the left, actions on the right. */
 .game-row {
   display: flex;
