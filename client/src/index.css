@@ -196,12 +196,16 @@ label {
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  padding: 10px 12px 14px;
+  /* Extra bottom space reserves room for the fixed Next Question HUD so it never
+     overlaps the legend; the title is left-aligned so the top-right HUD (Pause /
+     Mute) never sits on top of it. */
+  padding: 12px 12px 84px;
   overflow: hidden;
 }
 .game-screen h1 {
-  margin: 4px 0 2px;
-  font-size: clamp(18px, 3.5vw, 32px);
+  align-self: flex-start;
+  margin: 2px 0;
+  font-size: clamp(16px, 3vw, 30px);
 }
 
 /* ===== Turn indicator ===== */
@@ -253,14 +257,38 @@ label {
   margin-top: 22px;
 }
 
-/* ===== Game controls (on the board) ===== */
-.game-controls {
+/* ===== Game controls — anchored HUD over the board ===== */
+.hud {
+  position: fixed;
+  z-index: 40;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
   gap: 10px;
-  margin: 20px auto 0;
-  max-width: 640px;
+}
+.hud-bottom {
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.hud-topright {
+  top: 14px;
+  right: 14px;
+}
+.hud-error {
+  top: 14px;
+  left: 14px;
+  margin: 0;
+  color: var(--magenta);
+}
+
+/* On phones, shrink the title and HUD so the top row (title + Pause/Mute) fits. */
+@media (max-width: 480px) {
+  .game-screen h1 {
+    font-size: 14px;
+  }
+  .hud .nes-btn {
+    font-size: 10px;
+    padding: 6px 8px;
+  }
 }
 
 /* ===== Jumanji-style board (Game Screen) ===== */
