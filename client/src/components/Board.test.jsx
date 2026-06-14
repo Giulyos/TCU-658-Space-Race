@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render } from '@testing-library/react'
 import Board from './Board.jsx'
-import { layoutFor, makeWindingPath, sampleAlong } from './boardLayout.js'
+import { layoutFor, makeWindingPath, sampleAlong, planetVariant } from './boardLayout.js'
 
 const close = (a, b, eps = 0.001) => Math.abs(a - b) < eps
 
@@ -35,6 +35,23 @@ describe('boardLayout', () => {
   })
 })
 
+describe('planetVariant', () => {
+  it('is deterministic for a given seed + slot', () => {
+    expect(planetVariant(12345, 0, 5)).toBe(planetVariant(12345, 0, 5))
+  })
+
+  it('stays within range and varies by slot / seed', () => {
+    for (let slot = 0; slot < 6; slot++) {
+      const v = planetVariant(999, slot, 5)
+      expect(v).toBeGreaterThanOrEqual(0)
+      expect(v).toBeLessThan(5)
+    }
+    // different seeds generally produce different maps for the same slot
+    const a = [0, 1, 2].map((s) => planetVariant(s, 0, 5))
+    expect(new Set(a).size).toBeGreaterThan(1)
+  })
+})
+
 const state = (over = {}) => ({
   active: 1,
   currentTeam: 1,
@@ -42,6 +59,7 @@ const state = (over = {}) => ({
   finishLine: 10,
   teamNames: ['Red', 'Blue', 'Green', 'Gold'],
   winner: null,
+  mapSeed: 42,
   ...over,
 })
 
@@ -49,6 +67,13 @@ describe('Board', () => {
   it('renders one ship per team', () => {
     const { container } = render(<Board state={state()} />)
     expect(container.querySelectorAll('.board-ship')).toHaveLength(4)
+  })
+
+  it('renders a home planet per team plus the finish planet', () => {
+    const { container } = render(<Board state={state()} />)
+    // 4 home planets + 1 finish planet
+    expect(container.querySelectorAll('.pixel-planet')).toHaveLength(5)
+    expect(container.querySelector('[aria-label="Finish planet"]')).toBeInTheDocument()
   })
 
   it('adapts to 2 and 3 teams', () => {

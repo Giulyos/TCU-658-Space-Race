@@ -18,6 +18,14 @@ export const layoutFor = (teamCount) => {
   }
 }
 
+// Deterministically picks a variant index (0..count-1) for a board "slot" from
+// the per-game map seed. Same seed+slot always yields the same variant (stable
+// across polls); a new seed each game yields a different map.
+export const planetVariant = (seed, slot, count) => {
+  const h = (((seed ?? 0) >>> 0) + (slot + 1) * 0x9e3779b1) >>> 0
+  return h % count
+}
+
 // Builds a winding (zig-zagging) polyline from start to finish: interior
 // waypoints are offset alternately to either side of the straight line, giving
 // the path its "twists and turns". Endpoints are exactly start and finish.
