@@ -22,7 +22,7 @@ function GameScreen() {
       ) : (
         <>
           <TurnIndicator state={state} />
-          <QuestionDisplay question={question} />
+          <QuestionDisplay question={question} state={state} />
           <Board state={state} />
           <Scoreboard state={state} />
         </>
