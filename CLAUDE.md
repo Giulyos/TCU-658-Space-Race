@@ -115,3 +115,28 @@ CREATE TABLE game_state (
 - Code and comments in English (UI copy is also English — it's the language being taught).
 - No authentication — this is a single local instance, trusted teacher device.
 - Keep the teacher (Admin Panel) and student-facing (Game Screen) views decoupled — Game Screen polls `/api/game/state` and should work even if opened on a separate device on the same local network.
+
+## Verifying UI changes (REQUIRED)
+
+Unit tests for UI run in **jsdom, which has no layout engine** — it cannot catch
+click interception, overlap, z-index, `pointer-events`, visibility, or styling
+bugs. (A real example: NES.css border overlays silently swallowed button clicks;
+every unit test passed while the buttons were unusable in the browser.)
+
+Therefore, for **any** change that affects the frontend UI (components, pages,
+CSS/styling, layout, interactions), passing unit tests is **not** sufficient.
+Before considering the work done, you **must** verify it in a real browser:
+
+1. Run the app: `npm run dev` (ensure port 3001 is free first).
+2. Drive the actual change in a real browser — ideally automated with Playwright
+   driving the **installed** Chrome (`playwright-core` + `executablePath` to the
+   system Chrome, so nothing is downloaded and it stays offline-friendly).
+   Install `playwright-core` as a throwaway dev dependency for the check and
+   remove it afterward, or keep an e2e setup if one exists.
+3. Exercise **every button/control you touched** and confirm it does what its
+   label says (clicks register, the right thing happens, no errors).
+4. For visual changes, capture a screenshot and actually look at it.
+
+Only after this real-browser pass is a UI change complete. Add a regression
+guard where feasible (e.g. assert the CSS rule that fixes a click-interception
+bug), since jsdom can't reproduce the failure itself.
