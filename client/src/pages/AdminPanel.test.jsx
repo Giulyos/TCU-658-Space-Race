@@ -4,10 +4,6 @@ import AdminPanel from './AdminPanel.jsx'
 import * as gamesApi from '../api/gamesApi.js'
 
 vi.mock('../api/gamesApi.js')
-// TurnControls (rendered in the play view) depends on these; stub them out.
-vi.mock('../hooks/useGameState.js', () => ({
-  useGameState: () => ({ state: { active: 0, winner: null }, refresh: vi.fn() }),
-}))
 vi.mock('../api/gameApi.js')
 
 const GAME = { id: 1, name: 'Unit 3 Review', team_names: ['Red', 'Blue'] }
@@ -26,13 +22,15 @@ describe('AdminPanel view router', () => {
     expect(screen.getByText('My Games')).toBeInTheDocument()
   })
 
-  it('activates a game and switches to the play view on Play', async () => {
+  it('activates + starts a game and switches to the play view on Play', async () => {
+    const gameApi = await import('../api/gameApi.js')
     render(<AdminPanel />)
     await screen.findByText('Unit 3 Review')
 
     fireEvent.click(screen.getByRole('button', { name: 'Play' }))
     await waitFor(() => expect(gamesApi.activateGame).toHaveBeenCalledWith(1))
-    expect(await screen.findByText('Playing: Unit 3 Review')).toBeInTheDocument()
+    expect(gameApi.startGame).toHaveBeenCalled()
+    expect(await screen.findByText('Now playing: Unit 3 Review')).toBeInTheDocument()
   })
 
   it('opens the wizard on New Game and returns to the library on Cancel', async () => {

@@ -1,14 +1,16 @@
 import Board from '../components/Board.jsx'
 import TurnIndicator from '../components/TurnIndicator.jsx'
 import QuestionDisplay from '../components/QuestionDisplay.jsx'
+import GameControls from '../components/GameControls.jsx'
 import { useGameState } from '../hooks/useGameState.js'
 
-// The projected, student-facing view. It polls /api/game/state and renders the
-// turn indicator, the active-question popup, and the board (which doubles as the
-// scoreboard via each team's position). The advance animation and winner banner
-// are added in #35.
+// The projected, teacher-operated view. It polls /api/game/state and renders the
+// turn indicator, the active-question popup, the board (which doubles as the
+// scoreboard via each team's position), and the during-game controls. Launch and
+// restart live on the Admin panel. The advance animation and winner banner are
+// added in #35.
 function GameScreen() {
-  const { state, question, loading, error } = useGameState()
+  const { state, question, loading, error, refresh } = useGameState()
 
   return (
     <main>
@@ -18,12 +20,13 @@ function GameScreen() {
       {loading && !state && <p>Loading…</p>}
 
       {state && state.active === 0 ? (
-        <p>Waiting for the teacher to start a game…</p>
+        <p>Waiting for the teacher to launch a game…</p>
       ) : (
         <>
           <TurnIndicator state={state} />
           <QuestionDisplay question={question} state={state} />
           <Board state={state} />
+          <GameControls state={state} question={question} refresh={refresh} />
         </>
       )}
     </main>

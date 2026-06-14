@@ -225,6 +225,16 @@ label {
   color: var(--amber);
 }
 
+/* ===== Game controls (on the board) ===== */
+.game-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px auto 0;
+  max-width: 640px;
+}
+
 /* ===== Jumanji-style board (Game Screen) ===== */
 .board {
   margin: 16px 0;

@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import GameLibrary from '../components/GameLibrary.jsx'
 import GameWizard from '../components/GameWizard.jsx'
-import TurnControls from '../components/TurnControls.jsx'
 import { activateGame } from '../api/gamesApi.js'
+import { startGame, restartGame } from '../api/gameApi.js'
 
 // The teacher's admin app, organized as a small view router:
 //   library — the home: a list of saved games (default)
-//   play    — controls for the currently activated game
+//   play    — confirmation + Restart for the launched game (the during-game
+//             controls live on the projected Game Screen)
 //   wizard  — create or edit a game's setup (#48)
 function AdminPanel() {
   const [view, setView] = useState('library')
@@ -19,12 +20,24 @@ function AdminPanel() {
     setView('library')
   }
 
+  // Launching a game = activate it (load its config) and start it, so the
+  // projected Game Screen immediately shows the board ready for Next Question.
   const handlePlay = async (game) => {
     setError(null)
     try {
       await activateGame(game.id)
+      await startGame()
       setSelected(game)
       setView('play')
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  const handleRestart = async () => {
+    setError(null)
+    try {
+      await restartGame()
     } catch (err) {
       setError(err.message)
     }
@@ -50,12 +63,20 @@ function AdminPanel() {
       )}
 
       {view === 'play' && (
-        <section>
-          <h2>Playing: {selected?.name}</h2>
+        <section className="nes-container with-title">
+          <p className="title">Now playing: {selected?.name}</p>
+          <p>Open the Game Screen to run the game — the Next Question and Correct/Incorrect controls are there.</p>
+          <p>
+            <a href="/game" target="_blank" rel="noreferrer">
+              Open the Game Screen ↗
+            </a>
+          </p>
+          <button type="button" className="nes-btn is-warning" onClick={handleRestart}>
+            Restart
+          </button>
           <button type="button" className="nes-btn" onClick={backToLibrary}>
             Back to games
           </button>
-          <TurnControls />
         </section>
       )}
 
