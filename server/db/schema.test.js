@@ -70,7 +70,7 @@ describe('game_state table schema', () => {
     expect(Object.keys(cols).sort()).toEqual(
       [
         'id', 'game_id', 'active', 'current_team', 'positions', 'finish_line',
-        'team_names', 'used_questions', 'current_question', 'winner', 'updated_at',
+        'team_names', 'used_questions', 'current_question', 'map_seed', 'winner', 'updated_at',
       ].sort(),
     )
     db.close()

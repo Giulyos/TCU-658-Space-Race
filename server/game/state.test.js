@@ -13,6 +13,7 @@ describe('createInitialState', () => {
       teamNames: ['Team 1', 'Team 2', 'Team 3', 'Team 4'],
       usedQuestions: [],
       currentQuestion: null,
+      mapSeed: null,
       winner: null,
     })
     expect(state.positions).toHaveLength(DEFAULT_TEAM_COUNT)

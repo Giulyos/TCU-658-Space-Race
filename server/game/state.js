@@ -18,6 +18,7 @@ import {
  *   teamNames     display names; length defines the number of teams
  *   usedQuestions   ids of questions already shown this session (no repeats)
  *   currentQuestion id of the question currently on screen, or null
+ *   mapSeed         per-game random number driving the board's visual variants
  *   winner          null until a team wins, then that team's 1-based number
  *
  * @param {object} [config]
@@ -27,7 +28,7 @@ import {
  * @returns {{
  *   active: number, currentTeam: number, positions: number[], finishLine: number,
  *   teamNames: string[], usedQuestions: number[], currentQuestion: number|null,
- *   winner: number|null
+ *   mapSeed: number|null, winner: number|null
  * }}
  */
 export const createInitialState = (config = {}) => {
@@ -44,6 +45,7 @@ export const createInitialState = (config = {}) => {
     teamNames: [...teamNames],
     usedQuestions: [],
     currentQuestion: null,
+    mapSeed: null,
     winner: null,
   }
 }

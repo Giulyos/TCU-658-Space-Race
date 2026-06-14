@@ -59,6 +59,7 @@ export const initializeSchema = (db = defaultDb) => {
       team_names       TEXT    NOT NULL DEFAULT '["Team 1","Team 2","Team 3","Team 4"]',
       used_questions   TEXT    NOT NULL DEFAULT '[]',
       current_question INTEGER,                       -- id of the question on screen, or NULL
+      map_seed         INTEGER,                       -- per-game seed for board visual variants
       winner           INTEGER,                        -- NULL or team number 1-4
       updated_at       DATETIME DEFAULT CURRENT_TIMESTAMP
     );
@@ -78,6 +79,10 @@ export const initializeSchema = (db = defaultDb) => {
   // Question reveal is teacher-paced: track which question is currently on screen.
   if (!hasColumn(db, 'game_state', 'current_question')) {
     db.exec('ALTER TABLE game_state ADD COLUMN current_question INTEGER')
+  }
+  // Per-game seed driving the board's planet/road visual variants.
+  if (!hasColumn(db, 'game_state', 'map_seed')) {
+    db.exec('ALTER TABLE game_state ADD COLUMN map_seed INTEGER')
   }
 
   // The game has exactly one persisted state: a single row with id = 1. Bootstrap

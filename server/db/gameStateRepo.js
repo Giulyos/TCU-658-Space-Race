@@ -21,6 +21,7 @@ const toEngineState = (row) => ({
   teamNames: JSON.parse(row.team_names),
   usedQuestions: JSON.parse(row.used_questions),
   currentQuestion: row.current_question ?? null,
+  mapSeed: row.map_seed ?? null,
   winner: row.winner ?? null,
 })
 
@@ -39,8 +40,8 @@ export const createGameStateRepo = (db = defaultDb) => {
       .prepare(
         `UPDATE game_state
             SET active = ?, current_team = ?, positions = ?, finish_line = ?,
-                team_names = ?, used_questions = ?, current_question = ?, winner = ?,
-                updated_at = CURRENT_TIMESTAMP
+                team_names = ?, used_questions = ?, current_question = ?,
+                map_seed = ?, winner = ?, updated_at = CURRENT_TIMESTAMP
           WHERE id = ?`,
       )
       .run(
@@ -51,6 +52,7 @@ export const createGameStateRepo = (db = defaultDb) => {
         JSON.stringify(state.teamNames),
         JSON.stringify(state.usedQuestions),
         state.currentQuestion ?? null,
+        state.mapSeed ?? null,
         state.winner,
         SINGLETON_ID,
       )
@@ -74,7 +76,8 @@ export const createGameStateRepo = (db = defaultDb) => {
         `UPDATE game_state
             SET game_id = ?, active = ?, current_team = ?, positions = ?,
                 finish_line = ?, team_names = ?, used_questions = ?,
-                current_question = ?, winner = ?, updated_at = CURRENT_TIMESTAMP
+                current_question = ?, map_seed = ?, winner = ?,
+                updated_at = CURRENT_TIMESTAMP
           WHERE id = ?`,
       )
       .run(
@@ -86,6 +89,7 @@ export const createGameStateRepo = (db = defaultDb) => {
         JSON.stringify(init.teamNames),
         JSON.stringify(init.usedQuestions),
         init.currentQuestion ?? null,
+        init.mapSeed ?? null,
         init.winner,
         SINGLETON_ID,
       )
