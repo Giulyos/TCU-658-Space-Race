@@ -16,8 +16,9 @@ import {
  *   positions     space each team's ship occupies (index 0 = team 1)
  *   finishLine    spaces required to win
  *   teamNames     display names; length defines the number of teams
- *   usedQuestions ids of questions already shown this session (no repeats)
- *   winner        null until a team wins, then that team's 1-based number
+ *   usedQuestions   ids of questions already shown this session (no repeats)
+ *   currentQuestion id of the question currently on screen, or null
+ *   winner          null until a team wins, then that team's 1-based number
  *
  * @param {object} [config]
  * @param {number}   [config.teamCount]  Number of teams (ignored if teamNames is given).
@@ -25,7 +26,8 @@ import {
  * @param {number}   [config.finishLine] Spaces required to win.
  * @returns {{
  *   active: number, currentTeam: number, positions: number[], finishLine: number,
- *   teamNames: string[], usedQuestions: number[], winner: number|null
+ *   teamNames: string[], usedQuestions: number[], currentQuestion: number|null,
+ *   winner: number|null
  * }}
  */
 export const createInitialState = (config = {}) => {
@@ -41,6 +43,7 @@ export const createInitialState = (config = {}) => {
     finishLine,
     teamNames: [...teamNames],
     usedQuestions: [],
+    currentQuestion: null,
     winner: null,
   }
 }

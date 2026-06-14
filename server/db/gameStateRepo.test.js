@@ -24,6 +24,7 @@ describe('gameStateRepo', () => {
       finishLine: 10,
       teamNames: ['Team 1', 'Team 2', 'Team 3', 'Team 4'],
       usedQuestions: [],
+      currentQuestion: null,
       winner: null,
     })
   })
@@ -36,6 +37,7 @@ describe('gameStateRepo', () => {
       finishLine: 12,
       teamNames: ['Red', 'Blue', 'Green', 'Gold'],
       usedQuestions: [4, 7, 1],
+      currentQuestion: 7,
       winner: null,
     }
     repo.save(state)
