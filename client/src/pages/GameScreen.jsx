@@ -1,4 +1,4 @@
-import RaceTrack from '../components/RaceTrack.jsx'
+import Board from '../components/Board.jsx'
 import TurnIndicator from '../components/TurnIndicator.jsx'
 import QuestionDisplay from '../components/QuestionDisplay.jsx'
 import Scoreboard from '../components/Scoreboard.jsx'
@@ -23,7 +23,7 @@ function GameScreen() {
         <>
           <TurnIndicator state={state} />
           <QuestionDisplay question={question} />
-          <RaceTrack state={state} />
+          <Board state={state} />
           <Scoreboard state={state} />
         </>
       )}
