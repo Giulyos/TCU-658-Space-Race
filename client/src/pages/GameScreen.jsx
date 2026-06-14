@@ -1,12 +1,12 @@
 import Board from '../components/Board.jsx'
 import TurnIndicator from '../components/TurnIndicator.jsx'
 import QuestionDisplay from '../components/QuestionDisplay.jsx'
-import Scoreboard from '../components/Scoreboard.jsx'
 import { useGameState } from '../hooks/useGameState.js'
 
 // The projected, student-facing view. It polls /api/game/state and renders the
-// turn indicator, active question, race track, and scoreboard. The advance
-// animation and winner banner are added in #35.
+// turn indicator, the active-question popup, and the board (which doubles as the
+// scoreboard via each team's position). The advance animation and winner banner
+// are added in #35.
 function GameScreen() {
   const { state, question, loading, error } = useGameState()
 
@@ -24,7 +24,6 @@ function GameScreen() {
           <TurnIndicator state={state} />
           <QuestionDisplay question={question} state={state} />
           <Board state={state} />
-          <Scoreboard state={state} />
         </>
       )}
     </main>
