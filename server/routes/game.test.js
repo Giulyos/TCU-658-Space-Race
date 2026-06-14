@@ -222,24 +222,30 @@ describe('PUT /api/game/settings', () => {
   it('updates finish line and team names, resetting to a fresh game', async () => {
     const res = await request(app)
       .put('/api/game/settings')
-      .send({ finishLine: 15, teamNames: ['Red', 'Blue', 'Green'] })
+      .send({ finishLine: 8, teamNames: ['Red', 'Blue', 'Green'] })
 
     expect(res.status).toBe(200)
-    expect(res.body.state.finishLine).toBe(15)
+    expect(res.body.state.finishLine).toBe(8)
     expect(res.body.state.teamNames).toEqual(['Red', 'Blue', 'Green'])
     expect(res.body.state.positions).toEqual([0, 0, 0]) // team count derived from names
     expect(res.body.state.active).toBe(0) // reset to not-started
   })
 
   it('keeps unspecified fields at their current value', async () => {
-    await request(app).put('/api/game/settings').send({ finishLine: 20 })
+    await request(app).put('/api/game/settings').send({ finishLine: 7 })
     const res = await request(app).get('/api/game/state')
-    expect(res.body.state.finishLine).toBe(20)
+    expect(res.body.state.finishLine).toBe(7)
     expect(res.body.state.teamNames).toHaveLength(4) // default kept
   })
 
-  it('rejects a finish line below 1 (400)', async () => {
-    const res = await request(app).put('/api/game/settings').send({ finishLine: 0 })
+  it('rejects a finish line below 3 (400)', async () => {
+    const res = await request(app).put('/api/game/settings').send({ finishLine: 2 })
+    expect(res.status).toBe(400)
+    expect(res.body.error).toMatch(/finishLine/)
+  })
+
+  it('rejects a finish line above 10 (400)', async () => {
+    const res = await request(app).put('/api/game/settings').send({ finishLine: 11 })
     expect(res.status).toBe(400)
     expect(res.body.error).toMatch(/finishLine/)
   })

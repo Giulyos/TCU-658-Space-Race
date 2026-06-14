@@ -55,7 +55,7 @@ describe('GameWizard — edit flow', () => {
     render(<GameWizard game={game} onDone={vi.fn()} onCancel={vi.fn()} />)
     expect(screen.getByText('Edit: Vocabulary')).toBeInTheDocument()
     expect(screen.getByLabelText('Game name')).toHaveValue('Vocabulary')
-    expect(screen.getByLabelText('Spaces to win')).toHaveValue(8)
+    expect(screen.getByLabelText(/spaces to win/i)).toHaveValue(8)
     expect(screen.getByLabelText('Team 3 name')).toHaveValue('Green')
   })
 

@@ -3,7 +3,7 @@ import defaultGamesRepo from '../db/gamesRepo.js'
 import defaultQuestionsRepo from '../db/questionsRepo.js'
 import defaultBridge from '../db/engineBridge.js'
 import { validateQuestion } from './questions.js'
-import { MIN_TEAMS, MAX_TEAMS, MIN_FINISH_LINE } from '../game/constants.js'
+import { MIN_TEAMS, MAX_TEAMS, MIN_FINISH_LINE, MAX_FINISH_LINE } from '../game/constants.js'
 import { badRequest, notFound } from '../middleware/errors.js'
 
 // Routes for persisted game sessions: CRUD over saved games, activating a game
@@ -18,8 +18,13 @@ export const validateGame = (body, { partial = false } = {}) => {
   if ((!partial || has('name')) && (typeof body.name !== 'string' || body.name.trim() === '')) {
     return 'name is required and must be a non-empty string'
   }
-  if (has('finishLine') && (!Number.isInteger(body.finishLine) || body.finishLine < MIN_FINISH_LINE)) {
-    return `finishLine must be an integer >= ${MIN_FINISH_LINE}`
+  if (
+    has('finishLine') &&
+    (!Number.isInteger(body.finishLine) ||
+      body.finishLine < MIN_FINISH_LINE ||
+      body.finishLine > MAX_FINISH_LINE)
+  ) {
+    return `finishLine must be an integer between ${MIN_FINISH_LINE} and ${MAX_FINISH_LINE}`
   }
   if (!partial || has('teamNames')) {
     const { teamNames } = body

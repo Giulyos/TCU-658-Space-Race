@@ -58,6 +58,11 @@ describe('games CRUD', () => {
     expect(res.body.error).toMatch(/teamNames/)
   })
 
+  it('rejects a finish line outside 3-10 (400)', async () => {
+    expect((await request(app).post('/api/games').send(newGame({ finishLine: 2 }))).status).toBe(400)
+    expect((await request(app).post('/api/games').send(newGame({ finishLine: 11 }))).status).toBe(400)
+  })
+
   it('gets one game or 404', async () => {
     const { body } = await request(app).post('/api/games').send(newGame())
     expect((await request(app).get(`/api/games/${body.id}`)).body.name).toBe('Unit 3')

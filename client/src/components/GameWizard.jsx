@@ -82,11 +82,12 @@ function GameWizard({ game, onDone, onCancel }) {
           </div>
 
           <div className="nes-field">
-            <label htmlFor="w-finish">Spaces to win</label>
+            <label htmlFor="w-finish">Spaces to win (3–10)</label>
             <input
               id="w-finish"
               type="number"
-              min="1"
+              min="3"
+              max="10"
               className="nes-input"
               value={finishLine}
               onChange={(e) => setFinishLine(e.target.value)}
