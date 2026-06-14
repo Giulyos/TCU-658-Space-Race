@@ -74,14 +74,16 @@ function GameControls({ state, question, refresh }) {
       )}
 
       {paused && (
-        <div className="pause-overlay" role="dialog" aria-label="Paused">
-          <div className="pause-card nes-container is-dark">
-            <p className="pause-title">⏸ Paused</p>
+        <>
+          {/* gray out the whole board, no popup */}
+          <div className="pause-grayout" aria-hidden="true" />
+          {/* Resume sits where Pause was (top-right), above the gray-out */}
+          <div className="hud hud-topright">
             <button type="button" className="nes-btn is-warning" onClick={() => run(resumeGame)}>
               Resume
             </button>
           </div>
-        </div>
+        </>
       )}
     </>
   )
