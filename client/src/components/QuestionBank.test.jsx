@@ -5,7 +5,7 @@ import * as api from '../api/questionsApi.js'
 
 vi.mock('../api/questionsApi.js')
 
-const Q1 = { id: 1, text: 'Past tense of go?', correct_answer: 'went', distractors: ['goed'], point_value: 1 }
+const Q1 = { id: 1, text: 'Past tense of go?', correct_answer: 'went', point_value: 1 }
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -27,9 +27,6 @@ describe('QuestionBank', () => {
 
     fireEvent.change(screen.getByLabelText('Question'), { target: { value: 'Plural of child?' } })
     fireEvent.change(screen.getByLabelText('Correct answer'), { target: { value: 'children' } })
-    fireEvent.change(screen.getByLabelText('Distractors (comma-separated)'), {
-      target: { value: 'childs, childer' },
-    })
     fireEvent.change(screen.getByLabelText('Point value'), { target: { value: '2' } })
     fireEvent.click(screen.getByRole('button', { name: 'Add question' }))
 
@@ -37,7 +34,6 @@ describe('QuestionBank', () => {
       expect(api.addQuestion).toHaveBeenCalledWith({
         text: 'Plural of child?',
         correct_answer: 'children',
-        distractors: ['childs', 'childer'],
         point_value: 2,
       }),
     )
@@ -50,7 +46,7 @@ describe('QuestionBank', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Edit question 1' }))
     expect(screen.getByLabelText('Question')).toHaveValue('Past tense of go?')
-    expect(screen.getByLabelText('Distractors (comma-separated)')).toHaveValue('goed')
+    expect(screen.getByLabelText('Correct answer')).toHaveValue('went')
 
     fireEvent.change(screen.getByLabelText('Point value'), { target: { value: '3' } })
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }))
@@ -83,7 +79,6 @@ describe('QuestionBank', () => {
       id: i + 1,
       text: `Question ${i + 1}`,
       correct_answer: `A${i + 1}`,
-      distractors: [],
       point_value: 1,
     }))
 

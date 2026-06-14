@@ -35,34 +35,17 @@ describe('TurnIndicator', () => {
 })
 
 describe('QuestionDisplay', () => {
-  const q = { id: 5, text: 'Past tense of go?', correct_answer: 'went', distractors: ['goed', 'gone'] }
+  const q = { id: 5, text: 'Past tense of go?', correct_answer: 'went' }
 
   it('shows the question text', () => {
     render(<QuestionDisplay question={q} />)
     expect(screen.getByText('Past tense of go?')).toBeInTheDocument()
   })
 
-  it('shows all options (correct + distractors) when distractors exist', () => {
+  it('does not reveal the correct answer or any answer options', () => {
     render(<QuestionDisplay question={q} />)
-    for (const opt of ['went', 'goed', 'gone']) {
-      expect(screen.getByText(new RegExp(opt))).toBeInTheDocument()
-    }
-  })
-
-  it('omits the options list when there are no distractors', () => {
-    render(<QuestionDisplay question={{ id: 1, text: 'Open?', correct_answer: 'x', distractors: [] }} />)
+    expect(screen.queryByText('went')).not.toBeInTheDocument()
     expect(screen.queryByRole('list')).not.toBeInTheDocument()
-  })
-
-  it('orders options stably across re-renders of the same question', () => {
-    const order = () =>
-      screen.getAllByRole('listitem').map((li) => li.textContent.replace(/^[A-Z]\s*/, ''))
-    const { unmount } = render(<QuestionDisplay question={q} />)
-    const first = order()
-    expect([...first].sort()).toEqual(['gone', 'goed', 'went'].sort()) // same set
-    unmount()
-    render(<QuestionDisplay question={q} />)
-    expect(order()).toEqual(first) // deterministic for the same id (unmutated)
   })
 
   it('renders nothing without a question', () => {

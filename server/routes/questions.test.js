@@ -26,21 +26,15 @@ describe('GET /api/questions', () => {
     expect(res.body).toEqual([])
   })
 
-  it('returns created questions with parsed distractors', async () => {
+  it('returns created questions', async () => {
     await request(app)
       .post('/api/questions')
-      .send({ text: 'Q1', correct_answer: 'A1', distractors: ['x', 'y'], point_value: 2 })
+      .send({ text: 'Q1', correct_answer: 'A1', point_value: 2 })
 
     const res = await request(app).get('/api/questions')
     expect(res.status).toBe(200)
     expect(res.body).toHaveLength(1)
-    expect(res.body[0]).toMatchObject({
-      id: 1,
-      text: 'Q1',
-      correct_answer: 'A1',
-      distractors: ['x', 'y'],
-      point_value: 2,
-    })
+    expect(res.body[0]).toMatchObject({ id: 1, text: 'Q1', correct_answer: 'A1', point_value: 2 })
   })
 })
 
@@ -54,7 +48,6 @@ describe('POST /api/questions', () => {
     expect(res.body.id).toBe(1)
     expect(res.body.text).toBe('Past tense of go?')
     expect(res.body.point_value).toBe(1) // default
-    expect(res.body.distractors).toEqual([]) // default
   })
 
   it('rejects a missing text with 400', async () => {
@@ -76,14 +69,6 @@ describe('POST /api/questions', () => {
     expect(res.status).toBe(400)
     expect(res.body.error).toMatch(/point_value/)
   })
-
-  it('rejects a non-array distractors with 400', async () => {
-    const res = await request(app)
-      .post('/api/questions')
-      .send({ text: 'Q', correct_answer: 'A', distractors: 'nope' })
-    expect(res.status).toBe(400)
-    expect(res.body.error).toMatch(/distractors/)
-  })
 })
 
 // Helper to seed one question and return its id.
@@ -93,13 +78,10 @@ const seed = async (body = { text: 'Q', correct_answer: 'A' }) =>
 describe('PUT /api/questions/:id', () => {
   it('updates an existing question and returns it', async () => {
     const id = await seed({ text: 'Q', correct_answer: 'A', point_value: 1 })
-    const res = await request(app)
-      .put(`/api/questions/${id}`)
-      .send({ point_value: 3, distractors: ['b', 'c'] })
+    const res = await request(app).put(`/api/questions/${id}`).send({ point_value: 3 })
 
     expect(res.status).toBe(200)
     expect(res.body.point_value).toBe(3)
-    expect(res.body.distractors).toEqual(['b', 'c'])
     expect(res.body.text).toBe('Q') // untouched field preserved
   })
 

@@ -3,113 +3,90 @@
     "id": 1,
     "text": "What is the past tense of the verb \"go\"?",
     "correct_answer": "went",
-    "distractors": ["goed", "gone", "going"],
     "point_value": 1
   },
   {
     "id": 2,
     "text": "Choose the correct article: \"___ apple a day keeps the doctor away.\"",
     "correct_answer": "An",
-    "distractors": ["A", "The", "Some"],
     "point_value": 1
   },
   {
     "id": 3,
     "text": "What is the plural of \"child\"?",
     "correct_answer": "children",
-    "distractors": ["childs", "childes", "childrens"],
     "point_value": 1
   },
   {
     "id": 4,
     "text": "Complete: \"She has worked here ___ 2019.\"",
     "correct_answer": "since",
-    "distractors": ["for", "from", "during"],
     "point_value": 2
   },
   {
     "id": 5,
     "text": "Which word is a synonym of \"happy\"?",
     "correct_answer": "glad",
-    "distractors": ["angry", "tired", "bored"],
     "point_value": 1
   },
   {
     "id": 6,
     "text": "What is the comparative form of \"good\"?",
     "correct_answer": "better",
-    "distractors": ["gooder", "more good", "best"],
     "point_value": 2
   },
   {
     "id": 7,
     "text": "Complete: \"If it rains tomorrow, we ___ stay home.\"",
     "correct_answer": "will",
-    "distractors": ["would", "are", "did"],
     "point_value": 2
   },
   {
     "id": 8,
     "text": "Which is the correct question form? \"___ you like coffee?\"",
     "correct_answer": "Do",
-    "distractors": ["Does", "Are", "Is"],
     "point_value": 1
   },
   {
     "id": 9,
     "text": "What is the opposite of \"expensive\"?",
     "correct_answer": "cheap",
-    "distractors": ["costly", "rich", "valuable"],
     "point_value": 1
   },
   {
     "id": 10,
     "text": "Complete: \"There ___ many students in the classroom.\"",
     "correct_answer": "are",
-    "distractors": ["is", "be", "was"],
     "point_value": 1
   },
   {
     "id": 11,
     "text": "Which sentence is in the present perfect tense?",
     "correct_answer": "I have finished my homework.",
-    "distractors": [
-      "I finished my homework.",
-      "I am finishing my homework.",
-      "I will finish my homework."
-    ],
     "point_value": 3
   },
   {
     "id": 12,
     "text": "Choose the correct preposition: \"The book is ___ the table.\"",
     "correct_answer": "on",
-    "distractors": ["in", "at", "of"],
     "point_value": 1
   },
   {
     "id": 13,
     "text": "What is the third person singular of \"to study\"?",
     "correct_answer": "studies",
-    "distractors": ["studys", "study", "studied"],
     "point_value": 2
   },
   {
     "id": 14,
     "text": "Which modal verb expresses obligation? \"You ___ wear a seatbelt.\"",
     "correct_answer": "must",
-    "distractors": ["can", "might", "could"],
     "point_value": 2
   },
   {
     "id": 15,
     "text": "Reorder to form a correct sentence: \"usually / to / she / school / walks\".",
     "correct_answer": "She usually walks to school.",
-    "distractors": [
-      "She walks usually to school.",
-      "Usually she to school walks.",
-      "Walks she to school usually."
-    ],
     "point_value": 3
   }
 ]

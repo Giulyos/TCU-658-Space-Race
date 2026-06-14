@@ -25,7 +25,6 @@ describe('sample-questions.json', () => {
       expect(q.text.length).toBeGreaterThan(0)
       expect(typeof q.correct_answer).toBe('string')
       expect(q.correct_answer.length).toBeGreaterThan(0)
-      expect(Array.isArray(q.distractors)).toBe(true)
       expect(Number.isInteger(q.point_value)).toBe(true)
       expect(q.point_value).toBeGreaterThanOrEqual(1)
     }

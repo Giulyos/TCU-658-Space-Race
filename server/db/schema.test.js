@@ -14,7 +14,7 @@ describe('questions table schema', () => {
 
     const cols = tableColumns(db, 'questions')
     expect(Object.keys(cols).sort()).toEqual(
-      ['id', 'game_id', 'text', 'correct_answer', 'distractors', 'point_value', 'created_at'].sort(),
+      ['id', 'game_id', 'text', 'correct_answer', 'point_value', 'created_at'].sort(),
     )
     db.close()
   })
@@ -184,6 +184,8 @@ describe('legacy migration (pre-M4.5 database)', () => {
     const attached = db.prepare('SELECT COUNT(*) AS n FROM questions WHERE game_id = ?').get(gid).n
     expect(attached).toBe(2)
     expect(db.prepare('SELECT game_id FROM game_state WHERE id = 1').get().game_id).toBe(gid)
+    // The legacy distractors column is dropped during the upgrade.
+    expect(tableColumns(db, 'questions')).not.toHaveProperty('distractors')
     db.close()
   })
 
