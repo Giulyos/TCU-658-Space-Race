@@ -22,10 +22,10 @@ describe('GameControls', () => {
     expect(screen.queryByRole('button', { name: 'Correct' })).not.toBeInTheDocument()
   })
 
-  it('shows Correct/Incorrect when a question is showing', () => {
+  it('does not show Correct/Incorrect in the bar (they live on the popup)', () => {
     render(<GameControls state={playing} question={{ id: 1, text: 'Q' }} refresh={refresh} />)
-    expect(screen.getByRole('button', { name: 'Correct' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Incorrect' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Correct', exact: true })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Incorrect' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Next Question' })).not.toBeInTheDocument()
   })
 
@@ -34,12 +34,6 @@ describe('GameControls', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Next Question' }))
     await waitFor(() => expect(gameApi.nextQuestion).toHaveBeenCalled())
     expect(refresh).toHaveBeenCalled()
-  })
-
-  it('submits a correct turn', async () => {
-    render(<GameControls state={playing} question={{ id: 1 }} refresh={refresh} />)
-    fireEvent.click(screen.getByRole('button', { name: 'Correct' }))
-    await waitFor(() => expect(gameApi.submitTurn).toHaveBeenCalledWith(true))
   })
 
   it('shows Resume when paused', () => {

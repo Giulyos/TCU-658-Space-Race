@@ -213,6 +213,9 @@ label {
   text-align: center;
   background: var(--space-800);
   box-shadow: 0 0 0 4px var(--space-900), 0 0 28px rgba(33, 212, 253, 0.35);
+  /* The overlay is click-through (board shows behind); the card itself must
+     capture clicks so its Correct/Incorrect buttons work. */
+  pointer-events: auto;
 }
 .question-label {
   font-size: 11px;
@@ -223,6 +226,12 @@ label {
   font-size: 22px;
   line-height: 1.6;
   color: var(--amber);
+}
+.question-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 22px;
 }
 
 /* ===== Game controls (on the board) ===== */

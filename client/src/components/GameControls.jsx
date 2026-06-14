@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { nextQuestion, submitTurn, pauseGame, resumeGame } from '../api/gameApi.js'
+import { nextQuestion, pauseGame, resumeGame } from '../api/gameApi.js'
 
 // The teacher's during-game controls, shown on the projected board itself.
 // State-driven:
 //   - active, no question showing: Next Question (+ Pause)
-//   - a question is showing:       Correct / Incorrect
+//   - a question is showing:       (Correct / Incorrect live on the popup)
 //   - paused:                      Resume
 //   - winner:                      no controls (the winner banner takes over)
 // Plus a Mute toggle (local, persisted preference the board reads for sounds).
@@ -53,25 +53,6 @@ function GameControls({ state, question, refresh }) {
           </button>
           <button type="button" className="nes-btn is-warning" onClick={() => run(pauseGame)}>
             Pause
-          </button>
-        </>
-      )}
-
-      {!hasWinner && active === STATUS.ACTIVE && showingQuestion && (
-        <>
-          <button
-            type="button"
-            className="nes-btn is-success"
-            onClick={() => run(() => submitTurn(true))}
-          >
-            Correct
-          </button>
-          <button
-            type="button"
-            className="nes-btn is-error"
-            onClick={() => run(() => submitTurn(false))}
-          >
-            Incorrect
           </button>
         </>
       )}

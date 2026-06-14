@@ -24,7 +24,7 @@ function GameScreen() {
       ) : (
         <>
           <TurnIndicator state={state} />
-          <QuestionDisplay question={question} state={state} />
+          <QuestionDisplay question={question} state={state} refresh={refresh} />
           <Board state={state} />
           <GameControls state={state} question={question} refresh={refresh} />
         </>
