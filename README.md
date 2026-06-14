@@ -16,9 +16,9 @@ Built as a **Progressive Web App (PWA)** with a local Express + SQLite backend, 
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
   - [Running in Development](#running-in-development)
-  - [Building for Production](#building-for-production)
+- [Status & Roadmap](#status--roadmap)
 - [Using the Application](#using-the-application)
-  - [For the Teacher — Admin Panel](#for-the-teacher--admin-panel)
+  - [For the Teacher](#for-the-teacher)
   - [For Students — How to Play](#for-students--how-to-play)
 - [API Reference](#api-reference)
 - [Database Schema](#database-schema)
@@ -33,34 +33,40 @@ Built as a **Progressive Web App (PWA)** with a local Express + SQLite backend, 
 
 Space Race was developed as part of **TCU-658** at the **Escuela de Lenguas Modernas, Universidad de Costa Rica**, in collaboration with CTP de Guácimo. It is designed for use in English language classrooms at the secondary level and is fully adaptable to any topic, level, or unit from the MEP Technical English program.
 
-The teacher loads questions into the question bank before class, projects the game on the classroom screen, and manages turns using simple Correct/Incorrect buttons. Students discuss answers as a team and a representative communicates the answer. No student device is needed — the entire game is teacher-operated.
+The teacher sets up a game (teams + questions) before class, projects the board on the classroom screen, reveals one question at a time with **Next Question**, and marks each spoken answer **Correct** or **Incorrect**. Students discuss answers as a team and a representative communicates the answer. No student device is needed — the entire game is teacher-operated.
 
 ---
 
 ## Features
 
 ### Gameplay
-- 🛸 Four simultaneous teams, each with their own spaceship on the race track
-- ❓ Questions drawn randomly from the teacher's question bank (no repeats per session)
-- ⚖️ Configurable point values per question (each question can advance the ship 1 or more spaces)
-- 🏁 Configurable finish line (teacher sets how many spaces are needed to win)
-- 🎬 Visual advance animation on correct answers
-- 🔊 Sound effects with mute option
-- 🏆 Automatic winner detection and announcement
+- 🛸 2–4 teams, each starting on its own 8-bit home planet, racing along a winding board to a shared finish planet
+- ❓ Questions drawn randomly from the game's question bank (no repeats per session), revealed one at a time when the teacher presses **Next Question**
+- ⚖️ Configurable point values per question (each correct answer advances the ship by that many spaces, 1 or more)
+- 🏁 Configurable finish line — 3 to 10 spaces to win
+- 🗺️ Randomized map look each game (planet variants), with routes spaced so ships never overlap
+- 🏆 Winner detection when a team reaches the finish
 
 ### Admin Panel
-- ➕ Add, edit, and delete questions with correct answers and optional distractors
-- 📋 Live editable question bank list
-- ⚙️ Configure team names, number of spaces to win, and active question bank
-- ▶️ Start, pause, and restart game controls
-- ✅ One-click Correct / Incorrect buttons for turn management
+- 🗂️ A **library of saved games** — each game has its own teams, settings, and question bank
+- 🧭 A step-by-step **setup wizard** to create or edit a game (teams & rules, then the question bank)
+- ➕ Add, edit, and delete questions (text, correct answer, point value)
+- ▶️ **Play** a game (and **Restart** it); the in-game controls live on the projected Game Screen
+- 🎁 A built-in **example game** is preloaded so you can try it immediately
+
+### Game Screen (projected)
+- 🖥️ Full-screen board with the teacher's controls anchored on it (Next Question, Pause, Mute)
+- ❓ A Jeopardy-style popup shows the question, with **Correct** / **Incorrect** on the popup itself
+- ⏸️ Pausing grays out the whole board
 
 ### Technical
 - 📱 Responsive layout — works on projectors, desktops, tablets, and phones
 - 🌐 Progressive Web App — installable to home screen on Android and iOS
 - 📴 Fully offline — no internet required after first load
-- 💾 Persistent question bank — questions are saved between sessions in local SQLite
-- 📦 Single executable per platform (~30 MB) — no Node.js or npm required to run
+- 💾 Persistent — saved games and questions are stored between sessions in local SQLite
+- 📦 *Planned:* single executable per platform (~30 MB) — no Node.js or npm required to run
+
+> ⚠️ **Status:** the one-click executable is **not built yet** (see [Roadmap](#status--roadmap)). For now the app is run from source with Node.js — suitable for developers, not yet for a non-technical teacher. The teacher-ready packaged build is the next major milestone.
 
 ---
 
@@ -83,41 +89,33 @@ The teacher loads questions into the question bank before class, projects the ga
 ```
 space-race/
 ├── client/                        ← React + Vite PWA frontend
-│   ├── public/
-│   │   ├── icons/                 ← PWA icons (192x192, 512x512)
-│   │   └── sounds/                ← Sound effects (.mp3)
 │   ├── src/
-│   │   ├── api/
-│   │   │   ├── gameApi.js         ← API calls: start, turn, state, restart
-│   │   │   └── questionsApi.js    ← API calls: CRUD for question bank
+│   │   ├── api/                   ← fetch wrappers (gamesApi, gameApi, questionsApi)
 │   │   ├── components/
-│   │   │   ├── RaceTrack.jsx      ← Visual race track with n spaces
-│   │   │   ├── Spaceship.jsx      ← Individual team spaceship
-│   │   │   ├── QuestionDisplay.jsx← Active question card
-│   │   │   ├── Scoreboard.jsx     ← Team progress indicators
-│   │   │   └── TurnIndicator.jsx  ← "Team X's turn" display
-│   │   ├── hooks/
-│   │   │   └── useGameState.js    ← Custom hook for game state polling
-│   │   ├── pages/
-│   │   │   ├── GameScreen.jsx     ← Main projected game view
-│   │   │   └── AdminPanel.jsx     ← Teacher control panel
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── index.html
-│   ├── vite.config.js             ← Vite config with PWA plugin and API proxy
-│   └── package.json
+│   │   │   ├── GameLibrary.jsx    ← list of saved games (admin home)
+│   │   │   ├── GameWizard.jsx     ← create/edit a game (teams + questions)
+│   │   │   ├── QuestionBank.jsx   ← paginated add/edit/delete questions
+│   │   │   ├── Board.jsx          ← the winding game board (SVG)
+│   │   │   ├── PixelShip.jsx      ← 8-bit team spaceship
+│   │   │   ├── PixelPlanet.jsx    ← 8-bit start/finish planet
+│   │   │   ├── QuestionDisplay.jsx← question popup (Correct/Incorrect)
+│   │   │   ├── GameControls.jsx   ← Next Question / Pause / Mute (on the board)
+│   │   │   └── TurnIndicator.jsx  ← "Team X's turn"
+│   │   ├── hooks/useGameState.js  ← polls /api/game/state
+│   │   ├── pages/                 ← AdminPanel.jsx, GameScreen.jsx
+│   │   └── main.jsx, App.jsx
+│   └── vite.config.js             ← Vite + PWA plugin + API proxy
 │
 ├── server/                        ← Node.js + Express backend
-│   ├── db/
-│   │   ├── database.js            ← better-sqlite3 init, exports db instance
-│   │   └── schema.js              ← Table creation (questions, game_state)
-│   ├── routes/
-│   │   ├── questions.js           ← CRUD endpoints for question bank
-│   │   └── game.js                ← Game control endpoints
-│   ├── server.js                  ← Express entry point
+│   ├── db/                        ← schema, repositories, seed (example game)
+│   ├── game/                      ← pure engine, state, sample questions, CLI
+│   ├── routes/                    ← games.js, questions.js, game.js
+│   ├── middleware/                ← central error handling
+│   ├── app.js, server.js
 │   └── package.json
 │
-├── package.json                   ← Root: concurrently dev script, build script
+├── scripts/play-http.mjs          ← HTTP playthrough demo
+├── package.json                   ← root scripts (dev, play, demo:*, test, lint)
 └── README.md
 ```
 
@@ -133,14 +131,14 @@ Make sure you have the following installed on your machine **for development**:
 - npm v9 or higher (comes with Node.js)
 - A code editor — [VS Code](https://code.visualstudio.com/) is recommended
 
-> End users (teachers) do **not** need Node.js. They run the compiled executable directly.
+> Once the packaged executable is built, end users (teachers) will **not** need Node.js — they'll run the compiled executable directly. **That build does not exist yet** (see [Status & Roadmap](#status--roadmap)); for now the app runs from source as below.
 
 ### Installation
 
 Clone the repository and install all dependencies:
 
 ```bash
-git clone https://github.com/your-username/space-race.git
+git clone https://github.com/Giulyos/TCU-658-Space-Race.git
 cd space-race
 
 # Install root dev dependencies (concurrently)
@@ -211,7 +209,23 @@ track after each turn — until a team wins. It pauses for Enter at the major
 steps so it can be narrated. This demonstrates that the entire backend works
 end to end before any frontend is built.
 
+## Status & Roadmap
+
+The game is fully playable **from source** today: create games, manage questions,
+and run a complete match on the projected board.
+
+| Area | Status |
+|---|---|
+| Game engine, REST API, database (with a preloaded example game) | ✅ Done |
+| Admin Panel — game library + setup wizard | ✅ Done |
+| Game Screen — board, question popup, in-game controls, pause | ✅ Done |
+| Smooth advance animation + on-screen winner banner | ⏳ Planned |
+| Sound effects | ⏳ Planned |
+| **Single double-click executable + offline PWA packaging** | ⏳ Planned (**needed before a non-technical teacher can run it without a terminal**) |
+
 ### Building for Production
+
+> ⏳ The packaging steps below are the **intended** build and are not finished yet.
 
 Build the React frontend and then package everything into cross-platform executables:
 
@@ -234,78 +248,93 @@ dist/
 
 ## Using the Application
 
-### For the Teacher — Admin Panel
+There are two screens, both opened in a normal web browser:
 
-#### First-time setup (once per device)
+- **Admin Panel** (`/admin`) — the teacher's control room: pick or create a game, then play it.
+- **Game Screen** (`/game`) — projected for the class: the board and the in-game controls.
 
-Download the executable for your operating system from the [Releases](https://github.com/your-username/space-race/releases) page:
+> **Opening the app today (from source):** start it with `npm run dev`, then open
+> **`http://localhost:5173/admin`** (teacher) and **`http://localhost:5173/game`** (projected).
+> Once the packaged executable exists, the teacher will instead just double-click `SpaceRace`
+> and it will open the browser automatically — no terminal needed.
 
-| OS | File |
-|---|---|
-| Windows | `SpaceRace.exe` — double-click to run |
-| macOS | `SpaceRace` — open from Downloads folder |
-| Linux | `SpaceRace` — run `./SpaceRace` in terminal |
+### For the Teacher
 
-The app will automatically open your browser at `http://localhost:3001`.
+#### 1. Open the Admin Panel and pick a game
 
-On mobile: tap the browser menu → **"Add to Home Screen"** to install the PWA for quick access.
+Go to **`/admin`**. You'll see **My Games** — a library of saved games. A built-in
+**example game** ("Example Game — English Basics") is already there to try.
 
-#### Before class — Setting up the question bank
+- To use it as-is, click **Play** on it.
+- To make your own, click **+ New Game** (see step 2).
+- To change a game's teams, settings, or questions, click **Edit** on it.
 
-1. Go to the **Admin Panel** (`/admin`)
-2. Under **Question Bank**, add each question:
-   - Question text (in English)
-   - Correct answer
-   - Optional distractors (wrong answers, shown to students if using multiple choice mode)
-   - Point value (how many spaces the spaceship advances on a correct answer)
-3. Under **Game Settings**, configure:
-   - Number of spaces needed to win (`n`)
-   - Team names (Team 1–4 or custom names)
-4. Click **Save Configuration**
-5. Project the Game Screen (`/game`) on the classroom display
+#### 2. Create or edit a game (the setup wizard)
 
-#### During the game
+The wizard has two steps:
 
-1. Click **Start Game** — the first question appears randomly on screen
-2. The active team discusses and gives their answer
-3. Click **Correct** ✅ or **Incorrect** ❌
-   - Correct: the team's spaceship advances by the question's point value
-   - Incorrect: the spaceship stays in place
-4. The turn passes automatically to the next team with a new random question
-5. The game ends when a team reaches the finish line — the winner is announced on screen
+- **Step 1 — Teams & rules:** the game name, **spaces to win (3–10)**, the number of
+  teams (2–4), and each team's name. Click **Next: Questions**.
+- **Step 2 — Question bank:** add each question with its **text**, the **correct answer**,
+  and a **point value** (how many spaces a correct answer advances the ship). Edit or delete
+  any question. Click **Done** when finished — it returns to the library.
 
-#### Additional controls
+> Questions are answered **verbally** in class, so you only enter the question and the
+> correct answer — there are no multiple-choice options shown to students.
 
-- **Pause** — freezes the game at any point
-- **Restart** — resets all ships to the start (keeps the question bank)
-- **Mute** — toggles sound effects
+#### 3. Play
 
-> The question bank persists between sessions. You do not need to re-enter questions each time you use the app.
+1. On **`/admin`**, click **Play** on the game you want — this loads it and starts a match.
+2. Project the **Game Screen** (`/game`) on the classroom display. It shows the board with
+   each team's spaceship on its home planet.
+3. On the Game Screen, press **Next Question** — the question pops up over the board for the
+   team whose turn it is.
+4. The team discusses and gives their answer out loud.
+5. On the question popup, press **Correct** or **Incorrect**:
+   - **Correct:** the popup closes and that team's spaceship advances by the question's point value.
+   - **Incorrect:** the popup closes and the ship stays put.
+6. Press **Next Question** again for the next team. Repeat until a team reaches the finish
+   planet and wins.
+
+#### In-game controls (on the Game Screen)
+
+- **Next Question** (bottom) — reveal the next question for the current team.
+- **Correct / Incorrect** (on the question popup) — mark the team's answer.
+- **Pause** (top-right) — grays out the board; press **Resume** to continue.
+- **Mute** (top-right) — toggle sound effects (shown when no question is up).
+
+#### Restart
+
+To play the same game again from the start (keeping its questions), go back to the
+Admin Panel and press **Restart**.
+
+> Saved games and their questions persist between sessions — you don't need to re-enter
+> them each class.
 
 ---
 
 ### For Students — How to Play
 
-**Objective:** Be the first team to reach the finish line!
+**Objective:** Be the first team to reach the finish planet!
 
 **Setup:**
-- The teacher divides the class into 4 teams
-- Each team picks a name
-- The teacher projects the game on the screen
+- The teacher divides the class into 2–4 teams.
+- Each team has a spaceship that starts on its own planet.
+- The teacher projects the game on the screen.
 
 **Gameplay:**
-1. The game starts with Team 1 — a question appears on screen
-2. Your team discusses and agrees on an answer
-3. One representative communicates the answer to the teacher
-4. If correct ✅ → your spaceship advances
-5. If incorrect ❌ → your spaceship stays put, next team plays
-6. Teams alternate until one spaceship reaches the finish line
+1. A question appears on screen for the team whose turn it is.
+2. Your team discusses and agrees on **one** answer.
+3. A representative says the answer out loud to the teacher.
+4. If correct → your spaceship advances toward the center.
+5. If incorrect → your spaceship stays put.
+6. Turns pass between teams until one ship reaches the finish planet.
 
 **Rules:**
-- Only one answer per turn — agree before answering
-- The teacher has the final say on correctness
-- Do not interrupt other teams' turns
-- Be respectful at all times
+- Only one answer per turn — agree before answering.
+- The teacher has the final say on correctness.
+- Do not interrupt other teams' turns.
+- Be respectful at all times.
 
 **Example:**
 
@@ -313,7 +342,7 @@ On mobile: tap the browser menu → **"Add to Home Screen"** to install the PWA 
 >
 > **Team answers:** *"The past tense of GO is WENT."*
 >
-> **Teacher marks:** ✅ Correct — spaceship advances one space!
+> **Teacher marks:** ✅ Correct — the spaceship advances!
 
 ---
 
@@ -321,51 +350,70 @@ On mobile: tap the browser menu → **"Add to Home Screen"** to install the PWA 
 
 All endpoints are local (`localhost:3001`) and require no authentication.
 
+### Games (saved sessions)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/games` | List saved games |
+| `POST` | `/api/games` | Create a game (name, finishLine 3–10, teamNames 2–4) |
+| `GET` | `/api/games/:id` | Get one game |
+| `PUT` | `/api/games/:id` | Update a game |
+| `DELETE` | `/api/games/:id` | Delete a game (and its questions) |
+| `POST` | `/api/games/:id/activate` | Load a game for play |
+| `GET` | `/api/games/:gameId/questions` | List that game's questions |
+| `POST` | `/api/games/:gameId/questions` | Add a question to that game |
+
 ### Questions
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/questions` | Get all questions in the bank |
-| `POST` | `/api/questions` | Add a new question |
-| `PUT` | `/api/questions/:id` | Update an existing question |
+| `GET` | `/api/questions` | Get all questions |
+| `POST` | `/api/questions` | Add a question |
+| `PUT` | `/api/questions/:id` | Update a question |
 | `DELETE` | `/api/questions/:id` | Delete a question |
 
 **Question object:**
 ```json
 {
   "id": 1,
+  "game_id": 1,
   "text": "What is the past tense of GO?",
   "correct_answer": "WENT",
-  "distractors": ["GOED", "GOING", "GONE"],
   "point_value": 1
 }
 ```
 
-### Game
+### Game (play)
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/game/start` | Start a new game with current config |
+| `POST` | `/api/game/start` | Start a match (board shown, no question yet) |
+| `POST` | `/api/game/next` | Reveal the next question for the current team |
+| `POST` | `/api/game/turn` | Mark the current question correct/incorrect |
+| `POST` | `/api/game/pause` / `/api/game/resume` | Pause / resume |
+| `POST` | `/api/game/restart` | Reset the match (keeps the game's questions) |
+| `PUT` | `/api/game/settings` | Set finish line / team names |
 | `GET` | `/api/game/state` | Get current game state |
-| `POST` | `/api/game/turn` | Submit result of current turn |
-| `POST` | `/api/game/restart` | Reset game (keeps question bank) |
 
 **Turn request body:**
 ```json
-{
-  "correct": true
-}
+{ "correct": true }
 ```
 
 **Game state response:**
 ```json
 {
-  "active": true,
-  "current_team": 2,
-  "positions": [3, 1, 0, 2],
-  "finish_line": 10,
-  "current_question": { ... },
-  "winner": null
+  "state": {
+    "active": 1,
+    "currentTeam": 2,
+    "positions": [3, 1, 0, 2],
+    "finishLine": 10,
+    "teamNames": ["Team 1", "Team 2", "Team 3", "Team 4"],
+    "currentQuestion": 5,
+    "mapSeed": 123456,
+    "winner": null
+  },
+  "question": { "id": 5, "text": "...", "correct_answer": "...", "point_value": 2 }
 }
 ```
 
@@ -379,30 +427,44 @@ All endpoints are local (`localhost:3001`) and require no authentication.
 
 ## Database Schema
 
-The SQLite database is stored as `spacerace.db` in the same directory as the executable.
+The SQLite database is stored as `space-race.db` next to the server (in development,
+`server/space-race.db`; once packaged, beside the executable).
 
 ```sql
--- Question bank
-CREATE TABLE questions (
-  id            INTEGER PRIMARY KEY AUTOINCREMENT,
-  text          TEXT    NOT NULL,
-  correct_answer TEXT   NOT NULL,
-  distractors   TEXT,           -- JSON array stored as string
-  point_value   INTEGER NOT NULL DEFAULT 1,
-  created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
+-- Saved games (each has its own teams, finish line, and question bank)
+CREATE TABLE games (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  name        TEXT    NOT NULL,
+  finish_line INTEGER NOT NULL DEFAULT 10,   -- 3–10
+  team_names  TEXT    NOT NULL DEFAULT '["Team 1","Team 2","Team 3","Team 4"]',
+  created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Game configuration and state
+-- Question bank (each question belongs to a game)
+CREATE TABLE questions (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  game_id        INTEGER REFERENCES games(id),
+  text           TEXT    NOT NULL,
+  correct_answer TEXT    NOT NULL,
+  point_value    INTEGER NOT NULL DEFAULT 1,
+  created_at     DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- The single live game state (one row)
 CREATE TABLE game_state (
-  id            INTEGER PRIMARY KEY DEFAULT 1,
-  active        INTEGER NOT NULL DEFAULT 0,   -- 0 = not started, 1 = active, 2 = paused
-  current_team  INTEGER NOT NULL DEFAULT 1,   -- 1–4
-  positions     TEXT    NOT NULL DEFAULT '[0,0,0,0]',  -- JSON array
-  finish_line   INTEGER NOT NULL DEFAULT 10,
-  team_names    TEXT    NOT NULL DEFAULT '["Team 1","Team 2","Team 3","Team 4"]',
-  used_questions TEXT   NOT NULL DEFAULT '[]', -- JSON array of used question IDs
-  winner        INTEGER,                       -- NULL or team number 1–4
-  updated_at    DATETIME DEFAULT CURRENT_TIMESTAMP
+  id               INTEGER PRIMARY KEY DEFAULT 1,
+  game_id          INTEGER,                       -- the game loaded for play
+  active           INTEGER NOT NULL DEFAULT 0,    -- 0 = not started, 1 = active, 2 = paused
+  current_team     INTEGER NOT NULL DEFAULT 1,    -- 1–4
+  positions        TEXT    NOT NULL DEFAULT '[0,0,0,0]',
+  finish_line      INTEGER NOT NULL DEFAULT 10,
+  team_names       TEXT    NOT NULL DEFAULT '["Team 1","Team 2","Team 3","Team 4"]',
+  used_questions   TEXT    NOT NULL DEFAULT '[]',
+  current_question INTEGER,                        -- id of the question on screen, or NULL
+  map_seed         INTEGER,                        -- per-game board visual seed
+  winner           INTEGER,                        -- NULL or team number 1–4
+  updated_at       DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
@@ -412,7 +474,7 @@ CREATE TABLE game_state (
 
 After running `npm run build`, the three executables in `dist/` are self-contained. To distribute them:
 
-1. Upload them to the [GitHub Releases](https://github.com/your-username/space-race/releases) page
+1. Upload them to the [GitHub Releases](https://github.com/Giulyos/TCU-658-Space-Race/releases) page
 2. Teachers download the file for their OS — that's it
 
 The executable includes:
