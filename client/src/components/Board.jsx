@@ -28,20 +28,35 @@ function Board({ state }) {
   return (
     <div className="board" role="group" aria-label="Race board">
       <svg viewBox="0 0 100 100" className="board-svg" preserveAspectRatio="xMidYMid meet">
-        {/* each team's winding path + its board spaces */}
-        {teams.map((t) => (
-          <g key={t.team}>
-            <polyline
-              className="board-path"
-              points={t.path.map((p) => p.join(',')).join(' ')}
-              style={{ stroke: t.color }}
-              fill="none"
-            />
-            {t.spaces.map((s, idx) => (
-              <circle key={idx} className="board-space" cx={s[0]} cy={s[1]} r="1.1" />
-            ))}
-          </g>
-        ))}
+        {/* each team's winding road (pixel tiles) + its board spaces (squares) */}
+        {teams.map((t) => {
+          const road = sampleAlong(t.path, finishLine * 2)
+          return (
+            <g key={t.team}>
+              {road.map((p, idx) => (
+                <rect
+                  key={`road-${idx}`}
+                  className="road-tile"
+                  x={(p[0] - 0.45).toFixed(2)}
+                  y={(p[1] - 0.45).toFixed(2)}
+                  width="0.9"
+                  height="0.9"
+                />
+              ))}
+              {t.spaces.map((s, idx) => (
+                <rect
+                  key={`space-${idx}`}
+                  className="board-space"
+                  x={(s[0] - 1).toFixed(2)}
+                  y={(s[1] - 1).toFixed(2)}
+                  width="2"
+                  height="2"
+                  style={{ fill: t.color }}
+                />
+              ))}
+            </g>
+          )
+        })}
 
         {/* each team's home planet at its start */}
         {teams.map((t) => (

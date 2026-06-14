@@ -258,17 +258,14 @@ label {
   border: 4px solid var(--space-700);
 }
 
-/* each team's winding route */
-.board-path {
-  stroke-width: 0.7;
-  stroke-dasharray: 1.5 1.5;
-  opacity: 0.55;
+/* each team's winding road, drawn as neutral pixel tiles */
+.road-tile {
+  fill: #3a2a6e;
 }
-/* the board spaces along a route */
+/* the board spaces (steps) along a route — team-coloured pixel blocks */
 .board-space {
-  fill: #2a1a5e;
-  stroke: rgba(255, 255, 255, 0.15);
-  stroke-width: 0.2;
+  stroke: #06122e;
+  stroke-width: 0.25;
 }
 
 /* a soft ring marking the destination planet */
