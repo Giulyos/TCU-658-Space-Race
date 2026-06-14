@@ -328,14 +328,24 @@ label {
   justify-content: center;
   gap: 8px;
 }
+/* Largest 16:9 rectangle that fits the area: height-bound in landscape (fills
+   the available height, width follows), width-bound in portrait. Keeps the
+   element itself 16:9 (no internal letterbox). */
 .board-svg {
   display: block;
-  flex: 1;
-  min-height: 0;
+  aspect-ratio: 16 / 9;
   max-width: 100%;
-  aspect-ratio: 1 / 1;
+  max-height: 100%;
+  height: 100%;
+  width: auto;
   background: #0d0726;
   border: 4px solid var(--space-700);
+}
+@media (orientation: portrait) {
+  .board-svg {
+    width: 100%;
+    height: auto;
+  }
 }
 
 /* each team's winding road, drawn as neutral pixel tiles */

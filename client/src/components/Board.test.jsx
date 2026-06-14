@@ -10,12 +10,14 @@ describe('boardLayout', () => {
     expect(layoutFor(2).starts).toHaveLength(2)
     expect(layoutFor(3).starts).toHaveLength(3)
     expect(layoutFor(4).starts).toHaveLength(4)
-    // 2 and 3 finish at top-center; 4 finishes at the center
-    expect(layoutFor(2).finish).toEqual([50, 16])
-    expect(layoutFor(3).finish).toEqual([50, 16])
-    expect(layoutFor(4).finish).toEqual([50, 50])
-    // 3-team starts: bottom-left, bottom-center, bottom-right
-    expect(layoutFor(3).starts.map((s) => s[0])).toEqual([16, 50, 84])
+    // 2 and 3 finish at top-center; 4 finishes at the center (16:9 space)
+    expect(layoutFor(2).finish).toEqual([80, 16])
+    expect(layoutFor(3).finish).toEqual([80, 16])
+    expect(layoutFor(4).finish).toEqual([80, 45])
+    // 3-team starts: bottom-left, bottom-center, bottom-right (ascending x)
+    const xs = layoutFor(3).starts.map((s) => s[0])
+    expect(xs).toEqual([...xs].sort((a, b) => a - b))
+    expect(xs[1]).toBe(80) // middle start is centered
   })
 
   it('winding path begins at start and ends at finish', () => {
