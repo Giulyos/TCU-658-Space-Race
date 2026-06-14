@@ -185,6 +185,25 @@ label {
   margin-top: 16px;
 }
 
+/* ===== Game Screen: full-screen layout ===== */
+/* The projected view fills the whole viewport (escaping #root's max-width) and
+   lays out as a column: title, turn indicator, board (fills the middle), and
+   controls. svh keeps it correct with mobile browser chrome. */
+.game-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px 14px;
+  overflow: hidden;
+}
+.game-screen h1 {
+  margin: 4px 0 2px;
+  font-size: clamp(18px, 3.5vw, 32px);
+}
+
 /* ===== Turn indicator ===== */
 .turn-indicator {
   font-size: 18px;
@@ -245,14 +264,23 @@ label {
 }
 
 /* ===== Jumanji-style board (Game Screen) ===== */
+/* The board fills the available middle area as the largest undistorted square
+   that fits both width and height, with the legend just below it. */
 .board {
-  margin: 16px 0;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 .board-svg {
   display: block;
-  width: 100%;
-  max-width: 640px;
-  margin: 0 auto;
+  flex: 1;
+  min-height: 0;
+  max-width: 100%;
   aspect-ratio: 1 / 1;
   background: #0d0726;
   border: 4px solid var(--space-700);
