@@ -1,20 +1,24 @@
-// Pure geometry for the Jumanji-style board, in a 0..100 viewBox. Kept free of
-// React/DOM so ship positioning is unit-testable (jsdom has no layout engine).
+// Pure geometry for the Jumanji-style board, in a 16:9 viewBox (BOARD_W x
+// BOARD_H). Kept free of React/DOM so ship positioning is unit-testable (jsdom
+// has no layout engine).
 //
 // Layout per team count (finish is the shared destination):
 //   2 teams: finish top-center; teams start in the two bottom corners.
 //   3 teams: finish top-center; teams start bottom-left / center / right.
 //   4 teams: finish in the center; teams start in the four corners.
 
+export const BOARD_W = 160
+export const BOARD_H = 90
+
 export const layoutFor = (teamCount) => {
   switch (teamCount) {
     case 2:
-      return { finish: [50, 16], starts: [[16, 84], [84, 84]] }
+      return { finish: [80, 16], starts: [[22, 74], [138, 74]] }
     case 3:
-      return { finish: [50, 16], starts: [[16, 84], [50, 84], [84, 84]] }
+      return { finish: [80, 16], starts: [[22, 74], [80, 74], [138, 74]] }
     case 4:
     default:
-      return { finish: [50, 50], starts: [[14, 14], [86, 14], [14, 86], [86, 86]] }
+      return { finish: [80, 45], starts: [[20, 16], [140, 16], [20, 74], [140, 74]] }
   }
 }
 
@@ -29,7 +33,7 @@ export const planetVariant = (seed, slot, count) => {
 // Builds a winding (zig-zagging) polyline from start to finish: interior
 // waypoints are offset alternately to either side of the straight line, giving
 // the path its "twists and turns". Endpoints are exactly start and finish.
-export const makeWindingPath = (start, finish, twists = 4, amplitude = 9) => {
+export const makeWindingPath = (start, finish, twists = 4, amplitude = 11) => {
   const [sx, sy] = start
   const [fx, fy] = finish
   const dx = fx - sx

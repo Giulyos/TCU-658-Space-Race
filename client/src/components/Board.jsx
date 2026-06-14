@@ -1,5 +1,5 @@
 import { teamColor } from './raceUtils.js'
-import { layoutFor, makeWindingPath, sampleAlong, planetVariant } from './boardLayout.js'
+import { layoutFor, makeWindingPath, sampleAlong, planetVariant, BOARD_W, BOARD_H } from './boardLayout.js'
 import PixelShip from './PixelShip.jsx'
 import PixelPlanet from './PixelPlanet.jsx'
 import { PLANET_COUNT } from './planetVariants.js'
@@ -27,7 +27,7 @@ function Board({ state }) {
 
   return (
     <div className="board" role="group" aria-label="Race board">
-      <svg viewBox="0 0 100 100" className="board-svg" preserveAspectRatio="xMidYMid meet">
+      <svg viewBox={`0 0 ${BOARD_W} ${BOARD_H}`} className="board-svg" preserveAspectRatio="xMidYMid meet">
         {/* each team's winding road (pixel tiles) + its board spaces (squares) */}
         {teams.map((t) => {
           const road = sampleAlong(t.path, finishLine * 2)
@@ -37,20 +37,20 @@ function Board({ state }) {
                 <rect
                   key={`road-${idx}`}
                   className="road-tile"
-                  x={(p[0] - 0.45).toFixed(2)}
-                  y={(p[1] - 0.45).toFixed(2)}
-                  width="0.9"
-                  height="0.9"
+                  x={(p[0] - 0.65).toFixed(2)}
+                  y={(p[1] - 0.65).toFixed(2)}
+                  width="1.3"
+                  height="1.3"
                 />
               ))}
               {t.spaces.map((s, idx) => (
                 <rect
                   key={`space-${idx}`}
                   className="board-space"
-                  x={(s[0] - 1).toFixed(2)}
-                  y={(s[1] - 1).toFixed(2)}
-                  width="2"
-                  height="2"
+                  x={(s[0] - 1.5).toFixed(2)}
+                  y={(s[1] - 1.5).toFixed(2)}
+                  width="3"
+                  height="3"
                   style={{ fill: t.color }}
                 />
               ))}
@@ -64,18 +64,18 @@ function Board({ state }) {
             key={`home-${t.team}`}
             cx={t.start[0]}
             cy={t.start[1]}
-            size={13}
+            size={19}
             variant={planetVariant(mapSeed, t.team - 1, PLANET_COUNT)}
           />
         ))}
 
         {/* the shared finish planet (the destination) */}
         <g aria-label="Finish planet">
-          <circle className="board-finish-halo" cx={finish[0]} cy={finish[1]} r="11" />
+          <circle className="board-finish-halo" cx={finish[0]} cy={finish[1]} r="16" />
           <PixelPlanet
             cx={finish[0]}
             cy={finish[1]}
-            size={18}
+            size={27}
             variant={planetVariant(mapSeed, FINISH_SLOT, PLANET_COUNT)}
           />
         </g>
@@ -97,9 +97,9 @@ function Board({ state }) {
               aria-label={`Team ${t.team} spaceship`}
             >
               {(isCurrent || isWinner) && (
-                <circle className="ship-halo" cx={t.ship[0]} cy={t.ship[1]} r="6" />
+                <circle className="ship-halo" cx={t.ship[0]} cy={t.ship[1]} r="9" />
               )}
-              <PixelShip cx={t.ship[0]} cy={t.ship[1]} size={9} color={t.color} />
+              <PixelShip cx={t.ship[0]} cy={t.ship[1]} size={14} color={t.color} />
             </g>
           )
         })}
