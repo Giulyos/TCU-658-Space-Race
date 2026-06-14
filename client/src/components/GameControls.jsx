@@ -42,32 +42,45 @@ function GameControls({ state, question, refresh }) {
   const active = state.active
   const hasWinner = state.winner != null
   const showingQuestion = question != null
+  // Controls are shown when the game is active with no question popup up.
+  const ready = !hasWinner && active === STATUS.ACTIVE && !showingQuestion
+  const paused = !hasWinner && active === STATUS.PAUSED
 
   return (
-    <section className="game-controls">
-      {error && <p role="alert">{error}</p>}
+    <>
+      {error && (
+        <p className="hud hud-error" role="alert">
+          {error}
+        </p>
+      )}
 
-      {!hasWinner && active === STATUS.ACTIVE && !showingQuestion && (
-        <>
+      {ready && (
+        <div className="hud hud-bottom">
           <button type="button" className="nes-btn is-primary" onClick={() => run(nextQuestion)}>
             Next Question
           </button>
+        </div>
+      )}
+
+      {ready && (
+        <div className="hud hud-topright">
           <button type="button" className="nes-btn is-warning" onClick={() => run(pauseGame)}>
             Pause
           </button>
-          {/* Mute lives here so it only shows when no popup is up. */}
           <button type="button" className="nes-btn" onClick={toggleMute} aria-pressed={muted}>
             {muted ? 'Unmute' : 'Mute'}
           </button>
-        </>
+        </div>
       )}
 
-      {!hasWinner && active === STATUS.PAUSED && (
-        <button type="button" className="nes-btn is-warning" onClick={() => run(resumeGame)}>
-          Resume
-        </button>
+      {paused && (
+        <div className="hud hud-topright">
+          <button type="button" className="nes-btn is-warning" onClick={() => run(resumeGame)}>
+            Resume
+          </button>
+        </div>
       )}
-    </section>
+    </>
   )
 }
 
