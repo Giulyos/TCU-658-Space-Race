@@ -1,5 +1,14 @@
 import { teamColor } from './raceUtils.js'
-import { layoutFor, makeWindingPath, sampleAlong, planetVariant, BOARD_W, BOARD_H } from './boardLayout.js'
+import {
+  layoutFor,
+  makeWindingPath,
+  sampleAlong,
+  planetVariant,
+  finishApproach,
+  isUnderPlanet,
+  BOARD_W,
+  BOARD_H,
+} from './boardLayout.js'
 import PixelShip from './PixelShip.jsx'
 import PixelPlanet from './PixelPlanet.jsx'
 import { PLANET_COUNT } from './planetVariants.js'
@@ -16,10 +25,14 @@ function Board({ state }) {
   const { positions, finishLine, teamNames, currentTeam, winner, mapSeed } = state
   const { finish, starts } = layoutFor(teamNames.length)
 
+  const teamCount = teamNames.length
   const teams = teamNames.map((name, i) => {
     const team = i + 1
     const start = starts[i] ?? starts[starts.length - 1]
-    const path = makeWindingPath(start, finish)
+    // Route to a distinct point on the finish planet's rim so ships near the
+    // finish fan out instead of stacking on the same spot.
+    const approach = finishApproach(finish, start, i, teamCount)
+    const path = makeWindingPath(start, approach)
     const spaces = sampleAlong(path, finishLine)
     const pos = Math.min(Math.max(positions[i] ?? 0, 0), finishLine)
     return { team, name, color: teamColor(team), start, path, spaces, ship: spaces[pos], pos }
@@ -28,9 +41,13 @@ function Board({ state }) {
   return (
     <div className="board" role="group" aria-label="Race board">
       <svg viewBox={`0 0 ${BOARD_W} ${BOARD_H}`} className="board-svg" preserveAspectRatio="xMidYMid meet">
-        {/* each team's winding road (pixel tiles) + its board spaces (squares) */}
+        {/* each team's winding road (pixel tiles) + its board spaces (squares).
+            Tiles/markers hidden under a planet are skipped so every visible
+            space is clear of the planets. */}
         {teams.map((t) => {
-          const road = sampleAlong(t.path, finishLine * 2)
+          const road = sampleAlong(t.path, finishLine * 2).filter(
+            (p) => !isUnderPlanet(p, starts, finish),
+          )
           return (
             <g key={t.team}>
               {road.map((p, idx) => (
@@ -43,17 +60,19 @@ function Board({ state }) {
                   height="1.3"
                 />
               ))}
-              {t.spaces.map((s, idx) => (
-                <rect
-                  key={`space-${idx}`}
-                  className="board-space"
-                  x={(s[0] - 1.5).toFixed(2)}
-                  y={(s[1] - 1.5).toFixed(2)}
-                  width="3"
-                  height="3"
-                  style={{ fill: t.color }}
-                />
-              ))}
+              {t.spaces.map((s, idx) =>
+                isUnderPlanet(s, starts, finish) ? null : (
+                  <rect
+                    key={`space-${idx}`}
+                    className="board-space"
+                    x={(s[0] - 1.5).toFixed(2)}
+                    y={(s[1] - 1.5).toFixed(2)}
+                    width="3"
+                    height="3"
+                    style={{ fill: t.color }}
+                  />
+                ),
+              )}
             </g>
           )
         })}
@@ -64,18 +83,18 @@ function Board({ state }) {
             key={`home-${t.team}`}
             cx={t.start[0]}
             cy={t.start[1]}
-            size={19}
+            size={16}
             variant={planetVariant(mapSeed, t.team - 1, PLANET_COUNT)}
           />
         ))}
 
         {/* the shared finish planet (the destination) */}
         <g aria-label="Finish planet">
-          <circle className="board-finish-halo" cx={finish[0]} cy={finish[1]} r="16" />
+          <circle className="board-finish-halo" cx={finish[0]} cy={finish[1]} r="14" />
           <PixelPlanet
             cx={finish[0]}
             cy={finish[1]}
-            size={27}
+            size={28}
             variant={planetVariant(mapSeed, FINISH_SLOT, PLANET_COUNT)}
           />
         </g>

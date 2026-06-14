@@ -10,10 +10,11 @@ describe('boardLayout', () => {
     expect(layoutFor(2).starts).toHaveLength(2)
     expect(layoutFor(3).starts).toHaveLength(3)
     expect(layoutFor(4).starts).toHaveLength(4)
-    // 2 and 3 finish at top-center; 4 finishes at the center (16:9 space)
-    expect(layoutFor(2).finish).toEqual([80, 16])
-    expect(layoutFor(3).finish).toEqual([80, 16])
+    // 2 and 3 finish near top-center; 4 finishes near the centre (16:9 space)
+    expect(layoutFor(2).finish[0]).toBe(80)
+    expect(layoutFor(3).finish[0]).toBe(80)
     expect(layoutFor(4).finish).toEqual([80, 45])
+    expect(layoutFor(2).finish[1]).toBeLessThan(45) // upper area
     // 3-team starts: bottom-left, bottom-center, bottom-right (ascending x)
     const xs = layoutFor(3).starts.map((s) => s[0])
     expect(xs).toEqual([...xs].sort((a, b) => a - b))
@@ -90,7 +91,7 @@ describe('Board', () => {
     expect(c3.querySelectorAll('.board-ship')).toHaveLength(3)
   })
 
-  it('puts a ship at its start (pos 0) and at the finish (pos = finishLine)', () => {
+  it('puts a ship at its start (pos 0) and near the finish (pos = finishLine)', () => {
     const { container } = render(<Board state={state()} />)
     const { finish, starts } = layoutFor(4)
     const ship = (team) => container.querySelector(`.board-ship[data-team="${team}"]`)
@@ -98,9 +99,10 @@ describe('Board', () => {
     // team 1 at position 0 -> its start corner
     expect(close(xy(ship(1))[0], starts[0][0])).toBe(true)
     expect(close(xy(ship(1))[1], starts[0][1])).toBe(true)
-    // team 4 at position 10 (finishLine) -> the finish
-    expect(close(xy(ship(4))[0], finish[0])).toBe(true)
-    expect(close(xy(ship(4))[1], finish[1])).toBe(true)
+    // team 4 at position 10 (finishLine) -> on the finish planet's rim (within radius)
+    const [fx, fy] = finish
+    const [x4, y4] = xy(ship(4))
+    expect(Math.hypot(x4 - fx, y4 - fy)).toBeLessThan(16) // ~FINISH_R
   })
 
   it('marks the current team and the winner', () => {
@@ -114,5 +116,32 @@ describe('Board', () => {
   it('renders nothing without state', () => {
     const { container } = render(<Board state={null} />)
     expect(container).toBeEmptyDOMElement()
+  })
+
+  // Ships must not overlap graphically. The worst case is all teams sharing the
+  // same position; check pairwise ship distances stay above the ship size for
+  // every shared position and every team count (2, 3, 4). Position 10 (the
+  // finish) is excluded: reaching it wins and ends the game, so only the winner
+  // is ever there — other ships are always at <= 9.
+  it('keeps ships separated at every shared position (no graphical collisions)', () => {
+    const SHIP = 14 // matches PixelShip size in Board
+    for (const names of [['A', 'B'], ['A', 'B', 'C'], ['A', 'B', 'C', 'D']]) {
+      for (let p = 0; p <= 9; p++) {
+        const { container, unmount } = render(
+          <Board state={state({ teamNames: names, positions: names.map(() => p), finishLine: 10 })} />,
+        )
+        const ships = [...container.querySelectorAll('.board-ship')].map((g) => [
+          Number(g.getAttribute('data-x')),
+          Number(g.getAttribute('data-y')),
+        ])
+        for (let i = 0; i < ships.length; i++) {
+          for (let j = i + 1; j < ships.length; j++) {
+            const d = Math.hypot(ships[i][0] - ships[j][0], ships[i][1] - ships[j][1])
+            expect(d, `${names.length} teams, position ${p}, teams ${i + 1}&${j + 1}`).toBeGreaterThan(SHIP)
+          }
+        }
+        unmount()
+      }
+    }
   })
 })
