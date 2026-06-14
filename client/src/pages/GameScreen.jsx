@@ -13,7 +13,7 @@ function GameScreen() {
   const { state, question, loading, error, refresh } = useGameState()
 
   return (
-    <main>
+    <main className="game-screen">
       <h1>Space Race</h1>
 
       {error && <p role="alert">Could not reach the game server.</p>}
