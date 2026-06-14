@@ -1,14 +1,19 @@
 import { teamColor } from './raceUtils.js'
-import { layoutFor, makeWindingPath, sampleAlong } from './boardLayout.js'
+import { layoutFor, makeWindingPath, sampleAlong, planetVariant } from './boardLayout.js'
 import PixelShip from './PixelShip.jsx'
+import PixelPlanet from './PixelPlanet.jsx'
+import { PLANET_COUNT } from './planetVariants.js'
 
-// The Jumanji-style board: each team follows a winding path from its start to a
-// shared finish, with one board space per step (0..finishLine). A team's ship
-// sits on the space matching its score; reaching the finish wins. Start/finish
-// positions depend on the team count (see boardLayout). Driven by polled state.
+const FINISH_SLOT = 99 // distinct slot so the finish planet varies independently
+
+// The Jumanji-style board: each team starts on its own home planet and follows a
+// winding path to a shared finish planet, one board space per step
+// (0..finishLine). A team's ship sits on the space matching its score (on its
+// home planet at 0); reaching the finish wins. Planet variants are chosen from
+// the per-game map seed so each game looks different. Driven by polled state.
 function Board({ state }) {
   if (!state) return null
-  const { positions, finishLine, teamNames, currentTeam, winner } = state
+  const { positions, finishLine, teamNames, currentTeam, winner, mapSeed } = state
   const { finish, starts } = layoutFor(teamNames.length)
 
   const teams = teamNames.map((name, i) => {
@@ -17,7 +22,7 @@ function Board({ state }) {
     const path = makeWindingPath(start, finish)
     const spaces = sampleAlong(path, finishLine)
     const pos = Math.min(Math.max(positions[i] ?? 0, 0), finishLine)
-    return { team, name, color: teamColor(team), path, spaces, ship: spaces[pos], pos }
+    return { team, name, color: teamColor(team), start, path, spaces, ship: spaces[pos], pos }
   })
 
   return (
@@ -38,17 +43,27 @@ function Board({ state }) {
           </g>
         ))}
 
-        {/* shared finish */}
-        <circle className="board-finish" cx={finish[0]} cy={finish[1]} r="4" />
-        <text
-          className="board-finish-flag"
-          x={finish[0]}
-          y={finish[1]}
-          textAnchor="middle"
-          dominantBaseline="central"
-        >
-          🏁
-        </text>
+        {/* each team's home planet at its start */}
+        {teams.map((t) => (
+          <PixelPlanet
+            key={`home-${t.team}`}
+            cx={t.start[0]}
+            cy={t.start[1]}
+            size={13}
+            variant={planetVariant(mapSeed, t.team - 1, PLANET_COUNT)}
+          />
+        ))}
+
+        {/* the shared finish planet (the destination) */}
+        <g aria-label="Finish planet">
+          <circle className="board-finish-halo" cx={finish[0]} cy={finish[1]} r="11" />
+          <PixelPlanet
+            cx={finish[0]}
+            cy={finish[1]}
+            size={18}
+            variant={planetVariant(mapSeed, FINISH_SLOT, PLANET_COUNT)}
+          />
+        </g>
 
         {/* ships on top */}
         {teams.map((t) => {

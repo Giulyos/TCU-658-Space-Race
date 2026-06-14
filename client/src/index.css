@@ -271,14 +271,12 @@ label {
   stroke-width: 0.2;
 }
 
-/* shared finish */
-.board-finish {
+/* a soft ring marking the destination planet */
+.board-finish-halo {
   fill: none;
   stroke: var(--amber);
-  stroke-width: 0.8;
-}
-.board-finish-flag {
-  font-size: 4px;
+  stroke-width: 0.5;
+  opacity: 0.6;
 }
 
 /* ships (retro pixel sprites, tinted per team) */
