@@ -10,16 +10,43 @@
 export const BOARD_W = 160
 export const BOARD_H = 90
 
+// Planet radii in board units (must match the sizes drawn in Board.jsx). Used to
+// keep board spaces from being hidden under planets and to land routes on the
+// finish planet's rim.
+export const START_R = 8
+export const FINISH_R = 14
+
 export const layoutFor = (teamCount) => {
   switch (teamCount) {
     case 2:
-      return { finish: [80, 16], starts: [[22, 74], [138, 74]] }
+      return { finish: [80, 20], starts: [[20, 72], [140, 72]] }
     case 3:
-      return { finish: [80, 16], starts: [[22, 74], [80, 74], [138, 74]] }
+      return { finish: [80, 18], starts: [[18, 72], [80, 76], [142, 72]] }
     case 4:
     default:
-      return { finish: [80, 45], starts: [[20, 16], [140, 16], [20, 74], [140, 74]] }
+      return { finish: [80, 45], starts: [[18, 16], [142, 16], [18, 74], [142, 74]] }
   }
+}
+
+// A distinct point on the finish planet's rim for each team, fanned around the
+// side facing that team's start. Routing teams to different rim points (instead
+// of the single centre) keeps ships near the finish from stacking on top of each
+// other.
+export const finishApproach = (finish, start) => {
+  const [fx, fy] = finish
+  // Land on the point of the finish planet's rim facing this team's start, so a
+  // team approaches from its own side and ships fan around the planet rather
+  // than stacking on a single point. Starts are spread out, so the rim points
+  // are too.
+  const angle = Math.atan2(start[1] - fy, start[0] - fx)
+  return [fx + Math.cos(angle) * FINISH_R, fy + Math.sin(angle) * FINISH_R]
+}
+
+// Whether a point lies under any planet (a start planet or the finish), so such
+// board spaces can be skipped when drawing.
+export const isUnderPlanet = (p, starts, finish) => {
+  if (Math.hypot(p[0] - finish[0], p[1] - finish[1]) < FINISH_R - 1) return true
+  return starts.some((s) => Math.hypot(p[0] - s[0], p[1] - s[1]) < START_R + 1)
 }
 
 // Deterministically picks a variant index (0..count-1) for a board "slot" from
@@ -33,7 +60,7 @@ export const planetVariant = (seed, slot, count) => {
 // Builds a winding (zig-zagging) polyline from start to finish: interior
 // waypoints are offset alternately to either side of the straight line, giving
 // the path its "twists and turns". Endpoints are exactly start and finish.
-export const makeWindingPath = (start, finish, twists = 4, amplitude = 11) => {
+export const makeWindingPath = (start, finish, twists = 4, amplitude = 7) => {
   const [sx, sy] = start
   const [fx, fy] = finish
   const dx = fx - sx
