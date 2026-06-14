@@ -94,6 +94,15 @@ describe('QuestionBank', () => {
       expect(screen.getByText('Page 1 / 3')).toBeInTheDocument()
     })
 
+    it('hides the pagination controls when everything fits on one page', async () => {
+      api.getQuestions.mockResolvedValue(many.slice(0, 8)) // 8 questions -> 1 page
+      render(<QuestionBank />)
+      await screen.findByText('Question 1')
+      expect(screen.queryByRole('button', { name: 'Next' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Prev' })).not.toBeInTheDocument()
+      expect(screen.queryByText(/Page \d+ \/ \d+/)).not.toBeInTheDocument()
+    })
+
     it('navigates to the next page', async () => {
       render(<QuestionBank />)
       await screen.findByText('Question 1')
