@@ -36,21 +36,30 @@ describe('TurnIndicator', () => {
 
 describe('QuestionDisplay', () => {
   const q = { id: 5, text: 'Past tense of go?', correct_answer: 'went' }
+  const playing = { active: 1, winner: null }
 
-  it('shows the question text', () => {
-    render(<QuestionDisplay question={q} />)
+  it('shows the question text as a dialog during active play', () => {
+    render(<QuestionDisplay question={q} state={playing} />)
+    expect(screen.getByRole('dialog', { name: /current question/i })).toBeInTheDocument()
     expect(screen.getByText('Past tense of go?')).toBeInTheDocument()
   })
 
   it('does not reveal the correct answer or any answer options', () => {
-    render(<QuestionDisplay question={q} />)
+    render(<QuestionDisplay question={q} state={playing} />)
     expect(screen.queryByText('went')).not.toBeInTheDocument()
     expect(screen.queryByRole('list')).not.toBeInTheDocument()
   })
 
-  it('renders nothing without a question', () => {
-    const { container } = render(<QuestionDisplay question={null} />)
+  it('is hidden without a question', () => {
+    const { container } = render(<QuestionDisplay question={null} state={playing} />)
     expect(container).toBeEmptyDOMElement()
+  })
+
+  it('is hidden when paused or after a winner', () => {
+    const paused = render(<QuestionDisplay question={q} state={{ active: 2, winner: null }} />)
+    expect(paused.container).toBeEmptyDOMElement()
+    const won = render(<QuestionDisplay question={q} state={{ active: 1, winner: 2 }} />)
+    expect(won.container).toBeEmptyDOMElement()
   })
 })
 

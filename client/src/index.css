@@ -196,13 +196,31 @@ label {
   text-shadow: 2px 2px 0 #06122e;
 }
 
-/* ===== Active question ===== */
-.question-display {
-  margin: 12px 0 20px;
+/* ===== Active question (Jeopardy-style popup) ===== */
+.question-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 7vh 16px 0;
+  background: rgba(11, 4, 32, 0.5);
+  pointer-events: none;
+}
+.question-card {
+  width: min(860px, 92%);
   text-align: center;
+  background: var(--space-800);
+  box-shadow: 0 0 0 4px var(--space-900), 0 0 28px rgba(33, 212, 253, 0.35);
+}
+.question-label {
+  font-size: 11px;
+  color: var(--cyan);
+  margin-bottom: 14px;
 }
 .question-text {
-  font-size: 18px;
+  font-size: 22px;
   line-height: 1.6;
   color: var(--amber);
 }
