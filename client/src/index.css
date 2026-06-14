@@ -170,12 +170,11 @@ label {
   overflow-wrap: break-word;
   vertical-align: top;
 }
-.nes-table th:nth-child(1) { width: 5%; }  /* #           */
-.nes-table th:nth-child(2) { width: 36%; } /* Question    */
-.nes-table th:nth-child(3) { width: 17%; } /* Answer      */
-.nes-table th:nth-child(4) { width: 19%; } /* Distractors */
-.nes-table th:nth-child(5) { width: 7%; }  /* Pts         */
-.nes-table th:nth-child(6) { width: 16%; } /* Actions     */
+.nes-table th:nth-child(1) { width: 6%; }  /* #       */
+.nes-table th:nth-child(2) { width: 46%; } /* Question */
+.nes-table th:nth-child(3) { width: 24%; } /* Answer  */
+.nes-table th:nth-child(4) { width: 8%; }  /* Pts     */
+.nes-table th:nth-child(5) { width: 16%; } /* Actions */
 
 /* Question-bank pagination row. */
 .pagination {
@@ -206,27 +205,6 @@ label {
   font-size: 18px;
   line-height: 1.6;
   color: var(--amber);
-}
-.question-options {
-  list-style: none;
-  padding: 0;
-  margin: 16px auto 0;
-  max-width: 760px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  text-align: left;
-}
-.question-options li {
-  font-size: 12px;
-  line-height: 1.5;
-  padding: 8px 10px;
-  background: #0d0726;
-  border: 2px solid var(--space-700);
-}
-.option-key {
-  color: var(--cyan);
-  margin-right: 6px;
 }
 
 /* ===== Scoreboard ===== */

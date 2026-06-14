@@ -7,12 +7,8 @@ import { getGameQuestions, addGameQuestion } from '../api/gamesApi.js'
 // to that game (used inside the setup wizard); otherwise it operates on all
 // questions. Updates and deletes are by question id either way.
 
-const EMPTY_FORM = { text: '', correct_answer: '', distractors: '', point_value: 1 }
+const EMPTY_FORM = { text: '', correct_answer: '', point_value: 1 }
 const PAGE_SIZE = 10
-
-// distractors is edited as a comma-separated string; convert to/from an array.
-const parseDistractors = (s) =>
-  s.split(',').map((d) => d.trim()).filter(Boolean)
 
 function QuestionBank({ gameId = null }) {
   const [questions, setQuestions] = useState([])
@@ -45,7 +41,6 @@ function QuestionBank({ gameId = null }) {
     const payload = {
       text: form.text,
       correct_answer: form.correct_answer,
-      distractors: parseDistractors(form.distractors),
       point_value: Number(form.point_value),
     }
     try {
@@ -66,7 +61,6 @@ function QuestionBank({ gameId = null }) {
     setForm({
       text: q.text,
       correct_answer: q.correct_answer,
-      distractors: (q.distractors ?? []).join(', '),
       point_value: q.point_value,
     })
   }
@@ -116,16 +110,6 @@ function QuestionBank({ gameId = null }) {
         </div>
 
         <div className="nes-field">
-          <label htmlFor="q-distractors">Distractors (comma-separated)</label>
-          <input
-            id="q-distractors"
-            className="nes-input"
-            value={form.distractors}
-            onChange={(e) => setForm({ ...form, distractors: e.target.value })}
-          />
-        </div>
-
-        <div className="nes-field">
           <label htmlFor="q-points">Point value</label>
           <input
             id="q-points"
@@ -158,7 +142,6 @@ function QuestionBank({ gameId = null }) {
                   <th>#</th>
                   <th>Question</th>
                   <th>Answer</th>
-                  <th>Distractors</th>
                   <th>Pts</th>
                   <th>Actions</th>
                 </tr>
@@ -169,7 +152,6 @@ function QuestionBank({ gameId = null }) {
                     <td>{q.id}</td>
                     <td>{q.text}</td>
                     <td>{q.correct_answer}</td>
-                    <td>{(q.distractors ?? []).join(', ')}</td>
                     <td>{q.point_value}</td>
                     <td>
                       <button

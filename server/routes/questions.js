@@ -28,9 +28,6 @@ export const validateQuestion = (body, { partial = false } = {}) => {
   if (has('point_value') && (!Number.isInteger(body.point_value) || body.point_value < 1)) {
     return 'point_value must be an integer >= 1'
   }
-  if (has('distractors') && !Array.isArray(body.distractors)) {
-    return 'distractors must be an array'
-  }
   return null
 }
 

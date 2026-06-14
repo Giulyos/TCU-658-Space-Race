@@ -45,7 +45,6 @@ export const initializeSchema = (db = defaultDb) => {
       game_id        INTEGER REFERENCES games(id),  -- the game this question belongs to
       text           TEXT    NOT NULL,
       correct_answer TEXT    NOT NULL,
-      distractors    TEXT,                           -- JSON array stored as a string
       point_value    INTEGER NOT NULL DEFAULT 1,
       created_at     DATETIME DEFAULT CURRENT_TIMESTAMP
     );
@@ -70,6 +69,10 @@ export const initializeSchema = (db = defaultDb) => {
   }
   if (!hasColumn(db, 'game_state', 'game_id')) {
     db.exec('ALTER TABLE game_state ADD COLUMN game_id INTEGER')
+  }
+  // Distractors were removed (the game is teacher-judged); drop the old column.
+  if (hasColumn(db, 'questions', 'distractors')) {
+    db.exec('ALTER TABLE questions DROP COLUMN distractors')
   }
 
   // The game has exactly one persisted state: a single row with id = 1. Bootstrap

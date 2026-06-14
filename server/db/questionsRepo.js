@@ -1,46 +1,28 @@
 import defaultDb from './database.js'
 
 // Data-access layer for the questions table. The repository is the only place
-// that knows the table's SQL and how `distractors` is stored (a JSON array
-// serialized to a TEXT column) — callers always work with plain objects whose
-// `distractors` is a real array.
+// that knows the table's SQL. Questions are teacher-judged (no answer choices),
+// so a question is just text, a correct answer, and a point value.
 //
 // Exposed as a factory so tests can bind it to an in-memory database; a default
 // instance bound to the shared file-backed connection is exported for the app.
 
-// Converts a raw DB row into a question object with a parsed distractors array.
-const deserialize = (row) => {
-  if (!row) return undefined
-  return {
-    ...row,
-    distractors: row.distractors ? JSON.parse(row.distractors) : [],
-  }
-}
-
 export const createQuestionsRepo = (db = defaultDb) => {
-  const getAll = () =>
-    db
-      .prepare('SELECT * FROM questions ORDER BY id')
-      .all()
-      .map(deserialize)
+  const getAll = () => db.prepare('SELECT * FROM questions ORDER BY id').all()
 
   // Questions belonging to a single game (its question bank).
   const getAllByGame = (gameId) =>
-    db
-      .prepare('SELECT * FROM questions WHERE game_id = ? ORDER BY id')
-      .all(gameId)
-      .map(deserialize)
+    db.prepare('SELECT * FROM questions WHERE game_id = ? ORDER BY id').all(gameId)
 
-  const getById = (id) =>
-    deserialize(db.prepare('SELECT * FROM questions WHERE id = ?').get(id))
+  const getById = (id) => db.prepare('SELECT * FROM questions WHERE id = ?').get(id)
 
-  const create = ({ text, correct_answer, distractors = [], point_value = 1, game_id = null }) => {
+  const create = ({ text, correct_answer, point_value = 1, game_id = null }) => {
     const info = db
       .prepare(
-        `INSERT INTO questions (text, correct_answer, distractors, point_value, game_id)
-         VALUES (?, ?, ?, ?, ?)`,
+        `INSERT INTO questions (text, correct_answer, point_value, game_id)
+         VALUES (?, ?, ?, ?)`,
       )
-      .run(text, correct_answer, JSON.stringify(distractors), point_value, game_id)
+      .run(text, correct_answer, point_value, game_id)
     return getById(info.lastInsertRowid)
   }
 
@@ -54,16 +36,10 @@ export const createQuestionsRepo = (db = defaultDb) => {
     db
       .prepare(
         `UPDATE questions
-           SET text = ?, correct_answer = ?, distractors = ?, point_value = ?
+           SET text = ?, correct_answer = ?, point_value = ?
          WHERE id = ?`,
       )
-      .run(
-        merged.text,
-        merged.correct_answer,
-        JSON.stringify(merged.distractors ?? []),
-        merged.point_value,
-        id,
-      )
+      .run(merged.text, merged.correct_answer, merged.point_value, id)
     return getById(id)
   }
 
