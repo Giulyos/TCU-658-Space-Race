@@ -68,6 +68,12 @@ describe('POST /api/game/start', () => {
     expect(res.status).toBe(400)
     expect(res.body.error).toMatch(/empty question bank/i)
   })
+
+  it('assigns a map seed on start (for board visual variants)', async () => {
+    seedBank()
+    const res = await request(app).post('/api/game/start')
+    expect(Number.isInteger(res.body.state.mapSeed)).toBe(true)
+  })
 })
 
 describe('POST /api/game/next', () => {

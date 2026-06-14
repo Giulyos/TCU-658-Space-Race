@@ -40,7 +40,11 @@ export const createGameRouter = ({
       throw badRequest('Cannot start a game with an empty question bank')
     }
 
-    const state = bridge.applyAndPersist((current) => startGame(current))
+    // A fresh random map seed each start/restart drives the board's visual
+    // variants (planets, etc.). Generated here, at the IO boundary, so the
+    // engine stays pure.
+    const mapSeed = Math.floor(Math.random() * 2_000_000_000)
+    const state = bridge.applyAndPersist((current) => ({ ...startGame(current), mapSeed }))
     res.json({ state, question: null })
   }
 
