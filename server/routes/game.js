@@ -3,7 +3,7 @@ import defaultBridge from '../db/engineBridge.js'
 import defaultQuestionsRepo from '../db/questionsRepo.js'
 import { startGame, pickQuestion, resolveTurn, checkWinner, pause, resume } from '../game/engine.js'
 import { createInitialState } from '../game/state.js'
-import { STATUS, MIN_TEAMS, MAX_TEAMS, MIN_FINISH_LINE } from '../game/constants.js'
+import { STATUS, MIN_TEAMS, MAX_TEAMS, MIN_FINISH_LINE, MAX_FINISH_LINE } from '../game/constants.js'
 import { badRequest } from '../middleware/errors.js'
 
 // Routes for running a game. Exposed as a factory taking an injectable engine
@@ -111,8 +111,8 @@ export const createGameRouter = ({
     const finishLine = req.body?.finishLine ?? current.finishLine
     const teamNames = req.body?.teamNames ?? current.teamNames
 
-    if (!Number.isInteger(finishLine) || finishLine < MIN_FINISH_LINE) {
-      throw badRequest(`finishLine must be an integer >= ${MIN_FINISH_LINE}`)
+    if (!Number.isInteger(finishLine) || finishLine < MIN_FINISH_LINE || finishLine > MAX_FINISH_LINE) {
+      throw badRequest(`finishLine must be an integer between ${MIN_FINISH_LINE} and ${MAX_FINISH_LINE}`)
     }
     if (!Array.isArray(teamNames) || teamNames.length < MIN_TEAMS || teamNames.length > MAX_TEAMS) {
       throw badRequest(`teamNames must have between ${MIN_TEAMS} and ${MAX_TEAMS} entries`)

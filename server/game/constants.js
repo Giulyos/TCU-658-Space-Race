@@ -19,7 +19,8 @@ export const DEFAULT_FINISH_LINE = 10
 // Supported range for teacher-configurable settings (used by validation later).
 export const MIN_TEAMS = 2
 export const MAX_TEAMS = 4
-export const MIN_FINISH_LINE = 1
+export const MIN_FINISH_LINE = 3
+export const MAX_FINISH_LINE = 10
 
 // Generates sequential default team names: ["Team 1", "Team 2", ...].
 export const defaultTeamNames = (count = DEFAULT_TEAM_COUNT) =>
