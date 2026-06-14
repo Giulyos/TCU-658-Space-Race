@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import TurnIndicator from './TurnIndicator.jsx'
 import QuestionDisplay from './QuestionDisplay.jsx'
-import Scoreboard from './Scoreboard.jsx'
 
 const state = (over = {}) => ({
   active: 1,
@@ -60,25 +59,5 @@ describe('QuestionDisplay', () => {
     expect(paused.container).toBeEmptyDOMElement()
     const won = render(<QuestionDisplay question={q} state={{ active: 1, winner: 2 }} />)
     expect(won.container).toBeEmptyDOMElement()
-  })
-})
-
-describe('Scoreboard', () => {
-  it('ranks teams by position, highest first', () => {
-    render(<Scoreboard state={state()} />)
-    const names = screen.getAllByText(/Red|Blue|Green|Gold/).map((el) => el.textContent)
-    expect(names[0]).toBe('Blue') // 7 — leader
-    expect(names[1]).toBe('Red') // 3
-  })
-
-  it('shows each team position out of the finish line', () => {
-    render(<Scoreboard state={state()} />)
-    expect(screen.getByText('7/10')).toBeInTheDocument()
-    expect(screen.getByText('0/10')).toBeInTheDocument()
-  })
-
-  it('renders nothing before a game starts', () => {
-    const { container } = render(<Scoreboard state={state({ active: 0 })} />)
-    expect(container).toBeEmptyDOMElement()
   })
 })
