@@ -36,11 +36,14 @@ describe('GameControls', () => {
     expect(refresh).toHaveBeenCalled()
   })
 
-  it('shows a full-screen Paused overlay with Resume when paused', () => {
-    render(<GameControls state={{ active: 2, winner: null }} question={null} refresh={refresh} />)
-    expect(screen.getByRole('dialog', { name: /paused/i })).toBeInTheDocument()
-    expect(screen.getByText(/paused/i)).toBeInTheDocument()
+  it('grays out (no popup) and shows Resume when paused', () => {
+    const { container } = render(
+      <GameControls state={{ active: 2, winner: null }} question={null} refresh={refresh} />,
+    )
+    expect(container.querySelector('.pause-grayout')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Resume' })).toBeInTheDocument()
+    // no centered popup/dialog
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Pause' })).not.toBeInTheDocument()
   })
 

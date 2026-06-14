@@ -280,28 +280,16 @@ label {
   color: var(--magenta);
 }
 
-/* ===== Pause overlay (grays out the whole screen) ===== */
-.pause-overlay {
+/* ===== Pause gray-out (no popup) ===== */
+/* Dims and desaturates the whole board; the Resume HUD button (z 40) sits above
+   it where Pause was. */
+.pause-grayout {
   position: fixed;
   inset: 0;
-  z-index: 70;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(8, 6, 16, 0.7);
-  /* visually "gray out" the board behind the overlay */
+  z-index: 30;
+  background: rgba(8, 6, 16, 0.55);
   backdrop-filter: grayscale(0.85) brightness(0.5);
   -webkit-backdrop-filter: grayscale(0.85) brightness(0.5);
-}
-.pause-card {
-  text-align: center;
-  background: var(--space-800);
-  box-shadow: 0 0 0 4px var(--space-900), 0 0 28px rgba(33, 212, 253, 0.3);
-}
-.pause-title {
-  font-size: 22px;
-  color: var(--amber);
-  margin-bottom: 18px;
 }
 
 /* On phones, shrink the title and HUD so the top row (title + Pause/Mute) fits. */
