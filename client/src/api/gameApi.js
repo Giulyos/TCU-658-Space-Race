@@ -7,6 +7,8 @@ export const getState = () => request('GET', '/game/state')
 
 export const startGame = () => request('POST', '/game/start')
 
+export const nextQuestion = () => request('POST', '/game/next')
+
 export const submitTurn = (correct) => request('POST', '/game/turn', { correct })
 
 export const restartGame = () => request('POST', '/game/restart')
