@@ -1,8 +1,10 @@
+import { useEffect, useRef, useState } from 'react'
 import { teamColor } from './raceUtils.js'
 import {
   layoutFor,
   makeWindingPath,
   sampleAlong,
+  pointAtFraction,
   planetVariant,
   finishApproach,
   isUnderPlanet,
@@ -11,9 +13,58 @@ import {
 } from './boardLayout.js'
 import PixelShip from './PixelShip.jsx'
 import PixelPlanet from './PixelPlanet.jsx'
+import WinnerBanner from './WinnerBanner.jsx'
 import { PLANET_COUNT } from './planetVariants.js'
 
 const FINISH_SLOT = 99 // distinct slot so the finish planet varies independently
+const ADVANCE_MS = 900 // duration of a ship's glide to its new space
+const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2)
+
+// Smoothly animates each team's board position toward the latest target
+// positions. On mount (and whenever a position already matches) it snaps with no
+// animation; when a position changes (a turn was marked) it eases each ship
+// along its road over ADVANCE_MS. Returns the per-team float positions plus
+// whether an animation is currently running — used to defer the winner banner
+// until the winning ship has actually arrived. Driven by the polled state, so a
+// changed target interrupts cleanly from wherever the ship currently is.
+function useAdvanceAnimation(targets) {
+  const [display, setDisplay] = useState(targets)
+  const [animating, setAnimating] = useState(false)
+  const displayRef = useRef(targets)
+  const rafRef = useRef(0)
+  const key = targets.join(',')
+
+  useEffect(() => {
+    const from = displayRef.current
+    const to = targets
+    const sameLength = from.length === to.length
+    if (!sameLength) {
+      displayRef.current = to
+      setDisplay(to)
+      setAnimating(false)
+      return
+    }
+    if (from.every((v, i) => v === to[i])) return // already there; no animation
+
+    setAnimating(true)
+    const start = performance.now()
+    const step = (now) => {
+      const t = Math.min((now - start) / ADVANCE_MS, 1)
+      const e = easeInOut(t)
+      const next = to.map((v, i) => from[i] + (v - from[i]) * e)
+      displayRef.current = next
+      setDisplay(next)
+      if (t < 1) rafRef.current = requestAnimationFrame(step)
+      else setAnimating(false)
+    }
+    rafRef.current = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(rafRef.current)
+    // key encodes the target positions; `targets` is read fresh inside.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key])
+
+  return { display, animating }
+}
 
 // The Jumanji-style board: each team starts on its own home planet and follows a
 // winding path to a shared finish planet, one board space per step
@@ -21,8 +72,14 @@ const FINISH_SLOT = 99 // distinct slot so the finish planet varies independentl
 // home planet at 0); reaching the finish wins. Planet variants are chosen from
 // the per-game map seed so each game looks different. Driven by polled state.
 function Board({ state }) {
+  const { positions, finishLine, teamNames, currentTeam, winner, mapSeed } = state ?? {}
+
+  // Clamp targets to the track, then animate the ships' displayed positions
+  // toward them. Hooks must run before any early return, so guard with [].
+  const targets = (positions ?? []).map((p) => Math.min(Math.max(p ?? 0, 0), finishLine))
+  const { display, animating } = useAdvanceAnimation(targets)
+
   if (!state) return null
-  const { positions, finishLine, teamNames, currentTeam, winner, mapSeed } = state
   const { finish, starts } = layoutFor(teamNames.length)
 
   const teamCount = teamNames.length
@@ -34,8 +91,20 @@ function Board({ state }) {
     const approach = finishApproach(finish, start, i, teamCount)
     const path = makeWindingPath(start, approach)
     const spaces = sampleAlong(path, finishLine)
-    const pos = Math.min(Math.max(positions[i] ?? 0, 0), finishLine)
-    return { team, name, color: teamColor(team), start, path, spaces, ship: spaces[pos], pos }
+    const pos = targets[i] ?? 0
+    // Ship sits at its animated (possibly fractional) position along the road;
+    // at rest the float equals `pos`, landing exactly on space `pos`.
+    const shown = display[i] ?? pos
+    return {
+      team,
+      name,
+      color: teamColor(team),
+      start,
+      path,
+      spaces,
+      ship: pointAtFraction(path, shown / Math.max(finishLine, 1)),
+      pos,
+    }
   })
 
   return (
@@ -134,6 +203,9 @@ function Board({ state }) {
           </li>
         ))}
       </ul>
+
+      {/* Held back until the winning ship has glided onto the finish planet. */}
+      <WinnerBanner state={state} show={!animating} />
     </div>
   )
 }

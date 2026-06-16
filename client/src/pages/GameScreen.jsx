@@ -7,8 +7,9 @@ import { useGameState } from '../hooks/useGameState.js'
 // The projected, teacher-operated view. It polls /api/game/state and renders the
 // turn indicator, the active-question popup, the board (which doubles as the
 // scoreboard via each team's position), and the during-game controls. Launch and
-// restart live on the Admin panel. The advance animation and winner banner are
-// added in #35.
+// restart live on the Admin panel. The board glides ships to their new space
+// after a turn is marked and shows a full-screen winner banner once a team
+// reaches the finish.
 function GameScreen() {
   const { state, question, loading, error, refresh } = useGameState()
 

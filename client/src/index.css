@@ -292,6 +292,62 @@ label {
   -webkit-backdrop-filter: grayscale(0.85) brightness(0.5);
 }
 
+/* ===== Winner banner (full-screen) ===== */
+/* Shown over everything once the winning ship has arrived. Display-only (Restart
+   lives on the Admin panel), so it captures no clicks. */
+.winner-banner {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  background: rgba(8, 4, 24, 0.82);
+  pointer-events: none;
+  animation: winner-fade 0.4s ease-out both;
+}
+.winner-card {
+  text-align: center;
+  background: var(--space-800);
+  border-color: var(--team-color);
+  box-shadow: 0 0 0 4px var(--space-900), 0 0 40px var(--team-color);
+  padding: 32px 40px;
+  animation: winner-pop 0.5s cubic-bezier(0.18, 1.4, 0.4, 1) both;
+}
+.winner-stars {
+  font-size: 20px;
+  color: var(--amber);
+  letter-spacing: 8px;
+  animation: winner-twinkle 1s steps(2) infinite;
+}
+.winner-name {
+  font-size: clamp(24px, 6vw, 48px);
+  color: var(--team-color);
+  text-shadow: 3px 3px 0 var(--space-900);
+  margin: 18px 0 8px;
+}
+.winner-sub {
+  font-size: clamp(16px, 3vw, 26px);
+  color: #fff;
+}
+@keyframes winner-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes winner-pop {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+}
+@keyframes winner-twinkle {
+  50% {
+    opacity: 0.35;
+  }
+}
+
 /* On phones, shrink the title and HUD so the top row (title + Pause/Mute) fits. */
 @media (max-width: 480px) {
   .game-screen h1 {

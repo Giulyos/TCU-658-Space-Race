@@ -80,10 +80,11 @@ export const makeWindingPath = (start, finish, twists = 4, amplitude = 7) => {
   return pts
 }
 
-// Returns n+1 points evenly spaced by arc length along the polyline (index 0 at
-// the start, index n at the finish). Used both to draw the board spaces and to
-// place a ship on the space matching its score.
-export const sampleAlong = (waypoints, n) => {
+// Returns the point at a given fraction (0..1) of the polyline's total arc
+// length. Used to place a ship anywhere along its road — at an integer board
+// space (fraction = pos/finishLine) or at a fractional position mid-glide while
+// the advance animation interpolates between spaces.
+export const pointAtFraction = (waypoints, f) => {
   const segLen = []
   let total = 0
   for (let i = 1; i < waypoints.length; i++) {
@@ -95,23 +96,28 @@ export const sampleAlong = (waypoints, n) => {
     total += d
   }
 
-  const pointAt = (target) => {
-    if (target <= 0 || total === 0) return waypoints[0]
-    let acc = 0
-    for (let i = 0; i < segLen.length; i++) {
-      if (acc + segLen[i] >= target) {
-        const t = (target - acc) / segLen[i]
-        return [
-          waypoints[i][0] + (waypoints[i + 1][0] - waypoints[i][0]) * t,
-          waypoints[i][1] + (waypoints[i + 1][1] - waypoints[i][1]) * t,
-        ]
-      }
-      acc += segLen[i]
+  const target = total * Math.min(Math.max(f, 0), 1)
+  if (target <= 0 || total === 0) return waypoints[0]
+  let acc = 0
+  for (let i = 0; i < segLen.length; i++) {
+    if (acc + segLen[i] >= target) {
+      const t = (target - acc) / segLen[i]
+      return [
+        waypoints[i][0] + (waypoints[i + 1][0] - waypoints[i][0]) * t,
+        waypoints[i][1] + (waypoints[i + 1][1] - waypoints[i][1]) * t,
+      ]
     }
-    return waypoints[waypoints.length - 1]
+    acc += segLen[i]
   }
+  return waypoints[waypoints.length - 1]
+}
 
+// Returns n+1 points evenly spaced by arc length along the polyline (index 0 at
+// the start, index n at the finish). Used both to draw the board spaces and to
+// place a ship on the space matching its score. A ship at integer position `pos`
+// (pointAtFraction at pos/n) lands exactly on space `pos` here.
+export const sampleAlong = (waypoints, n) => {
   const out = []
-  for (let k = 0; k <= n; k++) out.push(pointAt(total * (k / Math.max(n, 1))))
+  for (let k = 0; k <= n; k++) out.push(pointAtFraction(waypoints, k / Math.max(n, 1)))
   return out
 }
