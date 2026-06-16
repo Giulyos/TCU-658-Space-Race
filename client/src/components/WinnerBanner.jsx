@@ -1,4 +1,6 @@
+import { useEffect } from 'react'
 import { teamColor } from './raceUtils.js'
+import { play } from '../sound/sounds.js'
 
 // Full-screen celebratory banner shown on the projected board when a team
 // reaches the finish line. The Board defers it (show=false) until the winning
@@ -6,7 +8,16 @@ import { teamColor } from './raceUtils.js'
 // movement, not on top of it. Restart lives on the Admin panel, so the banner is
 // purely a display — it captures no clicks.
 function WinnerBanner({ state, show }) {
-  if (!state || state.winner == null || !show) return null
+  const visible = !!state && state.winner != null && show
+
+  // Play the win fanfare once, when the banner actually appears (after the ship
+  // has glided in). Honors mute inside play(); follows the teacher's gestures so
+  // playback is permitted.
+  useEffect(() => {
+    if (visible) play('win')
+  }, [visible])
+
+  if (!visible) return null
 
   const team = state.winner
   const name = state.teamNames[team - 1] ?? `Team ${team}`

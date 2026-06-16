@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { nextQuestion, pauseGame, resumeGame } from '../api/gameApi.js'
+import { isMuted, setMuted } from '../sound/sounds.js'
 
 // The teacher's during-game controls, shown on the projected board itself.
 // State-driven:
@@ -12,11 +13,12 @@ import { nextQuestion, pauseGame, resumeGame } from '../api/gameApi.js'
 // and Restart live on the Admin panel.
 
 const STATUS = { NOT_STARTED: 0, ACTIVE: 1, PAUSED: 2 }
-const MUTE_KEY = 'spacerace:muted'
 
 function GameControls({ state, question, refresh }) {
   const [error, setError] = useState(null)
-  const [muted, setMuted] = useState(() => localStorage.getItem(MUTE_KEY) === 'true')
+  // Mute is a shared preference (see sound/sounds.js): the toggle writes it and
+  // the sound player reads it, both via MUTE_KEY in localStorage.
+  const [muted, setMutedState] = useState(() => isMuted())
 
   // Runs an API action then refreshes the shared game state, surfacing errors.
   const run = async (action) => {
@@ -30,9 +32,9 @@ function GameControls({ state, question, refresh }) {
   }
 
   const toggleMute = () => {
-    setMuted((prev) => {
+    setMutedState((prev) => {
       const next = !prev
-      localStorage.setItem(MUTE_KEY, String(next))
+      setMuted(next)
       return next
     })
   }
