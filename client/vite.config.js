@@ -10,6 +10,17 @@ export default defineConfig({
       // Precache the favicon alongside the build output so the installed app
       // shell is complete offline.
       includeAssets: ['favicon.svg'],
+      workbox: {
+        // Precache the entire app shell (cache-first). The default glob misses
+        // the .wav sound effects, so list every asset type the game ships —
+        // nothing must be fetched from the network after the first load.
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,wav,webmanifest}'],
+        // SPA: serve the cached index.html for client routes (/admin, /game) so
+        // a reload works offline. API calls are left to the network (the local
+        // server), never cached.
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api\//]
+      },
       manifest: {
         name: 'Space Race',
         short_name: 'SpaceRace',

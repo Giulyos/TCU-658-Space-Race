@@ -22,6 +22,21 @@ describe('PWA manifest config (vite.config.js)', () => {
   })
 })
 
+describe('Workbox offline precaching (vite.config.js)', () => {
+  it('precaches the sound effects and fonts (not just the default globs)', () => {
+    expect(viteConfig).toMatch(/globPatterns:/)
+    // wav is NOT in vite-plugin-pwa's default glob — it must be listed explicitly
+    // or the sounds break offline.
+    expect(viteConfig).toMatch(/globPatterns:\s*\[[^\]]*wav[^\]]*\]/)
+    expect(viteConfig).toMatch(/globPatterns:\s*\[[^\]]*woff2[^\]]*\]/)
+  })
+
+  it('serves the SPA shell offline but never falls back for /api', () => {
+    expect(viteConfig).toMatch(/navigateFallback:\s*'\/index\.html'/)
+    expect(viteConfig).toMatch(/navigateFallbackDenylist:.*\/\^\\\/api/)
+  })
+})
+
 describe('index.html PWA head', () => {
   it('has the app title, theme color and an apple-touch-icon', () => {
     expect(indexHtml).toMatch(/<title>Space Race<\/title>/)
