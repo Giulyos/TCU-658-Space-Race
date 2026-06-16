@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { submitTurn } from '../api/gameApi.js'
+import { play } from '../sound/sounds.js'
 
 // Jeopardy-style question popup: the active question appears as a large centered
 // card overlaid on the board, with the teacher's Correct / Incorrect buttons
@@ -15,6 +16,9 @@ function QuestionDisplay({ question, state, refresh }) {
   // closes this popup). Errors are shown on the card.
   const mark = async (correct) => {
     setError(null)
+    // Fired from the teacher's click (a user gesture), so playback is allowed.
+    // The win sound is handled separately by the banner.
+    play(correct ? 'correct' : 'incorrect')
     try {
       await submitTurn(correct)
       await refresh?.()
