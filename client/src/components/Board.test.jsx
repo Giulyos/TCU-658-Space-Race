@@ -1,7 +1,13 @@
 import { describe, it, expect } from 'vitest'
 import { render } from '@testing-library/react'
 import Board from './Board.jsx'
-import { layoutFor, makeWindingPath, sampleAlong, planetVariant } from './boardLayout.js'
+import {
+  layoutFor,
+  makeWindingPath,
+  sampleAlong,
+  pointAtFraction,
+  planetVariant,
+} from './boardLayout.js'
 
 const close = (a, b, eps = 0.001) => Math.abs(a - b) < eps
 
@@ -35,6 +41,18 @@ describe('boardLayout', () => {
     expect(close(pts[0][0], 0)).toBe(true)
     expect(close(pts[10][0], 10)).toBe(true)
     expect(close(pts[5][0], 5)).toBe(true) // evenly spaced
+  })
+
+  it('pointAtFraction lands exactly on the board space at integer positions', () => {
+    // A ship mid-glide uses pointAtFraction; at rest (pos/finishLine) it must
+    // coincide with the drawn space so the ship never settles off its square.
+    const path = makeWindingPath([18, 74], [80, 45])
+    const spaces = sampleAlong(path, 10)
+    for (let p = 0; p <= 10; p++) {
+      const pt = pointAtFraction(path, p / 10)
+      expect(close(pt[0], spaces[p][0])).toBe(true)
+      expect(close(pt[1], spaces[p][1])).toBe(true)
+    }
   })
 })
 
@@ -116,6 +134,25 @@ describe('Board', () => {
   it('renders nothing without state', () => {
     const { container } = render(<Board state={null} />)
     expect(container).toBeEmptyDOMElement()
+  })
+
+  it('shows the winner banner for a settled win (no pending movement)', () => {
+    const { container } = render(
+      <Board state={state({ winner: 4, positions: [0, 3, 6, 10] })} />,
+    )
+    const banner = container.querySelector('.winner-banner')
+    expect(banner).toBeInTheDocument()
+    expect(banner).toHaveTextContent('Gold')
+  })
+
+  it('defers the winner banner while the winning ship is still gliding in', () => {
+    // Team 4 jumps from space 9 to the finish and wins in the same state update;
+    // the ship animates, so the banner is held back until it arrives.
+    const { container, rerender } = render(
+      <Board state={state({ positions: [0, 3, 6, 9], winner: null })} />,
+    )
+    rerender(<Board state={state({ positions: [0, 3, 6, 10], winner: 4 })} />)
+    expect(container.querySelector('.winner-banner')).not.toBeInTheDocument()
   })
 
   // Ships must not overlap graphically. The worst case is all teams sharing the
