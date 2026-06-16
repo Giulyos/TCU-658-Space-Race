@@ -31,3 +31,24 @@ describe('index.css — NES.css overlay pointer-events guard', () => {
     }
   })
 })
+
+// The Game Screen is projected to a whole classroom, so its key type must scale
+// with the viewport (clamp with a vw term) rather than a fixed pixel size that
+// would be illegible from the back of the room. jsdom has no layout engine and
+// can't measure rendered sizes, so we guard the stylesheet: each rule's
+// declaration block must use a viewport-relative clamp().
+describe('index.css — projector-legible responsive type', () => {
+  const ruleBody = (selector) => {
+    const m = css.match(new RegExp(`${selector.replace('.', '\\.')}\\s*\\{([^}]*)\\}`))
+    return m ? m[1] : ''
+  }
+
+  it.each([
+    ['.turn-indicator'],
+    ['.question-text'],
+    ['.board-legend li'],
+  ])('%s scales its font-size with the viewport (clamp + vw)', (selector) => {
+    const body = ruleBody(selector)
+    expect(body).toMatch(/font-size:\s*clamp\([^)]*vw[^)]*\)/)
+  })
+})
