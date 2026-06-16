@@ -496,12 +496,34 @@ The only file created at runtime (not included) is `spacerace.db`, which is gene
 
 The PWA is configured with `vite-plugin-pwa` to cache all static assets (HTML, CSS, JS, images, sounds) during the first load. After that, the app works with zero internet connectivity.
 
-The service worker uses a **cache-first** strategy for static assets, meaning:
-- On subsequent visits, assets are served from cache instantly
-- When connectivity is available, the service worker checks for updates in the background
-- Teachers are notified when an update is ready and can refresh to apply it
+The service worker (Workbox via `vite-plugin-pwa`) **precaches the entire app shell** — HTML, JS, CSS, the bundled Press Start 2P font, the PWA icons, and the sound effects (`*.wav`) — using a **cache-first** strategy, meaning:
+- On subsequent visits, every asset is served from cache instantly, with **no network request** for any part of the UI
+- Client routes (`/admin`, `/game`) fall back to the cached `index.html`, so a page reload works offline (only `/api/*` is left to the local server)
+- When connectivity is available, the service worker checks for updates in the background and applies them automatically (`registerType: 'autoUpdate'`)
 
 Since all data (questions, game state) lives in the local SQLite database, there is no data dependency on any external server at any point.
+
+### Verifying offline support
+
+The service worker only runs against a **production build** (not the dev server), so test the built app:
+
+```bash
+# 1. Build the client (generates the service worker + precache manifest)
+npm --prefix client run build
+
+# 2. Serve the built app
+npm --prefix client run preview      # http://localhost:4173
+```
+
+Then in the browser:
+
+1. Open the app and load it once (this lets the service worker install and precache the shell).
+2. Open **DevTools → Application → Service Workers** and confirm the worker is **activated and running**.
+3. Tick **Offline** (DevTools → Network → "Offline", or Application → Service Workers → "Offline").
+4. **Reload the page.** The app shell must still load — title, board, styling, fonts, sounds all present — with no "no internet" error. (`/api` calls will fail while fully offline with no server; the point is that the *app itself* loads with the network disabled.)
+5. Navigate to `/admin` and `/game` and reload each — both should load from cache (SPA fallback).
+
+This was verified by automation against the production preview with the network disabled: the shell loads, and the precached sounds and icons serve from cache (HTTP 200) with no page errors.
 
 ---
 
