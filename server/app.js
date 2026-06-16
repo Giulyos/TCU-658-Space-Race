@@ -17,9 +17,16 @@ const __dirname = path.dirname(__filename)
 // @param {object}  [opts]
 // @param {object}  [opts.questionsRepo]  Questions repository (default instance if omitted).
 // @param {object}  [opts.gamesRepo]      Games repository (default instance if omitted).
-// @param {object}  [opts.bridge]         Engine/persistence bridge (default instance if omitted).
-// @param {boolean} [opts.serveStatic]    Serve the built client (production).
-export const createApp = ({ questionsRepo, gamesRepo, bridge, serveStatic = false } = {}) => {
+// @param {object}  [opts.bridge]          Engine/persistence bridge (default instance if omitted).
+// @param {boolean} [opts.serveStatic]     Serve the built client (production).
+// @param {string}  [opts.clientDistPath]  Override the built-client directory (for tests).
+export const createApp = ({
+  questionsRepo,
+  gamesRepo,
+  bridge,
+  serveStatic = false,
+  clientDistPath = path.resolve(__dirname, '../client/dist'),
+} = {}) => {
   const app = express()
   app.use(express.json())
 
@@ -31,12 +38,20 @@ export const createApp = ({ questionsRepo, gamesRepo, bridge, serveStatic = fals
   app.use('/api/questions', createQuestionsRouter(questionsRepo))
   app.use('/api/game', createGameRouter({ bridge, questionsRepo }))
 
-  // Unmatched /api/* routes return a consistent JSON 404.
+  // Unmatched /api/* routes return a consistent JSON 404 (handled by the error
+  // handler below), so they never reach the SPA fallback.
   app.use('/api', notFoundHandler)
 
   if (serveStatic) {
-    const clientDistPath = path.resolve(__dirname, '../client/dist')
     app.use(express.static(clientDistPath))
+
+    // SPA fallback: any GET that matched neither /api nor a static file returns
+    // the app shell, so client routes (/admin, /game) load on reload. Express 5
+    // rejects bare wildcard paths, so this is a pathless GET-only middleware.
+    app.use((req, res, next) => {
+      if (req.method !== 'GET') return next()
+      res.sendFile(path.join(clientDistPath, 'index.html'), (err) => err && next(err))
+    })
   }
 
   // Central error handler — must be registered last.
