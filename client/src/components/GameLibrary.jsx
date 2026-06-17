@@ -64,12 +64,12 @@ function GameLibrary({ onPlay, onEdit, onNew }) {
   }
 
   return (
-    <section className="nes-container with-title">
+    <section className="nes-container with-title game-library">
       <p className="title">My Games</p>
 
       {error && <p role="alert">{error}</p>}
 
-      <button type="button" className="nes-btn is-success" onClick={onNew}>
+      <button type="button" className="nes-btn is-success new-game-btn" onClick={onNew}>
         + New Game
       </button>
 
