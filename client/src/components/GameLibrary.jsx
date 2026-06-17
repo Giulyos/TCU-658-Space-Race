@@ -86,13 +86,35 @@ function GameLibrary({ onPlay, onEdit, onNew }) {
                 </span>
               </div>
               <div className="game-actions">
-                <button
-                  type="button"
-                  className="nes-btn is-primary"
-                  onClick={() => onPlay(game, { resume: isResumable(game) })}
-                >
-                  {isResumable(game) ? 'Resume' : 'Play'}
-                </button>
+                {isResumable(game) ? (
+                  <>
+                    {/* continue the in-progress save */}
+                    <button
+                      type="button"
+                      className="nes-btn is-primary"
+                      onClick={() => onPlay(game, { resume: true })}
+                    >
+                      Resume
+                    </button>
+                    {/* start the same game over (fresh match) */}
+                    <button
+                      type="button"
+                      className="nes-btn"
+                      onClick={() => onPlay(game, { resume: false })}
+                      aria-label={`Restart ${game.name}`}
+                    >
+                      Restart
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    className="nes-btn is-primary"
+                    onClick={() => onPlay(game, { resume: false })}
+                  >
+                    Play
+                  </button>
+                )}
                 <button
                   type="button"
                   className="nes-btn is-warning"
