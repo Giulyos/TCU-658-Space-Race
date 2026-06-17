@@ -474,54 +474,99 @@ label {
   color: var(--cyan);
 }
 
-/* ===== Launcher (route "/", what the installed PWA opens to) ===== */
-.launcher {
-  text-align: center;
-  padding-top: 6vh;
-}
-.launcher-tagline {
-  color: var(--cyan);
-  font-size: clamp(11px, 1.6vw, 18px);
-  margin: 0 0 40px;
-}
-.launcher-choices {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: clamp(16px, 4vw, 40px);
-}
-/* Big, tappable cards — links styled as panels (no underline, themed border). */
-.launcher-card {
+/* ===== Title screen (route "/", what the installed PWA opens to) ===== */
+/* An 8-bit arcade "attract screen": a pixel-ship scene over the starfield, the
+   logo, and a single Play/Resume button. Full-viewport, escaping #root. */
+.title-screen {
+  position: fixed;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  width: min(40vw, 280px);
-  min-height: 200px;
-  padding: 24px;
-  text-decoration: none;
-  color: var(--ink);
-  cursor: pointer;
-  transition: transform 0.12s ease;
+  padding: 4vh 16px;
+  text-align: center;
+  overflow: hidden;
 }
-.launcher-card:hover,
-.launcher-card:focus-visible {
-  transform: translateY(-4px);
-  outline: none;
+.title-scene {
+  display: block;
+  width: min(92vw, 720px);
+  max-height: 46vh;
 }
-.launcher-icon {
-  font-size: clamp(36px, 6vw, 64px);
+.title-star {
+  fill: #ffffff;
+  animation: title-twinkle 2.4s steps(2) infinite;
+}
+.title-star:nth-child(odd) {
+  animation-delay: 1.2s;
+  fill: #b9f6ff;
+}
+.title-planet-halo {
+  fill: none;
+  stroke: var(--amber);
+  stroke-width: 0.6;
+  opacity: 0.5;
+}
+/* ships gently bob as they "race" toward the planet */
+.title-ship {
+  animation: title-bob 2.6s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.title-ship-1 {
+  animation-delay: 0.4s;
+}
+.title-ship-2 {
+  animation-delay: 0.8s;
+}
+.title-logo {
+  font-size: clamp(28px, 7vw, 72px);
+  margin: 8px 0 0;
   color: var(--amber);
-  line-height: 1;
+  text-shadow: 4px 4px 0 var(--magenta);
 }
-.launcher-label {
-  font-size: clamp(16px, 2.4vw, 28px);
+.title-tagline {
   color: var(--cyan);
+  font-size: clamp(10px, 1.8vw, 18px);
+  margin: 0 0 18px;
 }
-.launcher-sub {
-  font-size: clamp(10px, 1.3vw, 14px);
-  color: var(--ink);
+/* big, arcade-style call to action */
+.title-play {
+  font-size: clamp(16px, 2.6vw, 28px);
+  padding: 14px 40px;
+  animation: title-pulse 1.4s ease-in-out infinite;
+}
+.title-play:hover,
+.title-play:focus-visible {
+  animation-play-state: paused;
+}
+.title-hint {
+  color: var(--green);
+  font-size: clamp(9px, 1.3vw, 13px);
+  margin: 6px 0 0;
+}
+@keyframes title-twinkle {
+  50% {
+    opacity: 0.2;
+  }
+}
+@keyframes title-bob {
+  50% {
+    transform: translateY(-3px);
+  }
+}
+@keyframes title-pulse {
+  50% {
+    transform: scale(1.06);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .title-star,
+  .title-ship,
+  .title-play {
+    animation: none;
+  }
 }
 
 /* ===== Cross-navigation links between the two screens ===== */
