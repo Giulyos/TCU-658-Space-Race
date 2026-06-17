@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { nextQuestion, pauseGame, resumeGame } from '../api/gameApi.js'
 import { isMuted, setMuted } from '../sound/sounds.js'
+import { navigateTo } from '../lib/nav.js'
 
 // The teacher's during-game controls, shown on the projected board itself.
 // State-driven:
@@ -39,6 +40,9 @@ function GameControls({ state, question, refresh }) {
     })
   }
 
+  // Back to the teacher's Admin Panel (sits next to Pause/Resume).
+  const goHome = () => navigateTo('/admin')
+
   if (!state) return null
 
   const active = state.active
@@ -66,6 +70,9 @@ function GameControls({ state, question, refresh }) {
 
       {ready && (
         <div className="hud hud-topright">
+          <button type="button" className="nes-btn" onClick={goHome}>
+            Home
+          </button>
           <button type="button" className="nes-btn is-warning" onClick={() => run(pauseGame)}>
             Pause
           </button>
@@ -79,8 +86,11 @@ function GameControls({ state, question, refresh }) {
         <>
           {/* gray out the whole board, no popup */}
           <div className="pause-grayout" aria-hidden="true" />
-          {/* Resume sits where Pause was (top-right), above the gray-out */}
+          {/* Home + Resume sit where Pause was (top-right), above the gray-out */}
           <div className="hud hud-topright">
+            <button type="button" className="nes-btn" onClick={goHome}>
+              Home
+            </button>
             <button type="button" className="nes-btn is-warning" onClick={() => run(resumeGame)}>
               Resume
             </button>

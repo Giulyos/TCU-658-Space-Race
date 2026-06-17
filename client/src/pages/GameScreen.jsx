@@ -16,8 +16,6 @@ function GameScreen() {
   return (
     <main className="game-screen">
       <h1>Space Race</h1>
-      {/* Unobtrusive flip to the teacher panel (bottom-left, clear of the HUD). */}
-      <a className="screen-nav screen-nav-game" href="/admin">⚙ Admin</a>
 
       {error && <p role="alert">Could not reach the game server.</p>}
       {loading && !state && <p>Loading…</p>}

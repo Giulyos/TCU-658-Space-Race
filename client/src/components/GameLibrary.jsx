@@ -78,9 +78,13 @@ function GameLibrary({ onPlay, onEdit, onNew }) {
       ) : (
         <ul className="nes-list">
           {games.map((game) => (
-            <li key={game.id} className="game-row">
+            <li
+              key={game.id}
+              className={isResumable(game) ? 'game-row is-current' : 'game-row'}
+            >
               <div className="game-info">
                 <strong>{game.name}</strong>
+                {isResumable(game) && <span className="game-badge">In progress</span>}
                 <span>
                   {game.team_names.length} teams · {counts[game.id] ?? 0} questions
                 </span>

@@ -2,8 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import GameControls from './GameControls.jsx'
 import * as gameApi from '../api/gameApi.js'
+import * as nav from '../lib/nav.js'
 
 vi.mock('../api/gameApi.js')
+vi.mock('../lib/nav.js')
 
 const refresh = vi.fn()
 const playing = { active: 1, winner: null }
@@ -68,6 +70,26 @@ describe('GameControls', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Mute' }))
     expect(localStorage.getItem('spacerace:muted')).toBe('true')
     expect(screen.getByRole('button', { name: 'Unmute' })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('shows a Home button next to Pause that navigates to the Admin Panel', () => {
+    render(<GameControls state={playing} question={null} refresh={refresh} />)
+    const home = screen.getByRole('button', { name: 'Home' })
+    expect(home).toBeInTheDocument()
+    fireEvent.click(home)
+    expect(nav.navigateTo).toHaveBeenCalledWith('/admin')
+  })
+
+  it('keeps Home available while paused (alongside Resume)', () => {
+    render(<GameControls state={{ active: 2, winner: null }} question={null} refresh={refresh} />)
+    expect(screen.getByRole('button', { name: 'Home' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Home' }))
+    expect(nav.navigateTo).toHaveBeenCalledWith('/admin')
+  })
+
+  it('hides Home while a question is showing', () => {
+    render(<GameControls state={playing} question={{ id: 1, text: 'Q' }} refresh={refresh} />)
+    expect(screen.queryByRole('button', { name: 'Home' })).not.toBeInTheDocument()
   })
 
   it('surfaces an API error', async () => {
