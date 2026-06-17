@@ -99,6 +99,11 @@ li {
 .nes-container.with-title > .title {
   background-color: var(--space-800);
   color: var(--amber);
+  /* NES.css pulls the title chip up onto the top border (margin-top: -1.8rem),
+     which makes it look like it sits outside the panel. Keep it inside, with a
+     clear gap before the content below. */
+  margin-top: 0;
+  margin-bottom: 20px;
 }
 
 /* Inputs read as dark terminal fields */
@@ -489,15 +494,18 @@ label {
   margin: 0;
 }
 
-/* The game currently in play: highlighted row + an explicit badge (colour alone
-   isn't enough — the text says what the outline means). */
-.game-row.is-current {
-  outline: 3px solid var(--green);
-  outline-offset: -3px;
-  background: rgba(109, 255, 143, 0.08);
-  padding-left: 10px;
-  padding-right: 10px;
+/* Game library spacing: an even gap between the New Game button and the list,
+   and a tidy list with no default browser indentation. */
+.game-library .new-game-btn {
+  margin: 0 0 24px;
 }
+.game-library .nes-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The game currently in play is marked by an explicit "In progress" badge. */
 .game-badge {
   align-self: flex-start;
   font-size: clamp(8px, 1vw, 11px);
