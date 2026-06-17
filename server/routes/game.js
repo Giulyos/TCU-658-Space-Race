@@ -127,7 +127,13 @@ export const createGameRouter = ({
 
   router.get('/state', (_req, res) => {
     const state = bridge.getState()
-    res.json({ state, question: findActiveQuestion(state, bankForPlay()) })
+    // activeGameId lets the Admin library tell which saved game is the one
+    // currently loaded (so its button can read "Resume" when it's in progress).
+    res.json({
+      state,
+      question: findActiveQuestion(state, bankForPlay()),
+      activeGameId: bridge.getActiveGameId(),
+    })
   })
 
   router.post('/restart', (_req, res) => beginGame(res))

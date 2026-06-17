@@ -9,8 +9,6 @@ describe('App', () => {
   it('renders the title screen at the default route', () => {
     render(<App />)
     expect(screen.getByRole('heading', { name: /space race/i })).toBeInTheDocument()
-    // Play by default (getState is unmocked here and resolves to no in-progress
-    // game / rejects), linking to the Admin Panel.
-    expect(screen.getByRole('link', { name: /play|resume/i })).toHaveAttribute('href', '/admin')
+    expect(screen.getByRole('link', { name: 'Play' })).toHaveAttribute('href', '/admin')
   })
 })

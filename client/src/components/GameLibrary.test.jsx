@@ -2,8 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import GameLibrary from './GameLibrary.jsx'
 import * as api from '../api/gamesApi.js'
+import * as gameApi from '../api/gameApi.js'
 
 vi.mock('../api/gamesApi.js')
+vi.mock('../api/gameApi.js')
 
 const GAMES = [
   { id: 1, name: 'Unit 3 Review', team_names: ['Red', 'Blue'] },
@@ -17,6 +19,8 @@ beforeEach(() => {
     id === 1 ? [{}, {}, {}] : [{}], // 3 questions for game 1, 1 for game 2
   )
   api.deleteGame.mockResolvedValue(null)
+  // No game in progress by default.
+  gameApi.getState.mockResolvedValue({ state: { active: 0, winner: null }, activeGameId: null })
 })
 
 describe('GameLibrary', () => {
@@ -44,10 +48,41 @@ describe('GameLibrary', () => {
     expect(onNew).toHaveBeenCalled()
 
     fireEvent.click(screen.getAllByRole('button', { name: 'Play' })[0])
-    expect(onPlay).toHaveBeenCalledWith(GAMES[0])
+    expect(onPlay).toHaveBeenCalledWith(GAMES[0], { resume: false })
 
     fireEvent.click(screen.getByRole('button', { name: 'Edit Unit 3 Review' }))
     expect(onEdit).toHaveBeenCalledWith(GAMES[0])
+  })
+
+  it('labels the in-progress game "Resume" and continues it (resume: true)', async () => {
+    // Game 1 is the loaded, started, unfinished session.
+    gameApi.getState.mockResolvedValue({
+      state: { active: 1, winner: null },
+      activeGameId: 1,
+    })
+    const onPlay = vi.fn()
+    render(<GameLibrary onPlay={onPlay} onEdit={vi.fn()} onNew={vi.fn()} />)
+    await screen.findByText('Unit 3 Review')
+
+    // Game 1 -> Resume, Game 2 -> Play.
+    const resume = await screen.findByRole('button', { name: 'Resume' })
+    expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument()
+
+    fireEvent.click(resume)
+    expect(onPlay).toHaveBeenCalledWith(GAMES[0], { resume: true })
+  })
+
+  it('shows "Play" for a finished game even if it is the active one', async () => {
+    gameApi.getState.mockResolvedValue({
+      state: { active: 1, winner: 2 }, // has a winner -> not resumable
+      activeGameId: 1,
+    })
+    render(<GameLibrary onPlay={vi.fn()} onEdit={vi.fn()} onNew={vi.fn()} />)
+    await screen.findByText('Unit 3 Review')
+    await waitFor(() =>
+      expect(screen.getAllByRole('button', { name: 'Play' })).toHaveLength(2),
+    )
+    expect(screen.queryByRole('button', { name: 'Resume' })).not.toBeInTheDocument()
   })
 
   it('requires confirmation before deleting', async () => {

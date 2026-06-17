@@ -541,11 +541,6 @@ label {
 .title-play:focus-visible {
   animation-play-state: paused;
 }
-.title-hint {
-  color: var(--green);
-  font-size: clamp(9px, 1.3vw, 13px);
-  margin: 6px 0 0;
-}
 @keyframes title-twinkle {
   50% {
     opacity: 0.2;

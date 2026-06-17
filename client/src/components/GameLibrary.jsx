@@ -1,17 +1,23 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getGames, getGameQuestions, deleteGame } from '../api/gamesApi.js'
+import { getState } from '../api/gameApi.js'
 
 // The Admin home: a library of saved games. Each game can be played, edited, or
 // deleted, and new games can be created. Question counts are fetched per game
 // (fine for the handful of games a teacher keeps on a local device).
 //
+// A game that is the active, in-progress session (started and not yet finished)
+// shows "Resume" instead of "Play": Resume continues it untouched, while Play
+// starts a fresh match.
+//
 // Props:
-//   onPlay(game) — activate and play the game
-//   onEdit(game) — open the setup wizard for an existing game
-//   onNew()      — open the setup wizard for a new game
+//   onPlay(game, { resume }) — play the game; resume=true continues the save
+//   onEdit(game)             — open the setup wizard for an existing game
+//   onNew()                  — open the setup wizard for a new game
 function GameLibrary({ onPlay, onEdit, onNew }) {
   const [games, setGames] = useState([])
   const [counts, setCounts] = useState({})
+  const [progress, setProgress] = useState({ activeGameId: null, active: 0, winner: null })
   const [error, setError] = useState(null)
   const [confirmingId, setConfirmingId] = useState(null)
 
@@ -26,7 +32,20 @@ function GameLibrary({ onPlay, onEdit, onNew }) {
     } catch (err) {
       setError(err.message)
     }
+    // Best-effort: which game (if any) is mid-session, so its button can read
+    // "Resume". A failure here must not block the library.
+    try {
+      const { state, activeGameId } = await getState()
+      setProgress({ activeGameId, active: state?.active ?? 0, winner: state?.winner ?? null })
+    } catch {
+      // leave the default (no in-progress game)
+    }
   }, [])
+
+  // A game is resumable when it is the loaded game, has been started, and has no
+  // winner yet.
+  const isResumable = (game) =>
+    progress.activeGameId === game.id && progress.active !== 0 && progress.winner == null
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -70,9 +89,9 @@ function GameLibrary({ onPlay, onEdit, onNew }) {
                 <button
                   type="button"
                   className="nes-btn is-primary"
-                  onClick={() => onPlay(game)}
+                  onClick={() => onPlay(game, { resume: isResumable(game) })}
                 >
-                  Play
+                  {isResumable(game) ? 'Resume' : 'Play'}
                 </button>
                 <button
                   type="button"

@@ -122,6 +122,9 @@ describe('GET /api/game/state', () => {
     expect(res.body.state.active).toBe(0)
     expect(res.body.state.positions).toEqual([0, 0, 0, 0])
     expect(res.body.question).toBeNull()
+    // activeGameId is exposed so the Admin library can detect an in-progress
+    // save (null when no game has been loaded).
+    expect(res.body).toHaveProperty('activeGameId')
   })
 
   it('returns the active game and the revealed question', async () => {
