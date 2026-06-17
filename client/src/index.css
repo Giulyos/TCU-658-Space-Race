@@ -478,6 +478,10 @@ label {
   flex: 1 1 auto;
   min-width: 0; /* allow the info to shrink so actions keep their place */
 }
+/* Type hierarchy: "My Games" heading > game names ≈ buttons > meta. */
+.game-info strong {
+  font-size: 14px;
+}
 .game-info span {
   font-size: 11px;
   color: var(--cyan);
@@ -492,6 +496,16 @@ label {
 /* the row's own gap handles spacing; drop the buttons' default right margin */
 .game-actions .nes-btn {
   margin: 0;
+}
+
+/* "My Games" is the section heading — larger than the names/buttons below it. */
+.game-library > .title {
+  font-size: 20px;
+}
+/* Library buttons (New Game + row actions) read at about the game-name size,
+   not the oversized default. */
+.game-library .nes-btn {
+  font-size: 13px;
 }
 
 /* Game library spacing: an even gap between the New Game button and the list,
