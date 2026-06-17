@@ -148,30 +148,77 @@ label {
   pointer-events: none;
 }
 
-/* Buttons: tighten spacing so a row of controls reads like an arcade panel. */
+/* ===== Neon buttons (space-arcade) =====
+   Every button: dark space-panel fill + a coloured neon border/glow + white
+   text. The border colour signals the action (drawn from the theme palette);
+   white text stays readable on the dark fill. This replaces NES.css's solid
+   coloured fills and grey pixel border so the buttons match the space theme. */
 .nes-btn {
   margin: 6px 6px 6px 0;
+  border-image: none;
+  border: 4px solid var(--ink);
+  border-radius: 0;
+  background-color: var(--space-800);
+  color: #fff;
+  text-shadow: none;
+  box-shadow: 0 0 8px rgba(232, 230, 255, 0.18);
+}
+.nes-btn:hover {
+  color: #fff;
+  background-color: var(--space-700);
+}
+.nes-btn:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+/* Drop NES.css's grey inset "depth" pseudo (all variants) so the neon border
+   reads cleanly; also keeps these decorative overlays from catching clicks. */
+.nes-btn::after,
+.nes-btn.is-primary::after,
+.nes-btn.is-success::after,
+.nes-btn.is-warning::after,
+.nes-btn.is-error::after {
+  display: none;
 }
 
-/* Green buttons (is-success: New Game, the title-screen Play) use the theme's
-   mint --green so they match the "In progress" badge — NES.css ships a
-   different lime (#92cc41). Dark text keeps them readable on the light green. */
+/* Coloured variants — border + glow only; fill and text stay constant. */
+.nes-btn.is-primary,
+.nes-btn.is-primary:hover,
+.nes-btn.is-primary:focus {
+  color: #fff;
+  background-color: var(--space-800);
+  border-color: var(--cyan);
+  box-shadow: 0 0 12px rgba(33, 212, 253, 0.55);
+}
 .nes-btn.is-success,
 .nes-btn.is-success:hover,
 .nes-btn.is-success:focus {
-  color: var(--space-900);
-  background-color: var(--green);
+  color: #fff;
+  background-color: var(--space-800);
+  border-color: var(--green);
+  box-shadow: 0 0 12px rgba(109, 255, 143, 0.55);
 }
-.nes-btn.is-success:hover {
-  background-color: #54e878;
+.nes-btn.is-warning,
+.nes-btn.is-warning:hover,
+.nes-btn.is-warning:focus {
+  color: #fff;
+  background-color: var(--space-800);
+  border-color: var(--amber);
+  box-shadow: 0 0 12px rgba(255, 210, 63, 0.55);
 }
-.nes-btn.is-success::after,
-.nes-btn.is-success:hover::after,
-.nes-btn.is-success:active:not(.is-disabled)::after {
-  box-shadow: inset -4px -4px #2fae5a;
+.nes-btn.is-error,
+.nes-btn.is-error:hover,
+.nes-btn.is-error:focus {
+  color: #fff;
+  background-color: var(--space-800);
+  border-color: var(--magenta);
+  box-shadow: 0 0 12px rgba(255, 60, 166, 0.55);
 }
-.nes-btn.is-success:focus {
-  box-shadow: 0 0 0 6px rgba(109, 255, 143, 0.3);
+.nes-btn.is-primary:hover,
+.nes-btn.is-success:hover,
+.nes-btn.is-warning:hover,
+.nes-btn.is-error:hover {
+  background-color: var(--space-700);
 }
 
 /* Smaller action buttons inside table rows so the table stays compact. */
@@ -255,13 +302,13 @@ label {
   z-index: 50;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding: 7vh 16px 0;
+  align-items: center; /* centered in the middle of the screen */
+  padding: 16px;
   background: rgba(11, 4, 32, 0.5);
   pointer-events: none;
 }
 .question-card {
-  width: min(1100px, 92%);
+  width: min(820px, 92%);
   text-align: center;
   background: var(--space-800);
   box-shadow: 0 0 0 4px var(--space-900), 0 0 28px rgba(33, 212, 253, 0.35);
@@ -269,13 +316,14 @@ label {
      capture clicks so its Correct/Incorrect buttons work. */
   pointer-events: auto;
 }
+/* Header: whose turn it is + the question's point value. */
 .question-label {
-  font-size: clamp(11px, 1.3vw, 20px);
-  color: var(--cyan);
+  font-size: clamp(11px, 1.4vw, 18px);
+  color: var(--ink);
   margin-bottom: 14px;
 }
 .question-text {
-  font-size: clamp(18px, 2.6vw, 42px);
+  font-size: clamp(15px, 1.9vw, 28px);
   line-height: 1.6;
   color: var(--amber);
 }
@@ -456,21 +504,23 @@ label {
   stroke-width: 1;
 }
 
-/* team legend (name + position) under the board */
+/* team legend (name + position) under the board. Sized + spaced so all four
+   teams stay on a single row (font/gap kept modest, width near-full). */
 .board-legend {
   list-style: none;
   padding: 0;
   margin: 14px auto 0;
-  max-width: min(90vw, 900px);
+  max-width: 98vw;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: clamp(12px, 2vw, 32px);
+  gap: clamp(8px, 1.6vw, 22px);
 }
 .board-legend li {
   display: flex;
   gap: 8px;
-  font-size: clamp(12px, 1.6vw, 26px);
+  white-space: nowrap;
+  font-size: clamp(11px, 1.3vw, 20px);
 }
 .board-legend .legend-name {
   color: var(--team-color);
@@ -542,16 +592,19 @@ label {
   list-style: none;
 }
 
-/* The game currently in play is marked by an explicit "In progress" badge.
-   Scoped under .game-info so its dark text beats the cyan ".game-info span"
-   rule (which is more specific than a bare ".game-badge"). Dark text on the
-   mint --green gives a readable, high-contrast badge. */
+/* The game currently in play is marked by an "In progress" status label —
+   green text with a leading dot, no fill or border, so it reads as a status
+   and never looks like a (neon-bordered) button. Scoped under .game-info so its
+   colour beats the cyan ".game-info span" rule. */
 .game-info .game-badge {
   align-self: flex-start;
-  font-size: clamp(8px, 1vw, 11px);
-  color: var(--space-900);
-  background: var(--green);
-  padding: 3px 7px;
+  font-size: clamp(9px, 1vw, 12px);
+  color: var(--green);
+  background: none;
+  padding: 0;
+}
+.game-info .game-badge::before {
+  content: '● ';
 }
 
 /* ===== Title screen (route "/", what the installed PWA opens to) ===== */
