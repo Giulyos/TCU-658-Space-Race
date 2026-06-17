@@ -4,11 +4,11 @@ import { play } from '../sound/sounds.js'
 import { teamColor } from './raceUtils.js'
 
 // Jeopardy-style question popup: the active question appears as a centered card
-// over the board, with the teacher's Correct / Incorrect buttons right on it
-// (they appear and disappear with the popup). Teacher-judged, so only the
-// question text is shown — no answer, no options. The header shows whose turn it
-// is and how many points the question is worth. Visible only during active play
-// (not before start, while paused, or after a winner).
+// over the board, with the teacher's Correct / Incorrect buttons *below* the
+// card (separated so they don't read as answer options). Teacher-judged, so only
+// the question text is shown — no answer, no options. The header shows whose turn
+// it is and how many points the question is worth. Visible only during active
+// play (not before start, while paused, or after a winner).
 function QuestionDisplay({ question, state, refresh }) {
   const [error, setError] = useState(null)
   const inPlay = state?.active === 1 && state?.winner == null
@@ -42,14 +42,15 @@ function QuestionDisplay({ question, state, refresh }) {
         </p>
         <p className="question-text">{question.text}</p>
         {error && <p role="alert">{error}</p>}
-        <div className="question-actions">
-          <button type="button" className="nes-btn is-success" onClick={() => mark(true)}>
-            Correct
-          </button>
-          <button type="button" className="nes-btn is-error" onClick={() => mark(false)}>
-            Incorrect
-          </button>
-        </div>
+      </div>
+      {/* Below the card (not inside it) so they don't read as answer options. */}
+      <div className="question-actions">
+        <button type="button" className="nes-btn is-success" onClick={() => mark(true)}>
+          Correct
+        </button>
+        <button type="button" className="nes-btn is-error" onClick={() => mark(false)}>
+          Incorrect
+        </button>
       </div>
     </div>
   )
