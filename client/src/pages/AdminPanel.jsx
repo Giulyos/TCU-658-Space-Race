@@ -20,13 +20,16 @@ function AdminPanel() {
     setView('library')
   }
 
-  // Launching a game = activate it (load its config) and start it, so the
-  // projected Game Screen immediately shows the board ready for Next Question.
-  const handlePlay = async (game) => {
+  // Launching a game opens the play view. Play (fresh) activates the game and
+  // starts a new match; Resume continues the in-progress save untouched (no
+  // activate/start, which would reset positions and the winner).
+  const handlePlay = async (game, { resume = false } = {}) => {
     setError(null)
     try {
-      await activateGame(game.id)
-      await startGame()
+      if (!resume) {
+        await activateGame(game.id)
+        await startGame()
+      }
       setSelected(game)
       setView('play')
     } catch (err) {
