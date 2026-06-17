@@ -301,8 +301,10 @@ label {
   inset: 0;
   z-index: 50;
   display: flex;
+  flex-direction: column; /* card on top, the Correct/Incorrect buttons below */
   justify-content: center;
-  align-items: center; /* centered in the middle of the screen */
+  align-items: center; /* whole group centered in the middle of the screen */
+  gap: 24px;
   padding: 16px;
   background: rgba(11, 4, 32, 0.5);
   pointer-events: none;
@@ -312,8 +314,6 @@ label {
   text-align: center;
   background: var(--space-800);
   box-shadow: 0 0 0 4px var(--space-900), 0 0 28px rgba(33, 212, 253, 0.35);
-  /* The overlay is click-through (board shows behind); the card itself must
-     capture clicks so its Correct/Incorrect buttons work. */
   pointer-events: auto;
 }
 /* Header: whose turn it is + the question's point value. */
@@ -327,11 +327,13 @@ label {
   line-height: 1.6;
   color: var(--amber);
 }
+/* The action buttons sit below the card. Since the overlay is click-through,
+   they must capture clicks themselves (the card no longer wraps them). */
 .question-actions {
   display: flex;
   justify-content: center;
   gap: 16px;
-  margin-top: 22px;
+  pointer-events: auto;
 }
 
 /* ===== Game controls — anchored HUD over the board ===== */
