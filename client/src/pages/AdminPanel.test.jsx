@@ -3,9 +3,11 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import AdminPanel from './AdminPanel.jsx'
 import * as gamesApi from '../api/gamesApi.js'
 import * as gameApi from '../api/gameApi.js'
+import * as nav from '../lib/nav.js'
 
 vi.mock('../api/gamesApi.js')
 vi.mock('../api/gameApi.js')
+vi.mock('../lib/nav.js')
 
 const GAME = { id: 1, name: 'Unit 3 Review', team_names: ['Red', 'Blue'] }
 
@@ -25,18 +27,17 @@ describe('AdminPanel view router', () => {
     expect(screen.getByText('My Games')).toBeInTheDocument()
   })
 
-  it('activates + starts a game and switches to the play view on Play', async () => {
-    const gameApi = await import('../api/gameApi.js')
+  it('activates + starts a game on Play, then navigates to the board', async () => {
     render(<AdminPanel />)
     await screen.findByText('Unit 3 Review')
 
     fireEvent.click(screen.getByRole('button', { name: 'Play' }))
     await waitFor(() => expect(gamesApi.activateGame).toHaveBeenCalledWith(1))
     expect(gameApi.startGame).toHaveBeenCalled()
-    expect(await screen.findByText('Now playing: Unit 3 Review')).toBeInTheDocument()
+    await waitFor(() => expect(nav.navigateTo).toHaveBeenCalledWith('/game'))
   })
 
-  it('resumes an in-progress game without resetting it (no activate/start)', async () => {
+  it('resumes an in-progress game without resetting it, going straight to the board', async () => {
     // The game is the loaded, started, unfinished session -> shows "Resume".
     gameApi.getState.mockResolvedValue({
       state: { active: 1, winner: null },
@@ -46,10 +47,24 @@ describe('AdminPanel view router', () => {
     await screen.findByText('Unit 3 Review')
 
     fireEvent.click(await screen.findByRole('button', { name: 'Resume' }))
-    expect(await screen.findByText('Now playing: Unit 3 Review')).toBeInTheDocument()
+    await waitFor(() => expect(nav.navigateTo).toHaveBeenCalledWith('/game'))
     // Resume must NOT restart the match.
     expect(gamesApi.activateGame).not.toHaveBeenCalled()
     expect(gameApi.startGame).not.toHaveBeenCalled()
+  })
+
+  it('restarts an in-progress game (fresh activate + start), then navigates to the board', async () => {
+    gameApi.getState.mockResolvedValue({
+      state: { active: 1, winner: null },
+      activeGameId: 1,
+    })
+    render(<AdminPanel />)
+    await screen.findByText('Unit 3 Review')
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Restart Unit 3 Review' }))
+    await waitFor(() => expect(gamesApi.activateGame).toHaveBeenCalledWith(1))
+    expect(gameApi.startGame).toHaveBeenCalled()
+    await waitFor(() => expect(nav.navigateTo).toHaveBeenCalledWith('/game'))
   })
 
   it('opens the wizard on New Game and returns to the library on Cancel', async () => {

@@ -54,7 +54,7 @@ describe('GameLibrary', () => {
     expect(onEdit).toHaveBeenCalledWith(GAMES[0])
   })
 
-  it('labels the in-progress game "Resume" and continues it (resume: true)', async () => {
+  it('shows Resume + Restart for the in-progress game (and Play for the rest)', async () => {
     // Game 1 is the loaded, started, unfinished session.
     gameApi.getState.mockResolvedValue({
       state: { active: 1, winner: null },
@@ -64,12 +64,17 @@ describe('GameLibrary', () => {
     render(<GameLibrary onPlay={onPlay} onEdit={vi.fn()} onNew={vi.fn()} />)
     await screen.findByText('Unit 3 Review')
 
-    // Game 1 -> Resume, Game 2 -> Play.
+    // Game 1 -> Resume + Restart; Game 2 -> Play.
     const resume = await screen.findByRole('button', { name: 'Resume' })
+    expect(screen.getByRole('button', { name: 'Restart Unit 3 Review' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument()
 
+    // Resume continues the save; Restart starts it fresh.
     fireEvent.click(resume)
     expect(onPlay).toHaveBeenCalledWith(GAMES[0], { resume: true })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Restart Unit 3 Review' }))
+    expect(onPlay).toHaveBeenCalledWith(GAMES[0], { resume: false })
   })
 
   it('shows "Play" for a finished game even if it is the active one', async () => {

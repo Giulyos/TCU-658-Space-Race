@@ -2,13 +2,15 @@ import { useState } from 'react'
 import GameLibrary from '../components/GameLibrary.jsx'
 import GameWizard from '../components/GameWizard.jsx'
 import { activateGame } from '../api/gamesApi.js'
-import { startGame, restartGame } from '../api/gameApi.js'
+import { startGame } from '../api/gameApi.js'
+import { navigateTo } from '../lib/nav.js'
 
-// The teacher's admin app, organized as a small view router:
-//   library — the home: a list of saved games (default)
-//   play    — confirmation + Restart for the launched game (the during-game
-//             controls live on the projected Game Screen)
-//   wizard  — create or edit a game's setup (#48)
+// The teacher's admin app, a small view router:
+//   library — the home: saved games (default)
+//   wizard  — create or edit a game's setup
+// Launching a game (Play / Resume / Restart) navigates straight to the projected
+// Game Screen — there is no intermediate confirmation screen. The during-game
+// controls live on the board.
 function AdminPanel() {
   const [view, setView] = useState('library')
   const [selected, setSelected] = useState(null)
@@ -20,9 +22,9 @@ function AdminPanel() {
     setView('library')
   }
 
-  // Launching a game opens the play view. Play (fresh) activates the game and
-  // starts a new match; Resume continues the in-progress save untouched (no
-  // activate/start, which would reset positions and the winner).
+  // Open a game on the board. Play and Restart (resume=false) begin a fresh
+  // match (activate + start); Resume (resume=true) continues the saved session
+  // untouched. Either way, go straight to the Game Screen.
   const handlePlay = async (game, { resume = false } = {}) => {
     setError(null)
     try {
@@ -30,17 +32,7 @@ function AdminPanel() {
         await activateGame(game.id)
         await startGame()
       }
-      setSelected(game)
-      setView('play')
-    } catch (err) {
-      setError(err.message)
-    }
-  }
-
-  const handleRestart = async () => {
-    setError(null)
-    try {
-      await restartGame()
+      navigateTo('/game')
     } catch (err) {
       setError(err.message)
     }
@@ -64,24 +56,6 @@ function AdminPanel() {
 
       {view === 'library' && (
         <GameLibrary onPlay={handlePlay} onEdit={handleEdit} onNew={handleNew} />
-      )}
-
-      {view === 'play' && (
-        <section className="nes-container with-title">
-          <p className="title">Now playing: {selected?.name}</p>
-          <p>Open the Game Screen to run the game — the Next Question and Correct/Incorrect controls are there.</p>
-          <p>
-            <a href="/game" target="_blank" rel="noreferrer">
-              Open the Game Screen ↗
-            </a>
-          </p>
-          <button type="button" className="nes-btn is-warning" onClick={handleRestart}>
-            Restart
-          </button>
-          <button type="button" className="nes-btn" onClick={backToLibrary}>
-            Back to games
-          </button>
-        </section>
       )}
 
       {view === 'wizard' && (
