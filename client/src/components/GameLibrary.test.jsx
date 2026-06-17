@@ -77,6 +77,22 @@ describe('GameLibrary', () => {
     expect(onPlay).toHaveBeenCalledWith(GAMES[0], { resume: false })
   })
 
+  it('marks the in-progress game row (badge + is-current) and leaves others unmarked', async () => {
+    gameApi.getState.mockResolvedValue({
+      state: { active: 1, winner: null },
+      activeGameId: 1,
+    })
+    const { container } = render(<GameLibrary onPlay={vi.fn()} onEdit={vi.fn()} onNew={vi.fn()} />)
+    await screen.findByText('Unit 3 Review')
+
+    await waitFor(() => expect(screen.getByText('In progress')).toBeInTheDocument())
+    const current = container.querySelectorAll('.game-row.is-current')
+    expect(current).toHaveLength(1)
+    expect(current[0]).toHaveTextContent('Unit 3 Review')
+    // only the in-progress game is badged
+    expect(screen.getAllByText('In progress')).toHaveLength(1)
+  })
+
   it('shows "Play" for a finished game even if it is the active one', async () => {
     gameApi.getState.mockResolvedValue({
       state: { active: 1, winner: 2 }, // has a winner -> not resumable

@@ -453,12 +453,14 @@ label {
   color: var(--cyan);
 }
 
-/* Game library rows: name + meta on the left, actions on the right. */
+/* Game library rows: name + meta on the left, actions on the right. The actions
+   block stays to the right of the info; if it has more buttons than fit (e.g.
+   Resume + Restart + Edit + Delete) they wrap among themselves rather than
+   dropping the whole block below the info. */
 .game-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
   gap: 12px;
   padding: 12px 0;
   border-bottom: 4px solid var(--space-700);
@@ -468,10 +470,40 @@ label {
   flex-direction: column;
   gap: 6px;
   text-align: left;
+  flex: 1 1 auto;
+  min-width: 0; /* allow the info to shrink so actions keep their place */
 }
 .game-info span {
   font-size: 11px;
   color: var(--cyan);
+}
+.game-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+/* the row's own gap handles spacing; drop the buttons' default right margin */
+.game-actions .nes-btn {
+  margin: 0;
+}
+
+/* The game currently in play: highlighted row + an explicit badge (colour alone
+   isn't enough — the text says what the outline means). */
+.game-row.is-current {
+  outline: 3px solid var(--green);
+  outline-offset: -3px;
+  background: rgba(109, 255, 143, 0.08);
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.game-badge {
+  align-self: flex-start;
+  font-size: clamp(8px, 1vw, 11px);
+  color: var(--space-900);
+  background: var(--green);
+  padding: 3px 7px;
 }
 
 /* ===== Title screen (route "/", what the installed PWA opens to) ===== */
@@ -562,30 +594,4 @@ label {
   .title-play {
     animation: none;
   }
-}
-
-/* ===== Cross-navigation links between the two screens ===== */
-/* Small, low-key "flip to the other screen" links. */
-.screen-nav {
-  color: var(--cyan);
-  text-decoration: none;
-  font-size: clamp(10px, 1.4vw, 16px);
-  opacity: 0.7;
-}
-.screen-nav:hover,
-.screen-nav:focus-visible {
-  opacity: 1;
-}
-/* On the projected board: fixed bottom-left, clear of the title (top-left),
-   the HUD (top-right) and Next Question (bottom-center). */
-.screen-nav-game {
-  position: fixed;
-  left: 14px;
-  bottom: 18px;
-  z-index: 40;
-}
-/* On the Admin Panel: top-right of the normal document flow. */
-.screen-nav-admin {
-  float: right;
-  margin-top: 8px;
 }

@@ -50,7 +50,6 @@ function AdminPanel() {
 
   return (
     <main>
-      <a className="screen-nav screen-nav-admin" href="/game">▶ Projector</a>
       <h1>Admin Panel</h1>
       {error && <p role="alert">{error}</p>}
 
