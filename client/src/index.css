@@ -153,6 +153,27 @@ label {
   margin: 6px 6px 6px 0;
 }
 
+/* Green buttons (is-success: New Game, the title-screen Play) use the theme's
+   mint --green so they match the "In progress" badge — NES.css ships a
+   different lime (#92cc41). Dark text keeps them readable on the light green. */
+.nes-btn.is-success,
+.nes-btn.is-success:hover,
+.nes-btn.is-success:focus {
+  color: var(--space-900);
+  background-color: var(--green);
+}
+.nes-btn.is-success:hover {
+  background-color: #54e878;
+}
+.nes-btn.is-success::after,
+.nes-btn.is-success:hover::after,
+.nes-btn.is-success:active:not(.is-disabled)::after {
+  box-shadow: inset -4px -4px #2fae5a;
+}
+.nes-btn.is-success:focus {
+  box-shadow: 0 0 0 6px rgba(109, 255, 143, 0.3);
+}
+
 /* Smaller action buttons inside table rows so the table stays compact. */
 .nes-table .nes-btn {
   font-size: 11px;
@@ -454,8 +475,10 @@ label {
 .board-legend .legend-name {
   color: var(--team-color);
 }
+/* Scores are neutral white so they never read as a team's colour (team 1 is
+   cyan, which used to match the old cyan score). */
 .board-legend .legend-pos {
-  color: var(--cyan);
+  color: #ffffff;
 }
 
 /* Game library rows: name + meta on the left, actions on the right. The actions
@@ -519,8 +542,11 @@ label {
   list-style: none;
 }
 
-/* The game currently in play is marked by an explicit "In progress" badge. */
-.game-badge {
+/* The game currently in play is marked by an explicit "In progress" badge.
+   Scoped under .game-info so its dark text beats the cyan ".game-info span"
+   rule (which is more specific than a bare ".game-badge"). Dark text on the
+   mint --green gives a readable, high-contrast badge. */
+.game-info .game-badge {
   align-self: flex-start;
   font-size: clamp(8px, 1vw, 11px);
   color: var(--space-900);
