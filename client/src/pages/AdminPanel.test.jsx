@@ -72,7 +72,7 @@ describe('AdminPanel view router', () => {
     await screen.findByText('Unit 3 Review')
 
     fireEvent.click(screen.getByRole('button', { name: '+ New Game' }))
-    expect(await screen.findByText(/step 1 of 2/i)).toBeInTheDocument()
+    expect(await screen.findByText(/step 1 of 3/i)).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
     expect(await screen.findByText('My Games')).toBeInTheDocument()
