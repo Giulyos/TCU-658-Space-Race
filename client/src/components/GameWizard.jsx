@@ -3,11 +3,12 @@ import { createGame, updateGame } from '../api/gamesApi.js'
 import QuestionBank from './QuestionBank.jsx'
 
 // Step-by-step game setup, used for both creating and editing a game:
-//   Step 1 — name, spaces to win, number of teams (2-4), team names
-//   Step 2 — the game's question bank (scoped to this game)
+//   Step 1 — name, spaces to win, number of teams (2-4)
+//   Step 2 — the team names
+//   Step 3 — the game's question bank (scoped to this game)
 //
-// Moving past Step 1 persists the game (create when new, update when editing),
-// which yields the game id that Step 2's question bank is scoped to.
+// Moving past Step 2 persists the game (create when new, update when editing),
+// which yields the game id that Step 3's question bank is scoped to.
 //
 // Props:
 //   game     — the game being edited, or null when creating a new one
@@ -41,12 +42,21 @@ function GameWizard({ game, onDone, onCancel }) {
   const handleNameChange = (index, value) =>
     setNames((prev) => prev.map((n, i) => (i === index ? value : n)))
 
-  // Step 1 -> Step 2: validate and persist the game (create or update).
-  const handleNext = async (e) => {
+  // Step 1 -> Step 2: name + rules entered; team names come next.
+  const handleRulesNext = (e) => {
+    e.preventDefault()
+    setError(null)
+    if (name.trim() === '') return setError('Game name is required')
+    setStep(2)
+  }
+
+  // Step 2 -> Step 3: persist the game (create or update), which yields the id
+  // the question bank is scoped to.
+  const handleTeamsNext = async (e) => {
     e.preventDefault()
     setError(null)
     const teamNames = names.slice(0, teamCount)
-    if (name.trim() === '') return setError('Game name is required')
+    if (teamNames.some((n) => n.trim() === '')) return setError('Every team needs a name')
 
     const payload = { name, finishLine: Number(finishLine), teamNames }
     try {
@@ -56,7 +66,7 @@ function GameWizard({ game, onDone, onCancel }) {
       } else {
         await updateGame(gameId, payload)
       }
-      setStep(2)
+      setStep(3)
     } catch (err) {
       setError(err.message)
     }
@@ -68,8 +78,8 @@ function GameWizard({ game, onDone, onCancel }) {
       {error && <p role="alert">{error}</p>}
 
       {step === 1 && (
-        <form onSubmit={handleNext}>
-          <p>Step 1 of 2 — Teams &amp; rules</p>
+        <form onSubmit={handleRulesNext}>
+          <p>Step 1 of 3 — Game &amp; rules</p>
 
           <div className="nes-field">
             <label htmlFor="w-name">Game name</label>
@@ -111,6 +121,19 @@ function GameWizard({ game, onDone, onCancel }) {
             </div>
           </div>
 
+          <button type="button" className="nes-btn" onClick={onCancel}>
+            Cancel
+          </button>
+          <button type="submit" className="nes-btn is-primary">
+            Next: Team names
+          </button>
+        </form>
+      )}
+
+      {step === 2 && (
+        <form onSubmit={handleTeamsNext}>
+          <p>Step 2 of 3 — Team names</p>
+
           {names.slice(0, teamCount).map((teamName, i) => (
             <div className="nes-field" key={i}>
               <label htmlFor={`w-name-${i}`}>Team {i + 1} name</label>
@@ -123,8 +146,8 @@ function GameWizard({ game, onDone, onCancel }) {
             </div>
           ))}
 
-          <button type="button" className="nes-btn" onClick={onCancel}>
-            Cancel
+          <button type="button" className="nes-btn" onClick={() => setStep(1)}>
+            Back
           </button>
           <button type="submit" className="nes-btn is-primary">
             Next: Questions
@@ -132,11 +155,11 @@ function GameWizard({ game, onDone, onCancel }) {
         </form>
       )}
 
-      {step === 2 && (
+      {step === 3 && (
         <div>
-          <p>Step 2 of 2 — Question bank</p>
+          <p>Step 3 of 3 — Question bank</p>
           <QuestionBank gameId={gameId} />
-          <button type="button" className="nes-btn" onClick={() => setStep(1)}>
+          <button type="button" className="nes-btn" onClick={() => setStep(2)}>
             Back
           </button>
           <button type="button" className="nes-btn is-success" onClick={onDone}>
