@@ -225,24 +225,38 @@ and run a complete match on the projected board.
 
 ### Building for Production
 
-> ⏳ The packaging steps below are the **intended** build and are not finished yet.
-
-Build the React frontend and then package everything into cross-platform executables:
+Build the React frontend and then package the server + frontend into a standalone
+executable with `@yao-pkg/pkg`:
 
 ```bash
 npm run build
 ```
 
-This will:
-1. Run `vite build` inside `client/` — outputs static files to `client/dist/`
-2. Run `@yao-pkg/pkg` from `server/` — bundles Express + SQLite + the built frontend into three executables placed in `dist/`:
+This runs:
+1. `vite build` inside `client/` → static files in `client/dist/`
+2. `@yao-pkg/pkg` from `server/` → an executable in `dist/` that bundles the
+   Express server, the built frontend, the SQLite native module, and the seed
+   questions. On launch the executable starts the local server, opens the
+   teacher's browser, and writes `space-race.db` **next to the executable**.
 
+To build only for the machine you're on (faster, used while testing):
+
+```bash
+npm --prefix client run build
+npm --prefix server run build:pkg:host    # → dist/space-race
 ```
-dist/
-├── SpaceRace.exe        ← Windows
-├── SpaceRace-macos      ← macOS
-└── SpaceRace-linux      ← Linux
-```
+
+**Important — Node version & native module.** The bundled SQLite engine
+(`better-sqlite3`) is a compiled native module, so its ABI must match the pkg
+runtime. Build with **Node 22** (the line `better-sqlite3` ships prebuilds for and
+that the `node22` pkg base uses). With a different Node version the executable
+fails to load the database.
+
+**Cross-platform builds.** Because the native module is platform-specific, a
+single machine can only produce a *working* binary for **its own OS/arch** — the
+bundled `.node` is the host's. The Windows / macOS / Linux binaries are therefore
+built on their own OS (a CI matrix), each with Node 22, so every binary ships the
+matching native module. (Set up in the packaging milestone, issue #43.)
 
 ---
 

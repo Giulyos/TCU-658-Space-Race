@@ -4,13 +4,15 @@
   "private": true,
   "type": "module",
   "main": "server.js",
+  "bin": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
-    "build:pkg": "pkg . --targets node18-linux-x64,node18-macos-x64,node18-win-x64 --output ../dist/space-race-server"
+    "build:pkg": "pkg . --targets node22-linux-x64,node22-macos-x64,node22-win-x64 --output ../dist/space-race",
+    "build:pkg:host": "pkg . --targets node22 --output ../dist/space-race"
   },
   "dependencies": {
     "better-sqlite3": "^12.4.1",
@@ -27,8 +29,20 @@
   "pkg": {
     "scripts": [
       "server.js",
+      "app.js",
+      "openBrowser.js",
       "routes/**/*.js",
-      "db/**/*.js"
+      "db/**/*.js",
+      "middleware/**/*.js",
+      "game/**/*.js",
+      "!**/*.test.js",
+      "!db/persistence-demo.mjs",
+      "!game/cli.js"
+    ],
+    "assets": [
+      "../client/dist/**/*",
+      "node_modules/better-sqlite3/build/Release/better_sqlite3.node",
+      "game/*.json"
     ]
   }
 }

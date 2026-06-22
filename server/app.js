@@ -7,8 +7,9 @@ import { createGameRouter } from './routes/game.js'
 import { createGamesRouter } from './routes/games.js'
 import { notFoundHandler, errorHandler } from './middleware/errors.js'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+// Named moduleDir (not __dirname) so it doesn't collide with the CJS __dirname
+// that the pkg packager injects when bundling this ESM file.
+const moduleDir = path.dirname(fileURLToPath(import.meta.url))
 
 // Builds the Express application. Dependencies are injectable so tests can wire
 // the routers to an in-memory database; when omitted, the routers fall back to
@@ -25,7 +26,7 @@ export const createApp = ({
   gamesRepo,
   bridge,
   serveStatic = false,
-  clientDistPath = path.resolve(__dirname, '../client/dist'),
+  clientDistPath = path.resolve(moduleDir, '../client/dist'),
 } = {}) => {
   const app = express()
   app.use(express.json())
