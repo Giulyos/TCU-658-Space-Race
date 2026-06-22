@@ -1,0 +1,85 @@
+name: Build executables
+
+# Builds a standalone Space Race executable for each platform. Each job runs on
+# its own OS with Node 22 so npm installs the matching better-sqlite3 native
+# module (its ABI must match the node22 pkg base) — this is why the three
+# binaries can't be built from one machine.
+#
+# Run it manually (Actions tab → "Build executables" → Run workflow), or push a
+# tag like v1.0.0 to also publish a GitHub Release with the binaries attached.
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: node22-linux-x64
+            output: space-race-linux-x64
+            label: Linux x64
+          - os: windows-latest
+            target: node22-win-x64
+            output: space-race-win-x64.exe
+            label: Windows x64
+          - os: macos-latest
+            target: node22-macos-arm64
+            output: space-race-macos-arm64
+            label: macOS arm64
+          - os: macos-13
+            target: node22-macos-x64
+            output: space-race-macos-x64
+            label: macOS x64
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: |
+          npm --prefix client ci
+          npm --prefix server ci
+
+      - name: Build client
+        run: npm --prefix client run build
+
+      - name: Package executable
+        working-directory: server
+        run: npx pkg . --targets ${{ matrix.target }} --fallback-to-source --output ../dist/${{ matrix.output }}
+
+      - name: Smoke-test executable
+        run: node scripts/smoke-exe.mjs dist/${{ matrix.output }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.output }}
+          path: dist/${{ matrix.output }}
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Attach binaries to the release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*

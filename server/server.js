@@ -23,5 +23,7 @@ app.listen(PORT, () => {
   const url = `http://localhost:${PORT}`
   console.log(`Space Race is running. Open ${url}`)
   console.log('Keep this window open while you play. Close it to stop the game.')
-  if (isPackaged) openBrowser(url)
+  // Open the teacher's browser when running as the packaged app. Skippable via
+  // SPACE_RACE_NO_BROWSER=1 (used by the CI smoke test / headless runs).
+  if (isPackaged && process.env.SPACE_RACE_NO_BROWSER !== '1') openBrowser(url)
 })
