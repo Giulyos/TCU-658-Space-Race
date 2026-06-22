@@ -4,6 +4,8 @@ An interactive classroom quiz game for English language teaching. Four teams com
 
 Built as a **Progressive Web App (PWA)** with a local Express + SQLite backend, packaged into a single executable file that works completely offline — no internet, no installation, no admin permissions required.
 
+> 👩‍🏫 **Teachers:** see the **[Teacher's Manual](docs/MANUAL.md)** — plain-language, step-by-step install and how-to-play instructions (no technical background needed).
+
 ---
 
 ## Table of Contents
@@ -486,10 +488,13 @@ CREATE TABLE game_state (
 
 ## Deployment — Distributing the Executable
 
-After running `npm run build`, the three executables in `dist/` are self-contained. To distribute them:
+The per-platform executables are built and published automatically by the
+[**Build executables** workflow](.github/workflows/build-executables.yml): run it
+from the Actions tab, or push a `vX.Y.Z` tag to attach the binaries to a GitHub
+Release. To distribute them:
 
-1. Upload them to the [GitHub Releases](https://github.com/Giulyos/TCU-658-Space-Race/releases) page
-2. Teachers download the file for their OS — that's it
+1. They appear on the [GitHub Releases](https://github.com/Giulyos/TCU-658-Space-Race/releases) page
+2. Teachers download the file for their OS and follow the **[Teacher's Manual](docs/MANUAL.md)** — that's it
 
 The executable includes:
 - The Node.js runtime
@@ -498,7 +503,7 @@ The executable includes:
 - The compiled React frontend (HTML/CSS/JS)
 - The PWA manifest and service worker
 
-The only file created at runtime (not included) is `spacerace.db`, which is generated automatically in the same folder as the executable on first run.
+The only file created at runtime (not included) is `space-race.db`, which is generated automatically in the same folder as the executable on first run.
 
 > ⚠️ **macOS note:** On first run, macOS may block the executable with a security warning. Right-click → Open → Open anyway to allow it. This is expected behavior for unsigned binaries.
 
