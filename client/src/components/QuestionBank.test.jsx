@@ -56,6 +56,25 @@ describe('QuestionBank', () => {
     )
   })
 
+  it('numbers rows per-bank (1-based), not by global question id', async () => {
+    // ids that do NOT match their position (simulates a new game whose first
+    // question has a large global id).
+    api.getQuestions.mockResolvedValue([
+      { id: 16, text: 'First', correct_answer: 'a', point_value: 1 },
+      { id: 17, text: 'Second', correct_answer: 'b', point_value: 1 },
+    ])
+    render(<QuestionBank />)
+    await screen.findByText('First')
+
+    const rows = screen.getAllByRole('row').slice(1) // drop the header row
+    expect(rows[0].querySelector('td').textContent).toBe('1')
+    expect(rows[1].querySelector('td').textContent).toBe('2')
+    // the global id is not shown as the number
+    expect(screen.queryByRole('cell', { name: '16' })).not.toBeInTheDocument()
+    // edit/delete still target the real id
+    expect(screen.getByRole('button', { name: 'Edit question 16' })).toBeInTheDocument()
+  })
+
   it('deletes a question', async () => {
     render(<QuestionBank />)
     await screen.findByText(/Past tense of go\?/)

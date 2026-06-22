@@ -147,9 +147,11 @@ function QuestionBank({ gameId = null }) {
                 </tr>
               </thead>
               <tbody>
-                {visible.map((q) => (
+                {visible.map((q, i) => (
                   <tr key={q.id}>
-                    <td>{q.id}</td>
+                    {/* Per-bank sequence number (1-based within this game),
+                        not the global question id. */}
+                    <td>{(safePage - 1) * PAGE_SIZE + i + 1}</td>
                     <td>{q.text}</td>
                     <td>{q.correct_answer}</td>
                     <td>{q.point_value}</td>
