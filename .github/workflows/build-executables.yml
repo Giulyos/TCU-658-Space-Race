@@ -21,6 +21,9 @@ jobs:
   build:
     name: ${{ matrix.label }}
     runs-on: ${{ matrix.os }}
+    # Optional targets (e.g. the Intel macOS runner, which GitHub is phasing out
+    # and can queue for a long time) don't fail the run or block the release.
+    continue-on-error: ${{ matrix.optional || false }}
     strategy:
       fail-fast: false
       matrix:
@@ -41,6 +44,7 @@ jobs:
             target: node22-macos-x64
             output: space-race-macos-x64
             label: macOS x64
+            optional: true
     steps:
       - uses: actions/checkout@v4
 
