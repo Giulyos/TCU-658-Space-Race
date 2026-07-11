@@ -2,8 +2,8 @@ name: Build executables
 
 # Builds a standalone Space Race executable for each platform. Each job runs on
 # its own OS with Node 22 so npm installs the matching better-sqlite3 native
-# module (its ABI must match the node22 pkg base) — this is why the three
-# binaries can't be built from one machine.
+# module (its ABI must match the node22 pkg base) — this is why the binaries
+# can't all be built from one machine.
 #
 # Run it manually (Actions tab → "Build executables" → Run workflow), or push a
 # tag like v1.0.0 to also publish a GitHub Release with the binaries attached.
@@ -18,12 +18,10 @@ permissions:
   contents: write
 
 jobs:
+  # The three reliable targets. The release depends only on these.
   build:
     name: ${{ matrix.label }}
     runs-on: ${{ matrix.os }}
-    # Optional targets (e.g. the Intel macOS runner, which GitHub is phasing out
-    # and can queue for a long time) don't fail the run or block the release.
-    continue-on-error: ${{ matrix.optional || false }}
     strategy:
       fail-fast: false
       matrix:
@@ -40,38 +38,58 @@ jobs:
             target: node22-macos-arm64
             output: space-race-macos-arm64
             label: macOS arm64
-          - os: macos-13
-            target: node22-macos-x64
-            output: space-race-macos-x64
-            label: macOS x64
-            optional: true
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-
       - name: Install dependencies
         run: |
           npm --prefix client ci
           npm --prefix server ci
-
       - name: Build client
         run: npm --prefix client run build
-
       - name: Package executable
         working-directory: server
         run: npx pkg . --targets ${{ matrix.target }} --fallback-to-source --output ../dist/${{ matrix.output }}
-
       - name: Smoke-test executable
         run: node scripts/smoke-exe.mjs dist/${{ matrix.output }}
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.output }}
           path: dist/${{ matrix.output }}
+          if-no-files-found: error
+
+  # Optional Intel macOS binary. GitHub is retiring the macos-13 (Intel) runners,
+  # so this job can queue a long time or fail to allocate. It is kept separate
+  # and is NOT a dependency of the release, so it can never fail the run or block
+  # the other three — it just adds the Intel binary whenever a runner is free.
+  build-intel:
+    name: macOS x64 (Intel, optional)
+    runs-on: macos-13
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: |
+          npm --prefix client ci
+          npm --prefix server ci
+      - name: Build client
+        run: npm --prefix client run build
+      - name: Package executable
+        working-directory: server
+        run: npx pkg . --targets node22-macos-x64 --fallback-to-source --output ../dist/space-race-macos-x64
+      - name: Smoke-test executable
+        run: node scripts/smoke-exe.mjs dist/space-race-macos-x64
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: space-race-macos-x64
+          path: dist/space-race-macos-x64
           if-no-files-found: error
 
   release:
