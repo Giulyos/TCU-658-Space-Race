@@ -24,9 +24,20 @@ Download the file for your computer from the project's **Releases** page, then:
 1. Download **`space-race-macos-arm64`** for Apple-Silicon Macs (M1/M2/M3/M4),
    or **`space-race-macos-x64`** for older Intel Macs. *(If you're unsure: Apple
    menu → About This Mac → if it says "Apple M…", use arm64.)*
-2. The first time, **right-click the file → Open**, then click **Open** in the
-   dialog. (Double-clicking the first time may be blocked by macOS; right-click →
-   Open allows it. You only do this once.)
+2. The first time you open it, macOS shows a warning like *"Apple could not
+   verify … is free of malware."* This is normal for a program that isn't signed
+   with a paid Apple Developer account — it is safe. Allow it once, either way:
+   - **Easiest:** open **System Settings → Privacy & Security**, scroll to the
+     message *"space-race-… was blocked"* and click **Open Anyway**, then open
+     the program again and choose **Open**.
+   - **Or in Terminal** (from the folder with the file), which also restores the
+     run permission a download can strip:
+     ```
+     chmod +x space-race-macos-arm64
+     xattr -d com.apple.quarantine space-race-macos-arm64
+     ./space-race-macos-arm64
+     ```
+   You only do this once per download.
 
 ### Linux
 1. Download **`space-race-linux-x64`**.
@@ -131,7 +142,7 @@ and start it again (it will recreate the Example Game).
 | Problem | What to do |
 |---|---|
 | The browser didn't open by itself | Open your browser and go to `http://localhost:3001`. |
-| "Windows protected your PC" / macOS won't open it | See §1 — this is normal for an unsigned program. Windows: *More info → Run anyway*. macOS: *right-click → Open*. |
+| "Windows protected your PC" / macOS "could not verify … malware" | See §1 — this is normal for an unsigned program. Windows: *More info → Run anyway*. macOS: *System Settings → Privacy & Security → Open Anyway* (or the Terminal `xattr` command in §1). |
 | It says the port is already in use | Another copy is probably already running. Close the extra black window (or restart the computer) and open it once. |
 | A phone can't reach the game | Make sure both are on the same Wi-Fi, use the correct `192.168.x.x` address, and allow the firewall prompt. |
 | Nothing happens / I want to stop | Close the small black window — that stops the game. Your saved games are kept. |
