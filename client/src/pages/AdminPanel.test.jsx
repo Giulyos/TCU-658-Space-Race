@@ -27,6 +27,12 @@ describe('AdminPanel view router', () => {
     expect(screen.getByText('My Games')).toBeInTheDocument()
   })
 
+  it('has a Menu button that returns to the start screen', () => {
+    render(<AdminPanel />)
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }))
+    expect(nav.navigateTo).toHaveBeenCalledWith('/')
+  })
+
   it('activates + starts a game on Play, then navigates to the board', async () => {
     render(<AdminPanel />)
     await screen.findByText('Unit 3 Review')

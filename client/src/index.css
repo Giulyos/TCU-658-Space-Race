@@ -533,6 +533,12 @@ label {
   color: #ffffff;
 }
 
+/* Admin Panel: the "Menu" button, top-left above the centered title. */
+.admin-nav {
+  text-align: left;
+  margin-bottom: 10px;
+}
+
 /* Game library rows: name + meta on the left, actions on the right. The actions
    block stays to the right of the info; if it has more buttons than fit (e.g.
    Resume + Restart + Edit + Delete) they wrap among themselves rather than
