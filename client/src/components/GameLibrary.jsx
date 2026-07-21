@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getGames, getGameQuestions, deleteGame } from '../api/gamesApi.js'
 import { getState } from '../api/gameApi.js'
+import { useI18n } from '../i18n/context.js'
 
 // The Admin home: a library of saved games. Each game can be played, edited, or
 // deleted, and new games can be created. Question counts are fetched per game
@@ -15,6 +16,7 @@ import { getState } from '../api/gameApi.js'
 //   onEdit(game)             — open the setup wizard for an existing game
 //   onNew()                  — open the setup wizard for a new game
 function GameLibrary({ onPlay, onEdit, onNew }) {
+  const { t } = useI18n()
   const [games, setGames] = useState([])
   const [counts, setCounts] = useState({})
   const [progress, setProgress] = useState({ activeGameId: null, active: 0, winner: null })
@@ -65,16 +67,16 @@ function GameLibrary({ onPlay, onEdit, onNew }) {
 
   return (
     <section className="nes-container with-title game-library">
-      <p className="title">My Games</p>
+      <p className="title">{t('library.title')}</p>
 
       {error && <p role="alert">{error}</p>}
 
       <button type="button" className="nes-btn is-success new-game-btn" onClick={onNew}>
-        + New Game
+        {t('library.newGame')}
       </button>
 
       {games.length === 0 ? (
-        <p>No games yet. Create your first game to get started.</p>
+        <p>{t('library.empty')}</p>
       ) : (
         <ul className="nes-list">
           {games.map((game) => (
@@ -84,9 +86,10 @@ function GameLibrary({ onPlay, onEdit, onNew }) {
             >
               <div className="game-info">
                 <strong>{game.name}</strong>
-                {isResumable(game) && <span className="game-badge">In progress</span>}
+                {isResumable(game) && <span className="game-badge">{t('library.inProgress')}</span>}
                 <span>
-                  {game.team_names.length} teams · {counts[game.id] ?? 0} questions
+                  {t('library.teams', { count: game.team_names.length })} ·{' '}
+                  {t('library.questions', { count: counts[game.id] ?? 0 })}
                 </span>
               </div>
               <div className="game-actions">
@@ -98,16 +101,16 @@ function GameLibrary({ onPlay, onEdit, onNew }) {
                       className="nes-btn is-primary"
                       onClick={() => onPlay(game, { resume: true })}
                     >
-                      Resume
+                      {t('library.resume')}
                     </button>
                     {/* start the same game over (fresh match) */}
                     <button
                       type="button"
                       className="nes-btn"
                       onClick={() => onPlay(game, { resume: false })}
-                      aria-label={`Restart ${game.name}`}
+                      aria-label={t('library.restartAria', { name: game.name })}
                     >
-                      Restart
+                      {t('library.restart')}
                     </button>
                   </>
                 ) : (
@@ -116,16 +119,16 @@ function GameLibrary({ onPlay, onEdit, onNew }) {
                     className="nes-btn is-primary"
                     onClick={() => onPlay(game, { resume: false })}
                   >
-                    Play
+                    {t('library.play')}
                   </button>
                 )}
                 <button
                   type="button"
                   className="nes-btn is-warning"
                   onClick={() => onEdit(game)}
-                  aria-label={`Edit ${game.name}`}
+                  aria-label={t('library.editAria', { name: game.name })}
                 >
-                  Edit
+                  {t('library.edit')}
                 </button>
                 {confirmingId === game.id ? (
                   <>
@@ -133,16 +136,16 @@ function GameLibrary({ onPlay, onEdit, onNew }) {
                       type="button"
                       className="nes-btn is-error"
                       onClick={() => handleDelete(game.id)}
-                      aria-label={`Confirm delete ${game.name}`}
+                      aria-label={t('library.confirmDeleteAria', { name: game.name })}
                     >
-                      Confirm
+                      {t('library.confirm')}
                     </button>
                     <button
                       type="button"
                       className="nes-btn"
                       onClick={() => setConfirmingId(null)}
                     >
-                      Cancel
+                      {t('library.cancel')}
                     </button>
                   </>
                 ) : (
@@ -150,9 +153,9 @@ function GameLibrary({ onPlay, onEdit, onNew }) {
                     type="button"
                     className="nes-btn is-error"
                     onClick={() => setConfirmingId(game.id)}
-                    aria-label={`Delete ${game.name}`}
+                    aria-label={t('library.deleteAria', { name: game.name })}
                   >
-                    Delete
+                    {t('library.delete')}
                   </button>
                 )}
               </div>

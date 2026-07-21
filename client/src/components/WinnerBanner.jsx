@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { teamColor } from './raceUtils.js'
 import { play } from '../sound/sounds.js'
+import { useI18n } from '../i18n/context.js'
 
 // Full-screen celebratory banner shown on the projected board when a team
 // reaches the finish line. The Board defers it (show=false) until the winning
@@ -8,6 +9,7 @@ import { play } from '../sound/sounds.js'
 // movement, not on top of it. Restart lives on the Admin panel, so the banner is
 // purely a display — it captures no clicks.
 function WinnerBanner({ state, show }) {
+  const { t } = useI18n()
   const visible = !!state && state.winner != null && show
 
   // Play the win fanfare once, when the banner actually appears (after the ship
@@ -26,13 +28,13 @@ function WinnerBanner({ state, show }) {
     <div
       className="winner-banner"
       role="alert"
-      aria-label={`${name} wins`}
+      aria-label={t('winner.ariaWins', { name })}
       style={{ '--team-color': teamColor(team) }}
     >
       <div className="winner-card nes-container is-dark">
         <p className="winner-stars">★ ★ ★</p>
         <p className="winner-name">{name}</p>
-        <p className="winner-sub">WINS!</p>
+        <p className="winner-sub">{t('winner.wins')}</p>
       </div>
     </div>
   )

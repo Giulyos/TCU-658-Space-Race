@@ -15,6 +15,7 @@ import PixelShip from './PixelShip.jsx'
 import PixelPlanet from './PixelPlanet.jsx'
 import WinnerBanner from './WinnerBanner.jsx'
 import { PLANET_COUNT } from './planetVariants.js'
+import { useI18n } from '../i18n/context.js'
 
 const FINISH_SLOT = 99 // distinct slot so the finish planet varies independently
 const ADVANCE_MS = 900 // duration of a ship's glide to its new space
@@ -72,6 +73,8 @@ function useAdvanceAnimation(targets) {
 // home planet at 0); reaching the finish wins. Planet variants are chosen from
 // the per-game map seed so each game looks different. Driven by polled state.
 function Board({ state }) {
+  // Aliased to `tr` because `t` is used below as the per-team map variable.
+  const { t: tr } = useI18n()
   const { positions, finishLine, teamNames, currentTeam, winner, mapSeed } = state ?? {}
 
   // Clamp targets to the track, then animate the ships' displayed positions
@@ -108,7 +111,7 @@ function Board({ state }) {
   })
 
   return (
-    <div className="board" role="group" aria-label="Race board">
+    <div className="board" role="group" aria-label={tr('board.aria')}>
       <svg viewBox={`0 0 ${BOARD_W} ${BOARD_H}`} className="board-svg" preserveAspectRatio="xMidYMid meet">
         {/* each team's winding road (pixel tiles) + its board spaces (squares).
             Tiles/markers hidden under a planet are skipped so every visible
@@ -158,7 +161,7 @@ function Board({ state }) {
         ))}
 
         {/* the shared finish planet (the destination) */}
-        <g aria-label="Finish planet">
+        <g aria-label={tr('board.finishAria')}>
           <circle className="board-finish-halo" cx={finish[0]} cy={finish[1]} r="14" />
           <PixelPlanet
             cx={finish[0]}
@@ -182,7 +185,7 @@ function Board({ state }) {
               data-team={t.team}
               data-x={t.ship[0].toFixed(3)}
               data-y={t.ship[1].toFixed(3)}
-              aria-label={`Team ${t.team} spaceship`}
+              aria-label={tr('board.shipAria', { team: t.team })}
             >
               {(isCurrent || isWinner) && (
                 <circle className="ship-halo" cx={t.ship[0]} cy={t.ship[1]} r="9" />

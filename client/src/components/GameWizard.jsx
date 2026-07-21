@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { createGame, updateGame } from '../api/gamesApi.js'
 import QuestionBank from './QuestionBank.jsx'
+import { useI18n } from '../i18n/context.js'
 
 // Step-by-step game setup, used for both creating and editing a game:
 //   Step 1 — name, spaces to win, number of teams (2-4)
@@ -21,6 +22,7 @@ const initialNames = (game) =>
   game?.team_names ?? ['Team 1', 'Team 2', 'Team 3', 'Team 4']
 
 function GameWizard({ game, onDone, onCancel }) {
+  const { t } = useI18n()
   const editing = Boolean(game)
   const [step, setStep] = useState(1)
   const [gameId, setGameId] = useState(game?.id ?? null)
@@ -46,7 +48,7 @@ function GameWizard({ game, onDone, onCancel }) {
   const handleRulesNext = (e) => {
     e.preventDefault()
     setError(null)
-    if (name.trim() === '') return setError('Game name is required')
+    if (name.trim() === '') return setError(t('wizard.nameRequired'))
     setStep(2)
   }
 
@@ -56,7 +58,7 @@ function GameWizard({ game, onDone, onCancel }) {
     e.preventDefault()
     setError(null)
     const teamNames = names.slice(0, teamCount)
-    if (teamNames.some((n) => n.trim() === '')) return setError('Every team needs a name')
+    if (teamNames.some((n) => n.trim() === '')) return setError(t('wizard.everyTeamName'))
 
     const payload = { name, finishLine: Number(finishLine), teamNames }
     try {
@@ -74,15 +76,17 @@ function GameWizard({ game, onDone, onCancel }) {
 
   return (
     <section className="nes-container with-title">
-      <p className="title">{editing ? `Edit: ${game.name}` : 'New Game'}</p>
+      <p className="title">
+        {editing ? t('wizard.editTitle', { name: game.name }) : t('wizard.newTitle')}
+      </p>
       {error && <p role="alert">{error}</p>}
 
       {step === 1 && (
         <form onSubmit={handleRulesNext}>
-          <p>Step 1 of 3 — Game &amp; rules</p>
+          <p>{t('wizard.step1')}</p>
 
           <div className="nes-field">
-            <label htmlFor="w-name">Game name</label>
+            <label htmlFor="w-name">{t('wizard.gameName')}</label>
             <input
               id="w-name"
               className="nes-input"
@@ -92,7 +96,7 @@ function GameWizard({ game, onDone, onCancel }) {
           </div>
 
           <div className="nes-field">
-            <label htmlFor="w-finish">Spaces to win (3–10)</label>
+            <label htmlFor="w-finish">{t('wizard.spacesToWin')}</label>
             <input
               id="w-finish"
               type="number"
@@ -105,7 +109,7 @@ function GameWizard({ game, onDone, onCancel }) {
           </div>
 
           <div className="nes-field">
-            <label htmlFor="w-teams">Number of teams</label>
+            <label htmlFor="w-teams">{t('wizard.numTeams')}</label>
             <div className="nes-select">
               <select
                 id="w-teams"
@@ -122,21 +126,21 @@ function GameWizard({ game, onDone, onCancel }) {
           </div>
 
           <button type="button" className="nes-btn" onClick={onCancel}>
-            Cancel
+            {t('wizard.cancel')}
           </button>
           <button type="submit" className="nes-btn is-primary">
-            Next: Team names
+            {t('wizard.nextTeams')}
           </button>
         </form>
       )}
 
       {step === 2 && (
         <form onSubmit={handleTeamsNext}>
-          <p>Step 2 of 3 — Team names</p>
+          <p>{t('wizard.step2')}</p>
 
           {names.slice(0, teamCount).map((teamName, i) => (
             <div className="nes-field" key={i}>
-              <label htmlFor={`w-name-${i}`}>Team {i + 1} name</label>
+              <label htmlFor={`w-name-${i}`}>{t('wizard.teamNameLabel', { n: i + 1 })}</label>
               <input
                 id={`w-name-${i}`}
                 className="nes-input"
@@ -147,23 +151,23 @@ function GameWizard({ game, onDone, onCancel }) {
           ))}
 
           <button type="button" className="nes-btn" onClick={() => setStep(1)}>
-            Back
+            {t('wizard.back')}
           </button>
           <button type="submit" className="nes-btn is-primary">
-            Next: Questions
+            {t('wizard.nextQuestions')}
           </button>
         </form>
       )}
 
       {step === 3 && (
         <div>
-          <p>Step 3 of 3 — Question bank</p>
+          <p>{t('wizard.step3')}</p>
           <QuestionBank gameId={gameId} />
           <button type="button" className="nes-btn" onClick={() => setStep(2)}>
-            Back
+            {t('wizard.back')}
           </button>
           <button type="button" className="nes-btn is-success" onClick={onDone}>
-            Done
+            {t('wizard.done')}
           </button>
         </div>
       )}

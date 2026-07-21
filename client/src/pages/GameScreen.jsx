@@ -3,6 +3,7 @@ import TurnIndicator from '../components/TurnIndicator.jsx'
 import QuestionDisplay from '../components/QuestionDisplay.jsx'
 import GameControls from '../components/GameControls.jsx'
 import { useGameState } from '../hooks/useGameState.js'
+import { useI18n } from '../i18n/context.js'
 
 // The projected, teacher-operated view. It polls /api/game/state and renders the
 // turn indicator, the active-question popup, the board (which doubles as the
@@ -12,16 +13,17 @@ import { useGameState } from '../hooks/useGameState.js'
 // reaches the finish.
 function GameScreen() {
   const { state, question, loading, error, refresh } = useGameState()
+  const { t } = useI18n()
 
   return (
     <main className="game-screen">
       <h1>Space Race</h1>
 
-      {error && <p role="alert">Could not reach the game server.</p>}
-      {loading && !state && <p>Loading…</p>}
+      {error && <p role="alert">{t('game.cantReach')}</p>}
+      {loading && !state && <p>{t('game.loading')}</p>}
 
       {state && state.active === 0 ? (
-        <p>Waiting for the teacher to launch a game…</p>
+        <p>{t('game.waiting')}</p>
       ) : (
         <>
           <TurnIndicator state={state} />
