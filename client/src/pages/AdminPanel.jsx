@@ -50,6 +50,13 @@ function AdminPanel() {
 
   return (
     <main>
+      {/* Back to the start/title screen (sits top-left, matching the board's
+          Home button format). */}
+      <div className="admin-nav">
+        <button type="button" className="nes-btn" onClick={() => navigateTo('/')}>
+          Menu
+        </button>
+      </div>
       <h1>Admin Panel</h1>
       {error && <p role="alert">{error}</p>}
 
