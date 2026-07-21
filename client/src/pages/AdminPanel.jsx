@@ -4,6 +4,7 @@ import GameWizard from '../components/GameWizard.jsx'
 import { activateGame } from '../api/gamesApi.js'
 import { startGame } from '../api/gameApi.js'
 import { navigateTo } from '../lib/nav.js'
+import { useI18n } from '../i18n/context.js'
 
 // The teacher's admin app, a small view router:
 //   library — the home: saved games (default)
@@ -12,6 +13,7 @@ import { navigateTo } from '../lib/nav.js'
 // Game Screen — there is no intermediate confirmation screen. The during-game
 // controls live on the board.
 function AdminPanel() {
+  const { t } = useI18n()
   const [view, setView] = useState('library')
   const [selected, setSelected] = useState(null)
   const [error, setError] = useState(null)
@@ -54,10 +56,10 @@ function AdminPanel() {
           Home button format). */}
       <div className="admin-nav">
         <button type="button" className="nes-btn" onClick={() => navigateTo('/')}>
-          Menu
+          {t('admin.menu')}
         </button>
       </div>
-      <h1>Admin Panel</h1>
+      <h1>{t('admin.title')}</h1>
       {error && <p role="alert">{error}</p>}
 
       {view === 'library' && (

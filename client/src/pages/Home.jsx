@@ -1,6 +1,7 @@
 import PixelShip from '../components/PixelShip.jsx'
 import PixelPlanet from '../components/PixelPlanet.jsx'
 import { TEAM_COLORS } from '../components/raceUtils.js'
+import { useI18n } from '../i18n/context.js'
 
 // The graphic title screen (route "/", and what the installed PWA opens to). An
 // 8-bit "attract screen": pixel ships racing toward a planet over a starfield,
@@ -22,6 +23,7 @@ const SHIPS = [
 ]
 
 function Home() {
+  const { lang, setLang, t } = useI18n()
   return (
     <main className="title-screen">
       <svg
@@ -49,11 +51,32 @@ function Home() {
       </svg>
 
       <h1 className="title-logo">Space Race</h1>
-      <p className="title-tagline">Classroom English quiz race</p>
+      <p className="title-tagline">{t('home.tagline')}</p>
 
       <a className="title-play nes-btn is-success" href="/admin">
-        Play
+        {t('home.play')}
       </a>
+
+      {/* Language toggle for the whole game (persisted). Language names are shown
+          in their own language, as is conventional for a language switcher. */}
+      <div className="title-lang" role="group" aria-label={t('home.language')}>
+        <button
+          type="button"
+          className={`nes-btn ${lang === 'en' ? 'is-primary' : ''}`}
+          aria-pressed={lang === 'en'}
+          onClick={() => setLang('en')}
+        >
+          English
+        </button>
+        <button
+          type="button"
+          className={`nes-btn ${lang === 'es' ? 'is-primary' : ''}`}
+          aria-pressed={lang === 'es'}
+          onClick={() => setLang('es')}
+        >
+          Español
+        </button>
+      </div>
     </main>
   )
 }

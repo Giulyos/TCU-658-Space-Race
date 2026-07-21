@@ -28,7 +28,8 @@ describe('GameLibrary', () => {
     render(<GameLibrary onPlay={vi.fn()} onEdit={vi.fn()} onNew={vi.fn()} />)
     expect(await screen.findByText('Unit 3 Review')).toBeInTheDocument()
     await waitFor(() => expect(screen.getByText('2 teams · 3 questions')).toBeInTheDocument())
-    expect(screen.getByText('4 teams · 1 questions')).toBeInTheDocument()
+    // counts are correctly pluralized now (1 question, not "1 questions")
+    expect(screen.getByText('4 teams · 1 question')).toBeInTheDocument()
   })
 
   it('shows an empty state when there are no games', async () => {

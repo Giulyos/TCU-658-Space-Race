@@ -682,6 +682,16 @@ label {
 .title-play:focus-visible {
   animation-play-state: paused;
 }
+/* Language toggle on the title screen (English / Español). */
+.title-lang {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 22px;
+}
+.title-lang .nes-btn {
+  font-size: clamp(10px, 1.4vw, 15px);
+}
 @keyframes title-twinkle {
   50% {
     opacity: 0.2;

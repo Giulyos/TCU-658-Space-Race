@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { nextQuestion, pauseGame, resumeGame } from '../api/gameApi.js'
 import { isMuted, setMuted } from '../sound/sounds.js'
 import { navigateTo } from '../lib/nav.js'
+import { useI18n } from '../i18n/context.js'
 
 // The teacher's during-game controls, shown on the projected board itself.
 // State-driven:
@@ -16,6 +17,7 @@ import { navigateTo } from '../lib/nav.js'
 const STATUS = { NOT_STARTED: 0, ACTIVE: 1, PAUSED: 2 }
 
 function GameControls({ state, question, refresh }) {
+  const { t } = useI18n()
   const [error, setError] = useState(null)
   // Mute is a shared preference (see sound/sounds.js): the toggle writes it and
   // the sound player reads it, both via MUTE_KEY in localStorage.
@@ -63,7 +65,7 @@ function GameControls({ state, question, refresh }) {
       {ready && (
         <div className="hud hud-bottom">
           <button type="button" className="nes-btn is-primary" onClick={() => run(nextQuestion)}>
-            Next Question
+            {t('controls.nextQuestion')}
           </button>
         </div>
       )}
@@ -71,13 +73,13 @@ function GameControls({ state, question, refresh }) {
       {ready && (
         <div className="hud hud-topright">
           <button type="button" className="nes-btn" onClick={goHome}>
-            Home
+            {t('controls.home')}
           </button>
           <button type="button" className="nes-btn is-warning" onClick={() => run(pauseGame)}>
-            Pause
+            {t('controls.pause')}
           </button>
           <button type="button" className="nes-btn" onClick={toggleMute} aria-pressed={muted}>
-            {muted ? 'Unmute' : 'Mute'}
+            {muted ? t('controls.unmute') : t('controls.mute')}
           </button>
         </div>
       )}
@@ -89,10 +91,10 @@ function GameControls({ state, question, refresh }) {
           {/* Home + Resume sit where Pause was (top-right), above the gray-out */}
           <div className="hud hud-topright">
             <button type="button" className="nes-btn" onClick={goHome}>
-              Home
+              {t('controls.home')}
             </button>
             <button type="button" className="nes-btn is-warning" onClick={() => run(resumeGame)}>
-              Resume
+              {t('controls.resume')}
             </button>
           </div>
         </>

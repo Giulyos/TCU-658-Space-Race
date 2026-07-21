@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getQuestions, addQuestion, updateQuestion, deleteQuestion } from '../api/questionsApi.js'
 import { getGameQuestions, addGameQuestion } from '../api/gamesApi.js'
+import { useI18n } from '../i18n/context.js'
 
 // Teacher's question-bank manager: a paginated table of questions plus a form to
 // add, edit, and delete them. When a `gameId` prop is given, the bank is scoped
@@ -11,6 +12,7 @@ const EMPTY_FORM = { text: '', correct_answer: '', point_value: 1 }
 const PAGE_SIZE = 10
 
 function QuestionBank({ gameId = null }) {
+  const { t } = useI18n()
   const [questions, setQuestions] = useState([])
   const [form, setForm] = useState(EMPTY_FORM)
   const [editingId, setEditingId] = useState(null)
@@ -84,13 +86,13 @@ function QuestionBank({ gameId = null }) {
 
   return (
     <section className="nes-container with-title">
-      <p className="title">Question Bank</p>
+      <p className="title">{t('bank.title')}</p>
 
       {error && <p role="alert">{error}</p>}
 
       <form onSubmit={handleSubmit}>
         <div className="nes-field">
-          <label htmlFor="q-text">Question</label>
+          <label htmlFor="q-text">{t('bank.question')}</label>
           <input
             id="q-text"
             className="nes-input"
@@ -100,7 +102,7 @@ function QuestionBank({ gameId = null }) {
         </div>
 
         <div className="nes-field">
-          <label htmlFor="q-answer">Correct answer</label>
+          <label htmlFor="q-answer">{t('bank.correctAnswer')}</label>
           <input
             id="q-answer"
             className="nes-input"
@@ -110,7 +112,7 @@ function QuestionBank({ gameId = null }) {
         </div>
 
         <div className="nes-field">
-          <label htmlFor="q-points">Point value</label>
+          <label htmlFor="q-points">{t('bank.pointValue')}</label>
           <input
             id="q-points"
             type="number"
@@ -122,28 +124,28 @@ function QuestionBank({ gameId = null }) {
         </div>
 
         <button type="submit" className="nes-btn is-primary">
-          {editingId === null ? 'Add question' : 'Save changes'}
+          {editingId === null ? t('bank.addQuestion') : t('bank.saveChanges')}
         </button>
         {editingId !== null && (
           <button type="button" className="nes-btn" onClick={resetForm}>
-            Cancel
+            {t('bank.cancel')}
           </button>
         )}
       </form>
 
       {questions.length === 0 ? (
-        <p>No questions yet. Add one above.</p>
+        <p>{t('bank.empty')}</p>
       ) : (
         <>
           <div className="nes-table-responsive">
             <table className="nes-table is-bordered is-dark">
               <thead>
                 <tr>
-                  <th>#</th>
-                  <th>Question</th>
-                  <th>Answer</th>
-                  <th>Pts</th>
-                  <th>Actions</th>
+                  <th>{t('bank.colNum')}</th>
+                  <th>{t('bank.colQuestion')}</th>
+                  <th>{t('bank.colAnswer')}</th>
+                  <th>{t('bank.colPts')}</th>
+                  <th>{t('bank.colActions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -160,17 +162,17 @@ function QuestionBank({ gameId = null }) {
                         type="button"
                         className="nes-btn is-warning"
                         onClick={() => handleEdit(q)}
-                        aria-label={`Edit question ${q.id}`}
+                        aria-label={t('bank.editAria', { id: q.id })}
                       >
-                        Edit
+                        {t('bank.edit')}
                       </button>
                       <button
                         type="button"
                         className="nes-btn is-error"
                         onClick={() => handleDelete(q.id)}
-                        aria-label={`Delete question ${q.id}`}
+                        aria-label={t('bank.deleteAria', { id: q.id })}
                       >
-                        Delete
+                        {t('bank.delete')}
                       </button>
                     </td>
                   </tr>
@@ -187,18 +189,16 @@ function QuestionBank({ gameId = null }) {
               onClick={() => setPage(safePage - 1)}
               disabled={safePage <= 1}
             >
-              Prev
+              {t('bank.prev')}
             </button>
-            <span>
-              Page {safePage} / {totalPages}
-            </span>
+            <span>{t('bank.page', { current: safePage, total: totalPages })}</span>
             <button
               type="button"
               className="nes-btn"
               onClick={() => setPage(safePage + 1)}
               disabled={safePage >= totalPages}
             >
-              Next
+              {t('bank.next')}
             </button>
           </div>
           )}
